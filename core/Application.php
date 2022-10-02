@@ -13,7 +13,7 @@ class Application
         print_r($_SERVER['REQUEST_URI']);
 
         $arr = $this->UrlProcess();
-
+        $arr = array_splice($arr, -1, 1);
         print_r($arr);
 
         // if (file_exists("../controllers/" . $arr[0] . ".php")) {
@@ -32,7 +32,8 @@ class Application
     {
         $str = explode('?', $_SERVER['REQUEST_URI']);
         $resStr = strtolower($str[0]);
-        $req = filter_var(str_replace('/php/obrien/', '', $resStr));
+        $req = filter_var(str_replace('/php/obrien', '', $resStr));
+
         return explode('/', $req);
     }
 }
