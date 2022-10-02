@@ -1,5 +1,5 @@
 <?php
-require '../Api/database/db.php';
+require './database/db.php';
 
 class User
 {

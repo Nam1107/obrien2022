@@ -1,5 +1,5 @@
 <?php
-require '../Api/path.php';
+require './path.php';
 session_start();
 global $conn;
 try {
