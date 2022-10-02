@@ -12,7 +12,9 @@ class Application
     {
         print_r($_SERVER['REQUEST_URI']);
 
-        // $arr = $this->UrlProcess();
+        $arr = $this->UrlProcess();
+
+        print_r($arr);
 
         // if (file_exists("../controllers/" . $arr[0] . ".php")) {
         //     $this->controller = $arr[0];
@@ -28,7 +30,9 @@ class Application
 
     function UrlProcess()
     {
-        $req = explode('?', filter_var(str_replace('/PHP/obrien/', '', $_SERVER['REQUEST_URI'])));
-        return explode('/', $req[0]);
+        $str = explode('?', $_SERVER['REQUEST_URI']);
+        $resStr = strtolower($str[0]);
+        $req = filter_var(str_replace('/php/obrien/', '', $resStr));
+        return explode('/', $req);
     }
 }
