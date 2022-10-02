@@ -11,16 +11,15 @@
 <script>
 function Show() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/Api/user/updateprofile',
-        type: 'put',
+        url: 'http://localhost/PHP/obrien/user/listuser',
+        type: 'get',
         data: {
             'ID': 5,
-            'email': 'user3@user',
-            'name': 'tết123',
 
         },
         success: function(data) {
             var obj = JSON.parse(data);
+
             console.log(obj);
         }
     })
@@ -29,6 +28,9 @@ function Show() {
 </script>
 
 <body>
+    <div class="textShow">
+
+    </div>
     <button onclick="Show()">Hello</button>
 
 </body>

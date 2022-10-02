@@ -10,18 +10,20 @@ class Application
 
     function __construct()
     {
-        $arr = $this->UrlProcess();
+        print_r($_SERVER['REQUEST_URI']);
 
-        if (file_exists("../controllers/" . $arr[0] . ".php")) {
-            $this->controller = $arr[0];
-            require_once "../controllers/" . $arr[0] . ".php";
-            if (isset($arr[1])) {
-                if (method_exists($this->controller, $arr[1])) {
-                    $this->action = $arr[1];
-                }
-                call_user_func_array([$this->controller, $this->action], []);
-            }
-        }
+        // $arr = $this->UrlProcess();
+
+        // if (file_exists("../controllers/" . $arr[0] . ".php")) {
+        //     $this->controller = $arr[0];
+        //     require_once "../controllers/" . $arr[0] . ".php";
+        //     if (isset($arr[1])) {
+        //         if (method_exists($this->controller, $arr[1])) {
+        //             $this->action = $arr[1];
+        //         }
+        //         call_user_func_array([$this->controller, $this->action], []);
+        //     }
+        // }
     }
 
     function UrlProcess()
