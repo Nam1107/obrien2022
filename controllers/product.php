@@ -11,6 +11,11 @@ class Product
         dd($product);
         exit;
     }
+    function test1()
+    {
+
+        dd('1');
+    }
     function ListProduct()
     {
         checkRequest('GET');
