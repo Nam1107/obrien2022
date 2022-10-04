@@ -43,13 +43,60 @@ function getlistProduct() {
 
 }
 
-function updateProfile() {
+function updateProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/product/updateprofile',
+        url: 'http://localhost/PHP/obrien/product/updateProduct',
         type: 'put',
         data: {
-            'ID': 5,
-            'name': '12312',
+            'ID': 1,
+            'price': '12',
+        },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function updateGallery() {
+    $.ajax({
+        url: 'http://localhost/PHP/obrien/gallery/updateGallery',
+        type: 'put',
+        data: {
+            'ID': 1,
+            'URLImage': '12',
+        },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function addImage() {
+    $.ajax({
+        url: 'http://localhost/PHP/obrien/gallery/addImage',
+        type: 'post',
+        data: {
+            'productID': 1,
+            'URLImage': '123',
+        },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function deleteGallery() {
+    $.ajax({
+        url: 'http://localhost/PHP/obrien/gallery/deleteimage',
+        type: 'Delete',
+        data: {
+            'ID': 4,
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -94,13 +141,21 @@ function createProduct() {
     <button onclick="getProduct()">getByID</button>
     <p></p>
     <button onclick="getlistProduct()">getlist</button>
-    <p></p>
-    <button onclick="updateProfile()">Update</button>
-    <p></p>
-    <button onclick="deleteProduct()">delete</button>
+
     <p></p>
     <button onclick="createProduct()">create</button>
     <p></p>
+    <button onclick="updateProduct()">updateProduct</button>
+    <p></p>
+    <button onclick="deleteProduct()">deleteProduct</button>
+    <p></p>
+    <button onclick="addImage()">addImage</button>
+    <p></p>
+    <button onclick="updateGallery()">updateGallery</button>
+    <p></p>
+    <button onclick="deleteGallery()">deleteGallery</button>
+    <p></p>
+
 
 
 </body>

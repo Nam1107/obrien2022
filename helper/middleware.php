@@ -1,4 +1,8 @@
 <?php
+function md5Security($pwd)
+{
+    return md5(md5($pwd) . MD5_PRIVATE_KEY);
+}
 
 function checkRequest($req)
 {

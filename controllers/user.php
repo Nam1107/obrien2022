@@ -176,7 +176,7 @@ class User
         checkRequest('POST');
         userOnly();
         $table = 'user';
-        $res['status'] = 0;
+
         $errors = validateChangePass($_POST);
         if (count($errors) === 0) {
             $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -184,12 +184,12 @@ class User
             unset($_POST['re_pass'], $_POST['ID']);
             $sent_vars['updatedAt'] = currentTime();
 
-            $res['rep'] = 1;
+            $res['status'] = 1;
             $res['msg'] = update('user', $user, $_POST);
             dd($res);
             exit();
         } else {
-            $res['rep'] = 0;
+            $res['status'] = 0;
             $res['msg'] = $errors;
             dd($res);
             exit();

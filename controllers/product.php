@@ -8,8 +8,6 @@ class Product
     {
         checkRequest('GET');
         $table = 'product';
-        // $res['status'] = 0; // 1: success; 0: failed;
-
         $res['status'] = 1;
         if (!isset($_GET['page']) || $_GET['page'] <= 0) {
             $page = 1;
@@ -59,6 +57,11 @@ class Product
             if (currentTime() > $obj["$i"]['startSale'] && currentTime() < $obj["$i"]['endSale']) {
                 $obj["$i"]['saleStatus'] = 1;
             } else $obj["$i"]['saleStatus'] = 0;
+            $gallery = selectAll('gallery', ['productID' => $obj["$i"]['ID']]);
+            $obj["$i"]["gallery"] = $gallery;
+            $category = selectOne('category', ['ID' => $obj["$i"]['categoryID']]);
+            unset($obj["$i"]['categoryID']);
+            $obj["$i"]['category'] = $category;
         }
         $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM $table");
 
@@ -115,17 +118,21 @@ class Product
         parse_str(file_get_contents("php://input"), $sent_vars);
         if (isset($sent_vars['ID'])) {
             $id['ID'] = $sent_vars['ID'];
-            delete($table, $id);
-            $res['status'] = 1;
-            $res['msg'] = delete($table, $id);
+            $status = delete($table, $id);
+            if ($status == 1) {
+                $res['status'] = 1;
+                $res['msg'] = 'Success';
+                dd($res);
+                exit();
+            }
+
+
+            $res['status'] = 0;
+            $res['msg'] = 'Not found product by ID';
+
             dd($res);
             exit();
         }
-        $res['status'] = 0;
-        $res['msg'] = 'Not found product by ID';
-
-        dd($res);
-        exit();
     }
     function updateProduct()
     {

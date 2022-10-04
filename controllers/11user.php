@@ -108,7 +108,7 @@ function Login() {
         type: 'POST',
         data: {
             'email': 'admin@admin',
-            'password': '123456',
+            'password': '654321',
         },
         success: function(data) {
             var obj = JSON.parse(data);

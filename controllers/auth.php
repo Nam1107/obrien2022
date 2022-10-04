@@ -5,6 +5,32 @@ require './helper/validateUser.php';
 
 class Auth
 {
+
+
+    function authenToken()
+    {
+        if (isset($_SESSION['user'])) {
+            return $_SESSION['user'];
+        }
+
+
+        if (empty($_COOKIE['token'])) {
+            return null;
+        } else {
+            $token = $_COOKIE['token'];
+        }
+
+        $result   = custom("select user.* from user, login_token where user.ID = login_token.userID and login_Token.token = '$token'");
+
+        if ($result != null && count($result) > 0) {
+            $_SESSION['user'] = $result[0];
+
+            return $result[0];
+        }
+
+        return null;
+    }
+
     function Logout()
     {
         userOnly();
@@ -34,6 +60,10 @@ class Auth
             if (!$user) {
                 array_push($errors, 'Email address does not exist');
             } elseif (password_verify($_POST['password'], $user['password'])) {
+                // $login_token['token'] = md5Security($user['email'] . time() . $user['ID']);
+                // $login_token['userID'] = $user['ID'];
+                // setcookie('token', $login_token['Token'], time() + 7 * 24 * 60 * 60, '/');
+                // create('[Login_Token]', $login_token);
                 $_SESSION['user'] = $user;
                 $res['msg'] = 'login success';
                 $res['status'] = 1;
