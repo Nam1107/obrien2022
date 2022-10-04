@@ -6,6 +6,7 @@
 
 function test()
 {
+    checkRequest('GET');
     $product = custom('select * from product');
     dd($product);
     exit;
