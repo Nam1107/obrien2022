@@ -7,14 +7,11 @@
 function test()
 {
     checkRequest('GET');
-    $product = custom('select * from product');
+    $product['obj'] = custom('select * from product');
     dd($product);
     exit;
 }
-function test1()
-{
-    dd('1');
-}
+
 function ListProduct()
 {
     checkRequest('GET');
@@ -63,17 +60,17 @@ function ListProduct()
         $page = $check - 1;
     }
     $obj = selectAll($table, $condition, " ORDER BY $orderBy $orderType LIMIT $perPage OFFSET $offset");
-    $sizeArray = sizeof($obj) - 1;
-    for ($i = 0; $i <= $sizeArray; $i++) {
-        if (currentTime() > $obj["$i"]['startSale'] && currentTime() < $obj["$i"]['endSale']) {
-            $obj["$i"]['saleStatus'] = 1;
-        } else $obj["$i"]['saleStatus'] = 0;
-        $gallery = selectAll('gallery', ['productID' => $obj["$i"]['ID']]);
-        $obj["$i"]["gallery"] = $gallery;
-        $category = selectOne('category', ['ID' => $obj["$i"]['categoryID']]);
-        unset($obj["$i"]['categoryID']);
-        $obj["$i"]['category'] = $category;
-    }
+    // $sizeArray = sizeof($obj) - 1;
+    // for ($i = 0; $i <= $sizeArray; $i++) {
+    //     if (currentTime() > $obj["$i"]['startSale'] && currentTime() < $obj["$i"]['endSale']) {
+    //         $obj["$i"]['saleStatus'] = 1;
+    //     } else $obj["$i"]['saleStatus'] = 0;
+    //     $gallery = selectAll('gallery', ['productID' => $obj["$i"]['ID']]);
+    //     $obj["$i"]["gallery"] = $gallery;
+    //     $category = selectOne('category', ['ID' => $obj["$i"]['categoryID']]);
+    //     unset($obj["$i"]['categoryID']);
+    //     $obj["$i"]['category'] = $category;
+    // }
     $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM $table");
 
     $res['obj'] = $obj;
