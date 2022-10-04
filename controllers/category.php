@@ -12,6 +12,7 @@ $search = '';
 $searchType = 'name';
 $orderBy = 'name';
 $orderType = 'ASC';
+$offset = $perPage * ($page - 1);
 $condition = [
     "$searchType" => $search,
 ];

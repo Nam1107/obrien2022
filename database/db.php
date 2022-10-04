@@ -47,7 +47,7 @@ function selectAll($table, $conditions = [], $order = "")
             $i++;
         }
         $sql = $sql . $order;
-        $stmt = executeQuerry($sql, $conditions);
+        $stmt = executeQuerry($sql);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }

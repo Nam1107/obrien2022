@@ -5,15 +5,15 @@ require './helper/middleware.php';
 class Product
 {
 
-    function test()
+    public static function test()
     {
         checkRequest('GET');
-        $product = custom('select * from product');
+        $product = selectAll('product', ['name' => '']);
         dd($product);
         exit;
     }
 
-    function ListProduct()
+    public static function ListProduct()
     {
         checkRequest('GET');
         $table = 'product';

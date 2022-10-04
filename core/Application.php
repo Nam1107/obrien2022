@@ -53,7 +53,7 @@ class Application
                 if (method_exists($this->controller, $arr[1])) {
                     $this->action = $arr[1];
                 }
-                call_user_func_array([$this->controller, $this->action], []);
+                call_user_func([$this->controller, $this->action]);
             }
         }
     }
