@@ -8,47 +8,47 @@ function test()
 {
     checkRequest('GET');
     $table = 'product';
-    $res['status'] = 1;
-    if (!isset($_GET['page']) || $_GET['page'] <= 0) {
-        $page = 1;
-    } else {
-        $page = $_GET['page'];
-    }
+    // $res['status'] = 1;
+    // if (!isset($_GET['page']) || $_GET['page'] <= 0) {
+    //     $page = 1;
+    // } else {
+    //     $page = $_GET['page'];
+    // }
 
-    $perPage = 10;
-    if (isset($_GET['perPage'])) {
-        $perPage = $_GET['perPage'];
-    }
+    // $perPage = 10;
+    // if (isset($_GET['perPage'])) {
+    //     $perPage = $_GET['perPage'];
+    // }
 
-    $search = '';
-    if (isset($_GET['search'])) {
-        $search = $_GET['search'];
-    }
+    // $search = '';
+    // if (isset($_GET['search'])) {
+    //     $search = $_GET['search'];
+    // }
 
-    $searchType = 'name';
-    if (isset($_GET['searchType'])) {
-        $searchType = $_GET['searchType'];
-    }
+    // $searchType = 'name';
+    // if (isset($_GET['searchType'])) {
+    //     $searchType = $_GET['searchType'];
+    // }
 
-    $orderBy = 'name';
-    if (isset($_GET['orderBy'])) {
-        $orderBy = $_GET['orderBy'];
-    }
+    // $orderBy = 'name';
+    // if (isset($_GET['orderBy'])) {
+    //     $orderBy = $_GET['orderBy'];
+    // }
 
-    $orderType = 'ASC';
-    if (isset($_GET['orderType'])) {
-        $orderType = $_GET['orderType'];
-    }
+    // $orderType = 'ASC';
+    // if (isset($_GET['orderType'])) {
+    //     $orderType = $_GET['orderType'];
+    // }
 
-    $condition = [
-        "$searchType" => $search,
-    ];
+    // $condition = [
+    //     "$searchType" => $search,
+    // ];
 
-    $offset = $perPage * ($page - 1);
+    // $offset = $perPage * ($page - 1);
 
-    $obj = selectAll($table, $condition, " ORDER BY $orderBy $orderType LIMIT $perPage OFFSET $offset");
+    $obj = selectAll($table);
 
-    $product['condition'] = $condition;
+    // $product['condition'] = $condition;
     $product['pro'] = $obj;
     $product['obj'] = custom('select * from product');
     dd($product);
