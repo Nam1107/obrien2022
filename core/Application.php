@@ -1,7 +1,7 @@
 <?php
 
-// require_once 'Router.php';
-
+require './database/db.php';
+require './helper/middleware.php';
 class Application
 {
     protected $controller;
@@ -10,27 +10,27 @@ class Application
 
     function __construct()
     {
-        // print_r($_SERVER['REQUEST_URI']);
-        // echo '<p>' . "</p>";
+        $product = custom('select * from product');
+        dd($product);
+        exit;
 
-        $arr = $this->UrlProcess();
-        array_splice($arr, 0, 1);
+        // $arr = $this->UrlProcess();
+        // array_splice($arr, 0, 1);
 
-        print_r($arr);
+        // // print_r($arr);
 
 
 
-        if (file_exists("./controllers/" . $arr[0] . ".php")) {
-            $this->controller = $arr[0];
-            require_once "./controllers/" . $arr[0] . ".php";
-            if (isset($arr[1])) {
-                if (method_exists($this->controller, $arr[1])) {
-                    $this->action = $arr[1];
-                    echo '1';
-                }
-                call_user_func_array([$this->controller, $this->action], []);
-            }
-        }
+        // if (file_exists("./controllers/" . $arr[0] . ".php")) {
+        //     $this->controller = $arr[0];
+        //     require_once "./controllers/" . $arr[0] . ".php";
+        //     if (isset($arr[1])) {
+        //         if (method_exists($this->controller, $arr[1])) {
+        //             $this->action = $arr[1];
+        //         }
+        //         call_user_func_array([$this->controller, $this->action], []);
+        //     }
+        // }
     }
 
     function UrlProcess()
