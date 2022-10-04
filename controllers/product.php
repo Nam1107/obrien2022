@@ -13,7 +13,6 @@ class Product
     }
     function test1()
     {
-
         dd('1');
     }
     function ListProduct()
