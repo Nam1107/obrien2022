@@ -1,0 +1,16 @@
+{
+    "name": "admin/obrien",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Nam1107",
+            "email": "teenhainam2603@gmail.com"
+        }
+    ],
+    "require": {},
+    "config": {
+        "platform": {
+            "php": " 7.4.29"
+        }
+    }
+}
