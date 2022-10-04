@@ -6,12 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script type="text/javascript" src="/cocomic/client/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="./js/path.js"></script>
+    <script type="text/javascript" src="./js/jquery-3.6.0.min.js"></script>
 </head>
 <script>
 function getUser() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/getuser',
+        url: ROOT + 'user/getuser',
         type: 'get',
         data: {
             'ID': 2,
@@ -27,7 +28,7 @@ function getUser() {
 
 function getProfile() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/getprofile',
+        url: ROOT + 'user/getprofile',
         type: 'get',
         success: function(data) {
             var obj = JSON.parse(data);
@@ -40,7 +41,7 @@ function getProfile() {
 
 function getlistUser() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/listuser',
+        url: ROOT + 'user/listuser',
         type: 'get',
         data: {
             'page': 1,
@@ -57,7 +58,7 @@ function getlistUser() {
 
 function updateProfile() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/updateprofile',
+        url: ROOT + 'user/updateprofile',
         type: 'put',
         data: {
             'ID': 5,
@@ -73,7 +74,7 @@ function updateProfile() {
 
 function deleteUser() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/deleteuser',
+        url: ROOT + 'user/deleteuser',
         type: 'delete',
         data: {
             'ID': 14,
@@ -88,7 +89,7 @@ function deleteUser() {
 
 function changePass() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/changePassword',
+        url: ROOT + 'user/changePassword',
         type: 'POST',
         data: {
             'password': '654321',
@@ -104,7 +105,7 @@ function changePass() {
 
 function Login() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/auth/login',
+        url: ROOT + 'auth/login',
         type: 'POST',
         data: {
             'email': 'admin@admin',
@@ -120,7 +121,7 @@ function Login() {
 
 function Logout() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/auth/logout',
+        url: ROOT + 'auth/logout',
         type: 'POST',
         success: function(data) {
             var obj = JSON.parse(data);
@@ -132,7 +133,7 @@ function Logout() {
 
 function Register() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/auth/register',
+        url: ROOT + 'auth/register',
         type: 'POST',
         data: {
             'firstName': 'Tran',

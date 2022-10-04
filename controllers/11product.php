@@ -6,12 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script type="text/javascript" src="/cocomic/client/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="./js/path.js"></script>
+    <script type="text/javascript" src="./js/jquery-3.6.0.min.js"></script>
 </head>
 <script>
 function getProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/product/getproduct',
+        url: ROOT + 'product/getproduct',
         type: 'get',
         data: {
             'ID': 2,
@@ -27,7 +28,7 @@ function getProduct() {
 
 function getlistProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/product/listproduct',
+        url: ROOT + 'product/listproduct',
         type: 'get',
         data: {
             'page': 1,
@@ -45,7 +46,7 @@ function getlistProduct() {
 
 function updateProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/product/updateProduct',
+        url: ROOT + 'product/updateProduct',
         type: 'put',
         data: {
             'ID': 1,
@@ -61,7 +62,7 @@ function updateProduct() {
 
 function updateGallery() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/gallery/updateGallery',
+        url: ROOT + 'gallery/updateGallery',
         type: 'put',
         data: {
             'ID': 1,
@@ -77,7 +78,7 @@ function updateGallery() {
 
 function addImage() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/gallery/addImage',
+        url: ROOT + 'gallery/addImage',
         type: 'post',
         data: {
             'productID': 1,
@@ -93,7 +94,7 @@ function addImage() {
 
 function deleteGallery() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/gallery/deleteimage',
+        url: ROOT + 'gallery/deleteimage',
         type: 'Delete',
         data: {
             'ID': 4,
@@ -108,7 +109,7 @@ function deleteGallery() {
 
 function deleteProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/product/deleteproduct',
+        url: ROOT + 'product/deleteproduct',
         type: 'delete',
         data: {
             'ID': 5,
@@ -123,7 +124,7 @@ function deleteProduct() {
 
 function createProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/product/createproduct',
+        url: ROOT + 'product/createproduct',
         type: 'post',
         data: {
             'name': 'kiwi',
