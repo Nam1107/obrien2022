@@ -17,8 +17,8 @@ class Application
         if ($arr[0] == 'product') {
             require_once './controllers/product.php';
             if ($arr[1] == 'listproduct') {
-                call_user_func('ListProduct', '');
-                // ListProduct();
+                // call_user_func('ListProduct', '');
+                ListProduct();
             }
             // if ($arr[1] == 'getProduct') {
             //     getProduct();
