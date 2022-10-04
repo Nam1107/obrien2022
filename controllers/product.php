@@ -2,10 +2,15 @@
 require './database/db.php';
 require './helper/middleware.php';
 
-echo '1';
+
 class Product
 {
-
+    function test()
+    {
+        $product = custom('select * from product');
+        dd($product);
+        exit;
+    }
     function ListProduct()
     {
         checkRequest('GET');
