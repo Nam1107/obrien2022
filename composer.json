@@ -7,10 +7,7 @@
             "email": "teenhainam2603@gmail.com"
         }
     ],
-    "require": {},
-    "config": {
-        "platform": {
-            "php": " 7.4.29"
-        }
+    "require": {
+        "php": ">=7.4"
     }
 }
