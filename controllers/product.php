@@ -1,6 +1,8 @@
 <?php
 require './database/db.php';
 require './helper/middleware.php';
+
+echo '1';
 class Product
 {
 
