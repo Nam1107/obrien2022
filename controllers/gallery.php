@@ -5,7 +5,7 @@ class Gallery
 {
 
 
-    function addImage()
+    public static function addImage()
     {
         checkRequest('POST');
         adminOnly();
@@ -26,7 +26,7 @@ class Gallery
         exit();
     }
 
-    function deleteImage()
+    public static function deleteImage()
     {
         checkRequest('DELETE');
         $table = 'gallery';
@@ -51,7 +51,7 @@ class Gallery
             exit();
         }
     }
-    function updateGallery()
+    public static function updateGallery()
     {
         checkRequest('PUT');
         $table = 'gallery';

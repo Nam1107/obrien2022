@@ -5,9 +5,7 @@ require './helper/validateUser.php';
 
 class Auth
 {
-
-
-    function authenToken()
+    public static function authenToken()
     {
         if (isset($_SESSION['user'])) {
             return $_SESSION['user'];
@@ -31,7 +29,7 @@ class Auth
         return null;
     }
 
-    function Logout()
+    public static function Logout()
     {
         userOnly();
         if (isset($_SESSION['user'])) {
@@ -48,7 +46,7 @@ class Auth
         }
     }
 
-    function Login()
+    public static function Login()
     {
         guestsOnly();
         $errors = validateLogin($_POST);
@@ -78,7 +76,7 @@ class Auth
         dd($res);
         exit();
     }
-    function Register()
+    public static function Register()
     {
         guestsOnly();
         $table = 'user';

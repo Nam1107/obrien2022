@@ -82,7 +82,7 @@ class Product
         dd($res);
         exit();
     }
-    function getProduct()
+    public static function getProduct()
     {
         checkRequest('GET');
         $table = 'product';
@@ -97,7 +97,7 @@ class Product
         exit();
     }
 
-    function createProduct()
+    public static function createProduct()
     {
         checkRequest('POST');
         adminOnly();
@@ -119,7 +119,7 @@ class Product
         exit();
     }
 
-    function deleteProduct()
+    public static function deleteProduct()
     {
         checkRequest('DELETE');
         $table = 'product';
@@ -143,7 +143,7 @@ class Product
             exit();
         }
     }
-    function updateProduct()
+    public static function updateProduct()
     {
         checkRequest('PUT');
         $table = 'product';

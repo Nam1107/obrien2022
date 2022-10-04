@@ -4,7 +4,7 @@ require './helper/middleware.php';
 require './helper/validateUser.php';
 class User
 {
-    function ListUser()
+    public static function ListUser()
     {
         checkRequest('GET');
         adminOnly();
@@ -65,7 +65,7 @@ class User
         exit();
     }
 
-    function getProfile()
+    public static function getProfile()
     {
         checkRequest('GET');
         userOnly();
@@ -78,20 +78,27 @@ class User
         exit();
     }
 
-    function getUser()
+    public static function getUser()
     {
         checkRequest('GET');
         adminOnly();
         $table = 'user';
-        $res['status'] = 0; // 1: success; 0: failed;
-        $res['status'] = 1;
+
         $obj = selectOne($table, ['ID' => $_GET['ID']]);
+        if (!$obj) {
+            $res['status'] = 0;
+            $res['msg'] = 'Not found user by ID';
+            dd($res);
+            exit();
+        }
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
         $res['obj'] = $obj;
         dd($res);
         exit();
     }
 
-    function deleteUser()
+    public static function deleteUser()
     {
         checkRequest('DELETE');
         adminOnly();
@@ -117,7 +124,7 @@ class User
         exit();
     }
 
-    function updateProfile()
+    public static function updateProfile()
     {
         checkRequest('PUT');
         userOnly();
@@ -127,12 +134,13 @@ class User
         $id['ID'] = $_SESSION['user']['ID'];
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID'],  $sent_vars['role']);
-        $res['msg'] = update($table, $id, $sent_vars);
+        $res['msg'] = 'Update success';
+        $res['obj'] = selectOne($table, $id);
         dd($res);
         exit();
     }
 
-    function updateUser()
+    public static function updateUser()
     {
         checkRequest('PUT');
         adminOnly();
@@ -147,7 +155,7 @@ class User
         exit();
     }
 
-    function setPassword()
+    public static function setPassword()
     {
         checkRequest('POST');
         adminOnly();
@@ -171,7 +179,7 @@ class User
         }
     }
 
-    function changePassword()
+    public static function changePassword()
     {
         checkRequest('POST');
         userOnly();
