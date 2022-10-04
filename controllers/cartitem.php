@@ -7,23 +7,11 @@ $table = 'product';
 $res['status'] = 1;
 
 $page = 1;
-
-
 $perPage = 10;
-
-
 $search = '';
-
-
 $searchType = 'name';
-
-
 $orderBy = 'name';
-
-
 $orderType = 'ASC';
-
-
 $condition = [
     "$searchType" => $search,
 ];
