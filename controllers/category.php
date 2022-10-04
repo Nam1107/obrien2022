@@ -5,9 +5,19 @@ require './helper/middleware.php';
 
 checkRequest('GET');
 $table = 'user';
-$total = count(selectAll($table, [], " ORDER BY ID DESC "));
+
+$page = 1;
+$perPage = 10;
+$search = '';
+$searchType = 'name';
+$orderBy = 'name';
+$orderType = 'ASC';
+$condition = [
+    "$searchType" => $search,
+];
+$total = count(selectAll($table));
 $check = ceil($total / 10);
-$obj = selectAll($table, [], " ORDER BY ID DESC LIMIT 10 OFFSET 0");
+$obj = selectAll($table, [], " ORDER BY $orderBy $orderType LIMIT $perPage OFFSET $offset");
 
 $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM $table");
 $res['obj'] = $obj;
