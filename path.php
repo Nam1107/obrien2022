@@ -8,5 +8,7 @@ define('DB_PASS',           '');
 define('DB_NAME',           '');
 define('DB_TABLE',          'obrien');
 
+// define('PASSWORD_KEY',          'obrien');
+
 $keyadmin = 'qwertyuiop';
 $keyuser = 'asdfghjkl';

@@ -1,4 +1,5 @@
 <?php
+require './core/authAPI.php';
 require './path.php';
 session_start();
 global $conn;

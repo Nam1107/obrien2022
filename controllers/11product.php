@@ -9,9 +9,9 @@
     <script type="text/javascript" src="/cocomic/client/js/jquery-3.6.0.min.js"></script>
 </head>
 <script>
-function getUser() {
+function getProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/getuser',
+        url: 'http://localhost/PHP/obrien/product/getproduct',
         type: 'get',
         data: {
             'ID': 2,
@@ -25,15 +25,14 @@ function getUser() {
 
 }
 
-function getlistUser() {
+function getlistProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/listuser',
+        url: 'http://localhost/PHP/obrien/product/listproduct',
         type: 'get',
         data: {
             'page': 1,
             'perPage': 4,
             'searchType': 'name',
-            'search': 'u',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -46,7 +45,7 @@ function getlistUser() {
 
 function updateProfile() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/updateprofile',
+        url: 'http://localhost/PHP/obrien/product/updateprofile',
         type: 'put',
         data: {
             'ID': 5,
@@ -60,9 +59,9 @@ function updateProfile() {
 
 }
 
-function deleteUser() {
+function deleteProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/deleteuser',
+        url: 'http://localhost/PHP/obrien/product/deleteproduct',
         type: 'delete',
         data: {
             'ID': 5,
@@ -75,49 +74,12 @@ function deleteUser() {
 
 }
 
-function changePass() {
+function createProduct() {
     $.ajax({
-        url: 'http://localhost/PHP/obrien/user/changePassword',
-        type: 'POST',
+        url: 'http://localhost/PHP/obrien/product/createproduct',
+        type: 'post',
         data: {
-            'ID': 4,
-            'password': '123456',
-            're_pass': '123456',
-        },
-        success: function(data) {
-            var obj = JSON.parse(data);
-            console.log(obj);
-        }
-    })
-
-}
-
-function Login() {
-    $.ajax({
-        url: 'http://localhost/PHP/obrien/auth/login',
-        type: 'POST',
-        data: {
-            'email': 'user2@user',
-            'password': '123456',
-        },
-        success: function(data) {
-            var obj = JSON.parse(data);
-            console.log(obj);
-        }
-    })
-
-}
-
-function Register() {
-    $.ajax({
-        url: 'http://localhost/PHP/obrien/auth/register',
-        type: 'POST',
-        data: {
-            'firstName': 'Tran',
-            'lastName': 'Nam',
-            'email': 'user6@user',
-            'password': '123456',
-            're_pass': '123456',
+            'name': 'kiwi',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -129,20 +91,17 @@ function Register() {
 </script>
 
 <body>
-    <button onclick="getUser()">getuser</button>
+    <button onclick="getProduct()">getByID</button>
     <p></p>
-    <button onclick="getlistUser()">getlist</button>
+    <button onclick="getlistProduct()">getlist</button>
     <p></p>
     <button onclick="updateProfile()">Update</button>
     <p></p>
-    <button onclick="deleteUser()">delete</button>
+    <button onclick="deleteProduct()">delete</button>
     <p></p>
-    <button onclick="changePass()">changePass</button>
+    <button onclick="createProduct()">create</button>
     <p></p>
-    <button onclick="Login()">login</button>
-    <p></p>
-    <button onclick="Register()">register</button>
-    <p></p>
+
 
 </body>
 

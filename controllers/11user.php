@@ -25,6 +25,19 @@ function getUser() {
 
 }
 
+function getProfile() {
+    $.ajax({
+        url: 'http://localhost/PHP/obrien/user/getprofile',
+        type: 'get',
+        success: function(data) {
+            var obj = JSON.parse(data);
+            // $('#textShow').append(obj);
+            console.log(obj);
+        }
+    })
+
+}
+
 function getlistUser() {
     $.ajax({
         url: 'http://localhost/PHP/obrien/user/listuser',
@@ -32,8 +45,6 @@ function getlistUser() {
         data: {
             'page': 1,
             'perPage': 4,
-            'searchType': 'name',
-            'search': 'u',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -65,7 +76,7 @@ function deleteUser() {
         url: 'http://localhost/PHP/obrien/user/deleteuser',
         type: 'delete',
         data: {
-            'ID': 5,
+            'ID': 14,
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -80,9 +91,8 @@ function changePass() {
         url: 'http://localhost/PHP/obrien/user/changePassword',
         type: 'POST',
         data: {
-            'ID': 4,
-            'password': '123456',
-            're_pass': '123456',
+            'password': '654321',
+            're_pass': '654321',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -97,9 +107,21 @@ function Login() {
         url: 'http://localhost/PHP/obrien/auth/login',
         type: 'POST',
         data: {
-            'email': 'user2@user',
+            'email': 'admin@admin',
             'password': '123456',
         },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function Logout() {
+    $.ajax({
+        url: 'http://localhost/PHP/obrien/auth/logout',
+        type: 'POST',
         success: function(data) {
             var obj = JSON.parse(data);
             console.log(obj);
@@ -115,7 +137,7 @@ function Register() {
         data: {
             'firstName': 'Tran',
             'lastName': 'Nam',
-            'email': 'user6@user',
+            'email': 'admin@admin',
             'password': '123456',
             're_pass': '123456',
         },
@@ -131,6 +153,8 @@ function Register() {
 <body>
     <button onclick="getUser()">getuser</button>
     <p></p>
+    <button onclick="getProfile()">getProfile</button>
+    <p></p>
     <button onclick="getlistUser()">getlist</button>
     <p></p>
     <button onclick="updateProfile()">Update</button>
@@ -139,9 +163,12 @@ function Register() {
     <p></p>
     <button onclick="changePass()">changePass</button>
     <p></p>
+
+    <button onclick="Register()">register</button>
+    <p></p>
     <button onclick="Login()">login</button>
     <p></p>
-    <button onclick="Register()">register</button>
+    <button onclick="Logout()">logout</button>
     <p></p>
 
 </body>

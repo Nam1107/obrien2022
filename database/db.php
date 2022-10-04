@@ -1,12 +1,16 @@
 <?php
 require('connect.php');
 
-$datetime = new DateTime();
-$timezone = new DateTimeZone('Asia/Ho_Chi_Minh');
-$datetime->setTimezone($timezone);
-$time = $datetime->format('Y-m-d H:i:s');
 
 // echo $conn;
+function currentTime()
+{
+    $datetime = new DateTime();
+    $timezone = new DateTimeZone('Asia/Ho_Chi_Minh');
+    $datetime->setTimezone($timezone);
+    $time = $datetime->format('Y-m-d H:i:s');
+    return $time;
+}
 function dd($value)
 {
     echo json_encode($value);
@@ -38,9 +42,9 @@ function selectAll($table, $conditions = [], $order = "")
         $i = 0;
         foreach ($conditions as $key => $value) {
             if ($i === 0) {
-                $sql = $sql . " WHERE $key=?";
+                $sql = $sql . " WHERE $key like '%$value%'";
             } else {
-                $sql = $sql . " AND $key=?";
+                $sql = $sql . " AND $key like '%$value%'";
             }
             $i++;
         }
@@ -139,7 +143,7 @@ function update($table, $where, $conditions)
     }
     $conditions = $conditions + $where;
     $stmt = executeQuerry($sql, $conditions);
-    return $stmt;
+    return $stmt->rowCount();
 }
 
 function delete($table, $conditions)
