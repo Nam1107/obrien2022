@@ -18,11 +18,13 @@ class Application
             require_once './controllers/product.php';
             if ($arr[1] == 'listproduct') {
                 // call_user_func('ListProduct', '');
+                // test();
                 ListProduct();
+            } elseif ($arr[1] == 'getProduct') {
+                getProduct();
+            } elseif ($arr[1] == 'test') {
+                test();
             }
-            // if ($arr[1] == 'getProduct') {
-            //     getProduct();
-            // }
             // if ($arr[1] == 'createProduct') {
             //     createProduct();
             // }
