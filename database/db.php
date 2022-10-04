@@ -1,8 +1,6 @@
 <?php
 require('connect.php');
 
-
-// echo $conn;
 function currentTime()
 {
     $datetime = new DateTime();

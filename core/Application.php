@@ -10,14 +10,17 @@ class Application
 
     function __construct()
     {
-        $product = custom('select * from product');
-        dd($product);
-        exit;
 
-        // $arr = $this->UrlProcess();
-        // array_splice($arr, 0, 1);
+        $arr = $this->UrlProcess();
+        array_splice($arr, 0, 1);
 
         // // print_r($arr);
+        if ($arr[0] == 'product') {
+            require_once './controllers/product.php';
+            if ($arr[1] == 'listproduct') {
+                test();
+            }
+        }
 
 
 
