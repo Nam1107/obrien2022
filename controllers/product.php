@@ -46,10 +46,13 @@ function test()
 
     // $offset = $perPage * ($page - 1);
 
+    $total = count(selectAll($table, [], ''));
+
     $obj = selectAll($table, [], " ORDER BY name DESC LIMIT 4 OFFSET 0");
 
     // $product['condition'] = $condition;
     $product['pro'] = $obj;
+    $product['total'] = $total;
     // $product['obj'] = custom('select * from product');
     dd($product);
     exit;
