@@ -14,12 +14,27 @@ class Application
         $arr = $this->UrlProcess();
         array_splice($arr, 0, 1);
 
-        // // print_r($arr);
         if ($arr[0] == 'product') {
             require_once './controllers/product.php';
             if ($arr[1] == 'listproduct') {
-                test();
+                call_user_func('ListProduct', '');
+                // ListProduct();
             }
+            // if ($arr[1] == 'getProduct') {
+            //     getProduct();
+            // }
+            // if ($arr[1] == 'createProduct') {
+            //     createProduct();
+            // }
+            // if ($arr[1] == 'getProduct') {
+            //     getProduct()
+            // }
+            // if ($arr[1] == 'getProduct') {
+            //     getProduct()
+            // }
+            // if ($arr[1] == 'getProduct') {
+            //     getProduct()
+            // }
         }
 
 
