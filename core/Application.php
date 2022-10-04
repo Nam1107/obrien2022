@@ -28,7 +28,7 @@ class Application
                     $this->action = $arr[1];
                     echo '1';
                 }
-                // call_user_func_array([$this->controller, $this->action], []);
+                call_user_func_array([$this->controller, $this->action], []);
             }
         }
     }
