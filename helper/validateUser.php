@@ -19,9 +19,9 @@ function validateRegister($user)
     if (empty($user['password'])) {
         array_push($errors, 'Password is required');
     }
-    if (empty($user['re_pass'])) {
+    if (empty($user['confirmPass'])) {
         array_push($errors, 'Password Confirm is required');
-    } elseif ($user['re_pass'] !== $user['password']) {
+    } elseif ($user['confirmPass'] !== $user['password']) {
         array_push($errors, 'password do not match');
     }
     $existingUser = selectOne('user', ['email' => $user['email']]);
@@ -36,12 +36,13 @@ function validateChangePass($user)
 {
 
     $errors = array();
-    if (strlen($user['password']) < 6) {
+    if (!password_verify($_POST['password'], $_SESSION['user']['password'])) {
+        array_push($errors, 'Wrong password');
+    } elseif (strlen($user['newPass']) < 6) {
         array_push($errors, 'Password must have more than 6 characters');
-    }
-    if (empty($user['re_pass'])) {
+    } elseif (empty($user['confirmPass'])) {
         array_push($errors, 'Password Confirm is required');
-    } elseif ($user['re_pass'] !== $user['password']) {
+    } elseif ($user['confirmPass'] !== $user['newPass']) {
         array_push($errors, 'Password do not match');
     }
 
@@ -61,28 +62,4 @@ function validateLogin($user)
 
 
     return $errors;
-}
-
-function authenToken()
-{
-    if (isset($_SESSION['user'])) {
-        return $_SESSION['user'];
-    }
-
-
-    if (empty($_COOKIE['token'])) {
-        return null;
-    } else {
-        $token = $_COOKIE['token'];
-    }
-
-    $result   = custom("select [User].* from [User], Login_Token where [User].UserID = [Login_Token].UserID and [Login_Token].token = '$token'");
-
-    if ($result != null && count($result) > 0) {
-        $_SESSION['user'] = $result[0];
-
-        return $result[0];
-    }
-
-    return null;
 }

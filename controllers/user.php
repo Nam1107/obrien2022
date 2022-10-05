@@ -134,7 +134,7 @@ class User
         $id['ID'] = $_SESSION['user']['ID'];
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID'],  $sent_vars['role']);
-        $res['msg'] = 'Update success';
+        $res['msg'] = update($table, $id, $sent_vars);
         $res['obj'] = selectOne($table, $id);
         dd($res);
         exit();
@@ -160,23 +160,16 @@ class User
         checkRequest('POST');
         adminOnly();
         $table = 'user';
-        $res['status'] = 0;
-        $errors = validateChangePass($_POST);
-        if (count($errors) === 0) {
-            $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $user['ID'] = $_POST['ID'];
-            unset($_POST['re_pass'], $_POST['ID']);
-            $sent_vars['updatedAt'] = currentTime();
-            $res['rep'] = 1;
-            $res['msg'] = update('user', $user, $_POST);
-            dd($res);
-            exit();
-        } else {
-            $res['rep'] = 0;
-            $res['msg'] = $errors;
-            dd($res);
-            exit();
-        }
+
+        $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $user['ID'] = $_POST['ID'];
+        $var['updatedAt'] = currentTime();
+        $var['password'] = $_POST['password'];
+        update('user', $user, $var);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        dd($res);
+        exit();
     }
 
     public static function changePassword()
@@ -187,13 +180,15 @@ class User
 
         $errors = validateChangePass($_POST);
         if (count($errors) === 0) {
-            $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $_POST['newPass'] = password_hash($_POST['newPass'], PASSWORD_DEFAULT);
             $user['ID'] = $_SESSION['user']['ID'];
-            unset($_POST['re_pass'], $_POST['ID']);
-            $sent_vars['updatedAt'] = currentTime();
+            unset($_POST['confirmPass'], $_POST['ID']);
+            $var['updatedAt'] = currentTime();
+            $var['password'] = $_POST['newPass'];
+            update('user', $user, $var);
 
             $res['status'] = 1;
-            $res['msg'] = update('user', $user, $_POST);
+            $res['msg'] = 'Success';
             dd($res);
             exit();
         } else {

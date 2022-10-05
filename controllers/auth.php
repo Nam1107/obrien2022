@@ -32,18 +32,17 @@ class Auth
     public static function Logout()
     {
         userOnly();
-        if (isset($_SESSION['user'])) {
-            session_destroy();
-            $res['msg'] = 'You have successfully logout';
-            $res['status'] = 1;
-            dd($res);
-            exit();
-        } else {
-            $res['msg'] = "You haven't logged";
-            $res['status'] = 0;
-            dd($res);
-            exit();
-        }
+        session_destroy();
+        if (!isset($_COOKIE['token'])) exit();
+
+        $token['token'] = $_COOKIE['token'];
+
+        delete('login_token', $token);
+        setcookie('token', '', time() - 7 * 24 * 60 * 60, '/');
+        $res['msg'] = 'You have successfully logout';
+        $res['status'] = 1;
+        dd($res);
+        exit();
     }
 
     public static function Login()
@@ -58,10 +57,10 @@ class Auth
             if (!$user) {
                 array_push($errors, 'Email address does not exist');
             } elseif (password_verify($_POST['password'], $user['password'])) {
-                // $login_token['token'] = md5Security($user['email'] . time() . $user['ID']);
-                // $login_token['userID'] = $user['ID'];
-                // setcookie('token', $login_token['Token'], time() + 7 * 24 * 60 * 60, '/');
-                // create('[Login_Token]', $login_token);
+                $login_token['token'] = md5Security($user['email'] . time() . $user['ID']);
+                $login_token['userID'] = $user['ID'];
+                setcookie('token', $login_token['token'], time() + 7 * 24 * 60 * 60, '/');
+                create('login_token', $login_token);
                 $_SESSION['user'] = $user;
                 $res['msg'] = 'login success';
                 $res['status'] = 1;

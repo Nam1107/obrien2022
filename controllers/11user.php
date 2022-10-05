@@ -15,7 +15,7 @@ function getUser() {
         url: ROOT + 'user/getuser',
         type: 'get',
         data: {
-            'ID': 2,
+            'ID': 4,
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -61,8 +61,25 @@ function updateProfile() {
         url: ROOT + 'user/updateprofile',
         type: 'put',
         data: {
-            'ID': 5,
-            'name': '12312',
+            'ID': 4,
+            'name': 'test',
+            'firstName': '123',
+        },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function updateUser() {
+    $.ajax({
+        url: ROOT + 'user/updateUser',
+        type: 'put',
+        data: {
+            'ID': 4,
+            'name': 'test',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -92,8 +109,25 @@ function changePass() {
         url: ROOT + 'user/changePassword',
         type: 'POST',
         data: {
-            'password': '654321',
-            're_pass': '654321',
+            'password': '123456',
+            'newPass': '654321',
+            'confirmPass': '654321',
+        },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function setPass() {
+    $.ajax({
+        url: ROOT + 'user/setPassword',
+        type: 'POST',
+        data: {
+            'ID': '14',
+            'password': '123456',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -109,7 +143,7 @@ function Login() {
         type: 'POST',
         data: {
             'email': 'admin@admin',
-            'password': '654321',
+            'password': '123456',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -138,9 +172,9 @@ function Register() {
         data: {
             'firstName': 'Tran',
             'lastName': 'Nam',
-            'email': 'admin@admin',
+            'email': 'admin1@admin',
             'password': '123456',
-            're_pass': '123456',
+            'confirmPass': '123456',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -158,13 +192,16 @@ function Register() {
     <p></p>
     <button onclick="getlistUser()">getlist</button>
     <p></p>
-    <button onclick="updateProfile()">Update</button>
+    <button onclick="updateProfile()">Updateprofile</button>
+    <p></p>
+    <button onclick="updateUser()">UpdateUser</button>
     <p></p>
     <button onclick="deleteUser()">delete</button>
     <p></p>
     <button onclick="changePass()">changePass</button>
     <p></p>
-
+    <button onclick="setPass()">setPass</button>
+    <p></p>
     <button onclick="Register()">register</button>
     <p></p>
     <button onclick="Login()">login</button>

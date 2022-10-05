@@ -4,6 +4,30 @@ function md5Security($pwd)
     return md5(md5($pwd) . MD5_PRIVATE_KEY);
 }
 
+function authenToken()
+{
+    if (isset($_SESSION['user'])) {
+        return $_SESSION['user'];
+    }
+
+
+    if (empty($_COOKIE['token'])) {
+        return null;
+    } else {
+        $token = $_COOKIE['token'];
+    }
+
+    $result   = custom("select user.* from user, login_token where user.ID = login_token.userID and login_token.token ='$token'");
+
+    if ($result != null && count($result) > 0) {
+        $_SESSION['user'] = $result[0];
+
+        return $result[0];
+    }
+
+    return null;
+}
+
 function checkRequest($req)
 {
     if ($_SERVER['REQUEST_METHOD'] !== $req) {
@@ -17,7 +41,7 @@ function checkRequest($req)
 function userOnly()
 {
     $table = 'user';
-    if (!isset($_SESSION['user']['ID'])) {
+    if (!authenToken()) {
         $res['msg'] = 'You need to login first';
         $res['status'] = '0';
         dd($res);
@@ -46,7 +70,7 @@ function adminOnly()
 }
 function guestsOnly()
 {
-    if (isset($_SESSION['user']['ID'])) {
+    if (authenToken()) {
         $res['msg'] = 'You have logged in';
         $res['status'] = '0';
         dd($res);
