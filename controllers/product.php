@@ -5,73 +5,71 @@ require './helper/middleware.php';
 class Product
 {
 
-    public static function test()
-    {
-        checkRequest('GET');
-        $product = selectAll('product', ['name' => '']);
-        dd($product);
-        exit;
-    }
-
     public static function ListProduct()
     {
         checkRequest('GET');
         $table = 'product';
         $res['status'] = 1;
-        if (!isset($_GET['page']) || $_GET['page'] <= 0) {
+
+        if (!isset($_GET['perPage']) || !isset($_GET['category']) || !isset($_GET['name']) || !isset($_GET['sale'])) {
+            $res['msg'] = 'Not enough information';
+            dd($res);
+            exit();
+        }
+
+        if ($_GET['page'] <= 0) {
             $page = 1;
         } else {
             $page = $_GET['page'];
         }
 
-        $perPage = 10;
-        if (isset($_GET['perPage'])) {
-            $perPage = $_GET['perPage'];
+        $perPage = $_GET['perPage'];
+        $category = $_GET['category'];
+        $name = $_GET['name'];
+        $sale = $_GET['sale'];
+
+        $sortBy = 'name';
+        if (isset($_GET['sortBy'])) {
+            $sortBy = $_GET['sortBy'];
         }
 
-        $search = '';
-        if (isset($_GET['search'])) {
-            $search = $_GET['search'];
+        $sortType = 'ASC';
+        if (isset($_GET['sortType'])) {
+            $sortType = $_GET['sortType'];
         }
-
-        $searchType = 'name';
-        if (isset($_GET['searchType'])) {
-            $searchType = $_GET['searchType'];
-        }
-
-        $orderBy = 'name';
-        if (isset($_GET['orderBy'])) {
-            $orderBy = $_GET['orderBy'];
-        }
-
-        $orderType = 'ASC';
-        if (isset($_GET['orderType'])) {
-            $orderType = $_GET['orderType'];
-        }
-
-        $condition = [
-            "$searchType" => $search,
-        ];
 
         $offset = $perPage * ($page - 1);
 
-        $total = count(selectAll($table, $condition, " ORDER BY $orderBy $orderType "));
-        $check = ceil($total / $perPage);
+        $total = custom(
+            "SELECT COUNT(ID) as total
+            FROM (
+                SELECT A.* , category.name AS category
+                FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+                FROM product) AS A,category
+                WHERE A.categoryID = category.ID
+                AND category.name LIKE '%$category%'
+                AND A.name LIKE '%$name%'
+                AND statusSale LIKE '%$sale%'
+            ) AS B
+        "
+        );
+
+        $check = ceil($total[0]['total'] / $perPage);
         if ($page >= $check && $check > 0) {
             $page = $check - 1;
         }
-        $obj = selectAll($table, $condition, " ORDER BY $orderBy $orderType LIMIT $perPage OFFSET $offset");
-        $sizeArray = sizeof($obj) - 1;
-        for ($i = 0; $i <= $sizeArray; $i++) {
-            if (currentTime() > $obj["$i"]['startSale'] && currentTime() < $obj["$i"]['endSale']) {
-                $obj["$i"]['saleStatus'] = 1;
-            } else $obj["$i"]['saleStatus'] = 0;
-            $gallery = selectAll('gallery', ['productID' => $obj["$i"]['ID']]);
-            $obj["$i"]["gallery"] = $gallery;
-            $category = selectOne('category', ['ID' => $obj["$i"]['categoryID']]);
-            unset($obj["$i"]['categoryID']);
-            $obj["$i"]['category'] = $category;
-        }
+        $obj = custom(
+            "SELECT A.* , category.name AS category
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            FROM product) AS A,category
+            WHERE A.categoryID = category.ID
+            AND category.name LIKE '%$category%'
+            AND A.name LIKE '%$name%'
+            AND statusSale LIKE '%$sale%'
+            ORDER BY $sortBy $sortType
+            LIMIT $perPage OFFSET $offset
+            "
+        );
         $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM $table");
 
         $res['obj'] = $obj;
@@ -86,13 +84,20 @@ class Product
     {
         checkRequest('GET');
         $table = 'product';
-        $res['status'] = 0; // 1: success; 0: failed;
         $res['status'] = 1;
-        $obj = selectOne($table, ['ID' => $_GET['ID']]);
-        if (currentTime() > $obj['startSale'] && currentTime() < $obj['endSale']) {
-            $obj['saleStatus'] = 1;
-        } else $obj['saleStatus'] = 0;
-        $res['obj'] = $obj;
+
+        $id = $_GET['ID'];
+
+        $obj = custom("
+            SELECT A.* , category.name AS category
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            FROM product) AS A,category
+            WHERE A.categoryID = category.ID
+            AND A.ID = $id
+        
+        ");
+
+        $res['obj'] = $obj[0];
         dd($res);
         exit();
     }

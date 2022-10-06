@@ -26,6 +26,29 @@ function getProduct() {
 
 }
 
+
+function getlistSale() {
+    $.ajax({
+        url: ROOT + 'product/listproduct',
+        type: 'get',
+        data: {
+            'page': 1,
+            'perPage': 4,
+            'category': '',
+            'name': '',
+            'sale': '1',
+            'sortType': 'ASC',
+            'sortBy': 'name',
+        },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            // $('#textShow').append(obj);
+            console.log(obj);
+        }
+    })
+
+}
+
 function getlistProduct() {
     $.ajax({
         url: ROOT + 'product/listproduct',
@@ -33,7 +56,11 @@ function getlistProduct() {
         data: {
             'page': 1,
             'perPage': 4,
-            'searchType': 'name',
+            'category': '',
+            'name': '',
+            'sale': '',
+            'sortType': 'ASC',
+            'sortBy': 'name',
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -140,6 +167,8 @@ function createProduct() {
 
 <body>
     <button onclick="getProduct()">getByID</button>
+    <p></p>
+    <button onclick="getlistSale()">getSale</button>
     <p></p>
     <button onclick="getlistProduct()">getlist</button>
 

@@ -82,7 +82,7 @@ class Auth
         $res['status'] = 0;
         $errors = validateRegister($_POST);
         if (count($errors) === 0) {
-            unset($_POST['re_pass']);
+            unset($_POST['confirmPass']);
 
             $_POST['role'] = '0';
             $_POST['name'] = $_POST['firstName'] . ' ' . $_POST['lastName'];
