@@ -6,7 +6,7 @@ class Application
 {
     protected $controller;
     protected $action;
-    protected $prarams = [];
+    protected $prarams;
 
     function __construct()
     {
@@ -50,10 +50,12 @@ class Application
             $this->controller = $arr[0];
             require "./controllers/" . $arr[0] . ".php";
             if (isset($arr[1])) {
+
                 if (method_exists($this->controller, $arr[1])) {
                     $this->action = $arr[1];
                 }
-                call_user_func([$this->controller, $this->action]);
+                if (isset($arr[2])) $this->prarams = $arr[2];
+                call_user_func([$this->controller, $this->action], $this->prarams);
             }
         }
     }

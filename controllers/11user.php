@@ -12,12 +12,10 @@
 
 <script>
 function getUser() {
+    var id = $('#idUser').val();
     $.ajax({
-        url: ROOT + 'user/getuser',
+        url: ROOT + 'user/getuser/' + id,
         type: 'get',
-        data: {
-            'ID': $('#idUser').val(),
-        },
         success: function(data) {
             var obj = JSON.parse(data);
             // $('#textShow').append(obj);

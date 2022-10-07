@@ -88,13 +88,11 @@ class Product
         dd($res);
         exit();
     }
-    public static function getProduct()
+    public static function getProduct($id)
     {
         checkRequest('GET');
         $table = 'product';
         $res['status'] = 1;
-
-        $id = $_GET['ID'];
 
         $obj = custom("
             SELECT A.* , category.name AS category

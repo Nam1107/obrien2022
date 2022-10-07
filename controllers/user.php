@@ -77,13 +77,13 @@ class User
         exit();
     }
 
-    public static function getUser()
+    public static function getUser($id)
     {
         checkRequest('GET');
         adminOnly();
         $table = 'user';
 
-        $obj = selectOne($table, ['ID' => $_GET['ID']]);
+        $obj = selectOne($table, ['ID' => $id]);
         if (!$obj) {
             $res['status'] = 0;
             $res['errors'] = 'Not found user by ID';
