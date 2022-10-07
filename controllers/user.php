@@ -9,7 +9,6 @@ class User
         checkRequest('GET');
         adminOnly();
         $table = 'user';
-        // $res['status'] = 0; // 1: success; 0: failed;
 
         $res['status'] = 1;
         if (!isset($_GET['page']) || $_GET['page'] <= 0) {
@@ -28,33 +27,33 @@ class User
             $search = $_GET['search'];
         }
 
-        $searchType = 'name';
-        if (isset($_GET['searchType'])) {
-            $searchType = $_GET['searchType'];
+        $searchValue = 'name';
+        if (isset($_GET['searchValue'])) {
+            $searchValue = $_GET['searchValue'];
         }
 
-        $orderBy = 'name';
-        if (isset($_GET['orderBy'])) {
-            $orderBy = $_GET['orderBy'];
+        $sortBy = 'name';
+        if (isset($_GET['sortBy'])) {
+            $sortBy = $_GET['sortBy'];
         }
 
-        $orderType = 'ASC';
-        if (isset($_GET['orderType'])) {
-            $orderType = $_GET['orderType'];
+        $sortType = 'ASC';
+        if (isset($_GET['sortType'])) {
+            $sortType = $_GET['sortType'];
         }
 
         $condition = [
-            "$searchType" => $search,
+            "$searchValue" => $search,
         ];
 
         $offset = $perPage * ($page - 1);
 
-        $total = count(selectAll($table, $condition, " ORDER BY $orderBy $orderType "));
+        $total = count(selectAll($table, $condition, " ORDER BY $sortBy $sortType "));
         $check = ceil($total / $perPage);
         if ($page >= $check && $check > 0) {
             $page = $check - 1;
         }
-        $obj = selectAll($table, $condition, " ORDER BY $orderBy $orderType LIMIT $perPage OFFSET $offset");
+        $obj = selectAll($table, $condition, " ORDER BY $sortBy $sortType LIMIT $perPage OFFSET $offset");
         $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM $table");
         $res['obj'] = $obj;
         $res['totalCount'] = $totalCount[0]['totalCount'];
@@ -87,7 +86,7 @@ class User
         $obj = selectOne($table, ['ID' => $_GET['ID']]);
         if (!$obj) {
             $res['status'] = 0;
-            $res['msg'] = 'Not found user by ID';
+            $res['errors'] = 'Not found user by ID';
             dd($res);
             exit();
         }
@@ -108,17 +107,17 @@ class User
         if (isset($sent_vars['ID'])) {
             if ($sent_vars['ID'] == $_SESSION['user']['ID']) {
                 $res['status'] = 0;
-                $res['msg'] = 'You cannot delete your account';
+                $res['errors'] = 'You cannot delete your account';
             } else {
 
                 $id['ID'] = $sent_vars['ID'];
                 delete($table, $id);
                 $res['status'] = 1;
-                $res['msg'] = delete($table, $id);
+                $res['msg'] = 'Success';
             }
         } else {
             $res['status'] = 0;
-            $res['msg'] = 'Not found user by ID';
+            $res['errors'] = 'Not found user by ID';
         }
         dd($res);
         exit();
@@ -150,7 +149,8 @@ class User
         $id['ID'] =  $sent_vars['ID'];
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID']);
-        $res['msg'] = update($table, $id, $sent_vars);
+        update($table, $id, $sent_vars);
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }

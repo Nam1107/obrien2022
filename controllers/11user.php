@@ -45,8 +45,7 @@ function getlistUser() {
         url: ROOT + 'user/listuser',
         type: 'get',
         data: {
-            'page': 1,
-            'perPage': 4,
+
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -110,7 +109,6 @@ function changePass() {
         data: {
             'password': $('#oldPass').val(),
             'newPass': $('#newPass').val(),
-            'confirmPass': $('#confirmPass').val(),
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -170,11 +168,37 @@ function Register() {
         url: ROOT + 'auth/register',
         type: 'POST',
         data: {
-            'firstName': 'Tran',
-            'lastName': 'Nam',
             'email': $('#emailRegister').val(),
             'password': $('#passwordRegister').val(),
-            'confirmPass': $('#confirmRegister').val(),
+        },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function getCart() {
+    $.ajax({
+        url: ROOT + 'order/getCart',
+        type: 'GET',
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function addToCart() {
+    $.ajax({
+        url: ROOT + 'order/addToCart',
+        type: 'POST',
+        data: {
+            'productID': 2,
+            'quanity': 2,
+
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -216,6 +240,10 @@ button {
         <button onclick="getlistUser()">getlist</button>
         <p></p>
         <button onclick="getProfile()">getProfile</button>
+        <p></p>
+        <button onclick="getCart()">getCart</button>
+        <p></p>
+        <button onclick="addToCart()">addToCart</button>
         <p></p>
 
     </div>

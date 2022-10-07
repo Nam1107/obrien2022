@@ -27,27 +27,7 @@ function getProduct() {
 }
 
 
-function getlistSale() {
-    $.ajax({
-        url: ROOT + 'product/listproduct',
-        type: 'get',
-        data: {
-            'page': 1,
-            'perPage': 4,
-            'category': '',
-            'name': '',
-            'sale': '1',
-            'sortType': 'ASC',
-            'sortBy': 'name',
-        },
-        success: function(data) {
-            var obj = JSON.parse(data);
-            // $('#textShow').append(obj);
-            console.log(obj);
-        }
-    })
 
-}
 
 function getlistProduct() {
     $.ajax({
@@ -92,8 +72,9 @@ function updateGallery() {
         url: ROOT + 'gallery/updateGallery',
         type: 'put',
         data: {
-            'ID': 1,
-            'URLImage': '12',
+            'ID': 6,
+            'URLImage': '1284',
+            'Sort': 2,
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -104,12 +85,13 @@ function updateGallery() {
 }
 
 function addImage() {
+    var image = ['123', '456'];
     $.ajax({
         url: ROOT + 'gallery/addImage',
         type: 'post',
         data: {
             'productID': 1,
-            'URLImage': '123',
+            'gallery': ['URL', 'URL'],
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -124,7 +106,7 @@ function deleteGallery() {
         url: ROOT + 'gallery/deleteimage',
         type: 'Delete',
         data: {
-            'ID': 4,
+            'ID': 18,
         },
         success: function(data) {
             var obj = JSON.parse(data);
@@ -154,7 +136,9 @@ function createProduct() {
         url: ROOT + 'product/createproduct',
         type: 'post',
         data: {
+            'category': 'fruits',
             'name': 'kiwi',
+            'gallery': ['123', '456'],
         },
         success: function(data) {
             var obj = JSON.parse(data);

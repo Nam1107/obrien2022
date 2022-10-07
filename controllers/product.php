@@ -11,22 +11,30 @@ class Product
         $table = 'product';
         $res['status'] = 1;
 
-        if (!isset($_GET['perPage']) || !isset($_GET['category']) || !isset($_GET['name']) || !isset($_GET['sale'])) {
-            $res['msg'] = 'Not enough information';
-            dd($res);
-            exit();
-        }
-
-        if ($_GET['page'] <= 0) {
+        if (!isset($_GET['page'])  || $_GET['page'] <= 0) {
             $page = 1;
         } else {
             $page = $_GET['page'];
         }
+        $perPage = 10;
+        if (isset($_GET['perPage'])) {
+            $perPage = $_GET['perPage'];
+        }
 
-        $perPage = $_GET['perPage'];
-        $category = $_GET['category'];
-        $name = $_GET['name'];
-        $sale = $_GET['sale'];
+        $category = '';
+        if (isset($_GET['category'])) {
+            $category = $_GET['category'];
+        }
+
+        $name = '';
+        if (isset($_GET['name'])) {
+            $name = $_GET['name'];
+        }
+
+        $sale = '';
+        if (isset($_GET['sale'])) {
+            $sale = $_GET['sale'];
+        }
 
         $sortBy = 'name';
         if (isset($_GET['sortBy'])) {
@@ -97,7 +105,10 @@ class Product
         
         ");
 
+        $gallery = selectAll('gallery', ['productID' => $id]);
+        $obj[0]['gallery'] = $gallery;
         $res['obj'] = $obj[0];
+
         dd($res);
         exit();
     }
@@ -110,15 +121,34 @@ class Product
         $res['status'] = 0;
         $_POST['createdAt'] = currentTime();
         $_POST['updatedAt'] = currentTime();
-        $productID = create($table, $_POST);
-        if (!$productID) {
-            $res['status'] = 0;
-            $res['msg'] = 'Errors';
-        } else {
-            $res['status'] = 1;
-            $res['msg'] = 'Success';
-            $res['obj'] = selectOne($table, ['ID' => $productID]);
-        }
+        $cate = $_POST['category'];
+        $urls = $_POST['gallery'];
+        $category = custom("
+        SELECT * FROM category WHERE name LIKE '%$cate%' 
+        ");
+        unset($_POST['category'], $_POST['gallery']);
+        $_POST['categoryID'] = $category[0]['ID'];
+        $id = create($table, $_POST);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        $obj = custom("
+            SELECT A.* , category.name AS category
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            FROM product) AS A,category
+            WHERE A.categoryID = category.ID
+            AND A.ID = $id
+
+        ");
+
+        foreach ($urls as $key => $url) :
+            $image['productID'] = $id;
+            $image['URLImage'] =  $url;
+            $image['Sort'] =  $key;
+            create('gallery', $image);
+        endforeach;
+        $gallery = selectAll('gallery', ['productID' => $id]);
+        $obj[0]['gallery'] = $gallery;
+        $res['obj'] = $obj[0];
 
         dd($res);
         exit();
@@ -139,10 +169,8 @@ class Product
                 dd($res);
                 exit();
             }
-
-
             $res['status'] = 0;
-            $res['msg'] = 'Not found product by ID';
+            $res['errors'] = 'Not found product by ID';
 
             dd($res);
             exit();
@@ -159,7 +187,17 @@ class Product
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['ID']);
         $res['status'] = 1;
-        $res['msg'] = update($table, $id, $sent_vars);
+        update($table, $id, $sent_vars);
+        $res['msg'] = 'Success';
+        $obj = custom("
+            SELECT A.* , category.name AS category
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            FROM product) AS A,category
+            WHERE A.categoryID = category.ID
+            AND A.ID = $id
+        
+        ");
+        $res['obj'] = $obj[0];
         dd($res);
         exit();
     }

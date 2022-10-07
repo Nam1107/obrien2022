@@ -32,7 +32,7 @@ function checkRequest($req)
 {
     if ($_SERVER['REQUEST_METHOD'] !== $req) {
         $res['status'] = 0;
-        $res['msg'] = 'Wrong method';
+        $res['errors'] = 'Wrong method';
         dd($res);
         exit();
     }
@@ -42,7 +42,7 @@ function userOnly()
 {
     $table = 'user';
     if (!authenToken()) {
-        $res['msg'] = 'You need to login first';
+        $res['errors'] = 'You need to login first';
         $res['status'] = '0';
         dd($res);
         exit();
@@ -51,7 +51,7 @@ function userOnly()
         unset($_SESSION['user']);
         $obj = selectOne($table, ['ID' => $id]);
         if (!$obj) {
-            $res['msg'] = 'Not found your account';
+            $res['errors'] = 'Not found your account';
             $res['status'] = '0';
             dd($res);
             exit();
@@ -62,7 +62,7 @@ function adminOnly()
 {
     userOnly();
     if ($_SESSION['user']['role'] != 1) {
-        $res['msg'] = 'You are not admin';
+        $res['errors'] = 'You are not admin';
         $res['status'] = '0';
         dd($res);
         exit();
@@ -71,7 +71,7 @@ function adminOnly()
 function guestsOnly()
 {
     if (authenToken()) {
-        $res['msg'] = 'You have logged in';
+        $res['errors'] = 'You have logged in';
         $res['status'] = '0';
         dd($res);
         exit();
