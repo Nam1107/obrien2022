@@ -188,14 +188,52 @@ function getCart() {
 }
 
 function addToCart() {
+    var id = 6;
     $.ajax({
-        url: ROOT + 'cart/addToCart',
+        url: ROOT + 'cart/addProduct/' + id,
         type: 'POST',
         data: {
-            'productID': 2,
             'quanity': 2,
-
         },
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function removeFromCart() {
+    var id = 6;
+    $.ajax({
+        url: ROOT + 'cart/removeProduct/' + id,
+        type: 'DELETE',
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function incrementByOne() {
+    var id = 1;
+    $.ajax({
+        url: ROOT + 'cart/incrementByOne/' + id,
+        type: 'PUT',
+        success: function(data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+        }
+    })
+
+}
+
+function decrementByOne() {
+    var id = 1;
+    $.ajax({
+        url: ROOT + 'cart/decrementByOne/' + id,
+        type: 'PUT',
         success: function(data) {
             var obj = JSON.parse(data);
             console.log(obj);
@@ -240,6 +278,12 @@ button {
         <button onclick="getCart()">getCart</button>
         <p></p>
         <button onclick="addToCart()">addToCart</button>
+        <p></p>
+        <button onclick="removeFromCart()">removeFromCart</button>
+        <p></p>
+        <button onclick="incrementByOne()">incrementByOne</button>
+        <p></p>
+        <button onclick="decrementByOne()">decrementByOne</button>
         <p></p>
 
     </div>
