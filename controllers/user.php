@@ -97,28 +97,22 @@ class User
         exit();
     }
 
-    public static function deleteUser()
+    public static function deleteUser($id)
     {
         checkRequest('DELETE');
         adminOnly();
         $table = 'user';
         parse_str(file_get_contents("php://input"), $sent_vars);
-
-        if (isset($sent_vars['ID'])) {
-            if ($sent_vars['ID'] == $_SESSION['user']['ID']) {
-                $res['status'] = 0;
-                $res['errors'] = 'You cannot delete your account';
-            } else {
-
-                $id['ID'] = $sent_vars['ID'];
-                delete($table, $id);
-                $res['status'] = 1;
-                $res['msg'] = 'Success';
-            }
-        } else {
+        if ($id == $_SESSION['user']['ID']) {
             $res['status'] = 0;
-            $res['errors'] = 'Not found user by ID';
+            $res['errors'] = 'You cannot delete your account';
+        } else {
+            $userID['ID'] = $id;
+            delete($table, $userID);
+            $res['status'] = 1;
+            $res['msg'] = 'Success';
         }
+
         dd($res);
         exit();
     }
@@ -139,30 +133,30 @@ class User
         exit();
     }
 
-    public static function updateUser()
+    public static function updateUser($id)
     {
         checkRequest('PUT');
         adminOnly();
         $table = 'user';
         $res['status'] = 1;
         parse_str(file_get_contents("php://input"), $sent_vars);
-        $id['ID'] =  $sent_vars['ID'];
+        $userID['ID'] =  $id;
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID']);
-        update($table, $id, $sent_vars);
+        update($table, $userID, $sent_vars);
         $res['msg'] = 'Success';
         dd($res);
         exit();
     }
 
-    public static function setPassword()
+    public static function setPassword($id)
     {
         checkRequest('POST');
         adminOnly();
         $table = 'user';
 
         $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $user['ID'] = $_POST['ID'];
+        $user['ID'] = $id;
         $var['updatedAt'] = currentTime();
         $var['password'] = $_POST['password'];
         update('user', $user, $var);

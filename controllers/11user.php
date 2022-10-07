@@ -70,11 +70,11 @@ function updateProfile() {
 }
 
 function updateUser() {
+    var id = $('#IDUpdate').val();
     $.ajax({
-        url: ROOT + 'user/updateUser',
+        url: ROOT + 'user/updateUser/' + id,
         type: 'put',
         data: {
-            'ID': $('#IDUpdate').val(),
             'name': $('#nameUpdate').val(),
         },
         success: function(data) {
@@ -86,12 +86,10 @@ function updateUser() {
 }
 
 function deleteUser() {
+    var id = $('#idDelete').val();
     $.ajax({
-        url: ROOT + 'user/deleteuser',
+        url: ROOT + 'user/deleteuser/' + id,
         type: 'delete',
-        data: {
-            'ID': $('#idDelete').val(),
-        },
         success: function(data) {
             var obj = JSON.parse(data);
             console.log(obj);
@@ -117,11 +115,11 @@ function changePass() {
 }
 
 function setPass() {
+    var id = $('#idSetPass').val();
     $.ajax({
-        url: ROOT + 'user/setPassword',
+        url: ROOT + 'user/setPassword/' + id,
         type: 'POST',
         data: {
-            'ID': $('#idSetPass').val(),
             'password': $('#setPass').val(),
         },
         success: function(data) {
@@ -179,7 +177,7 @@ function Register() {
 
 function getCart() {
     $.ajax({
-        url: ROOT + 'order/getCart',
+        url: ROOT + 'cart/getCart',
         type: 'GET',
         success: function(data) {
             var obj = JSON.parse(data);
@@ -191,7 +189,7 @@ function getCart() {
 
 function addToCart() {
     $.ajax({
-        url: ROOT + 'order/addToCart',
+        url: ROOT + 'cart/addToCart',
         type: 'POST',
         data: {
             'productID': 2,

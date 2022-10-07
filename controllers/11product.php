@@ -11,12 +11,11 @@
 </head>
 <script>
 function getProduct() {
+    var id = 2;
     $.ajax({
-        url: ROOT + 'product/getproduct',
+        url: ROOT + 'product/getproduct/' + id,
         type: 'get',
-        data: {
-            'ID': 2,
-        },
+
         success: function(data) {
             var obj = JSON.parse(data);
             // $('#textShow').append(obj);
@@ -52,11 +51,12 @@ function getlistProduct() {
 }
 
 function updateProduct() {
+    var id = 1;
     $.ajax({
-        url: ROOT + 'product/updateProduct',
+        url: ROOT + 'product/updateProduct/' + id,
         type: 'put',
         data: {
-            'ID': 1,
+
             'price': '12',
         },
         success: function(data) {
@@ -68,11 +68,11 @@ function updateProduct() {
 }
 
 function updateGallery() {
+    var id = 24;
     $.ajax({
-        url: ROOT + 'gallery/updateGallery',
+        url: ROOT + 'gallery/updateGallery/' + id,
         type: 'put',
         data: {
-            'ID': 6,
             'URLImage': '1284',
             'Sort': 2,
         },
@@ -85,12 +85,12 @@ function updateGallery() {
 }
 
 function addImage() {
+    var id = 1;
     var image = ['123', '456'];
     $.ajax({
-        url: ROOT + 'gallery/addImage',
+        url: ROOT + 'gallery/addImage/' + id,
         type: 'post',
         data: {
-            'productID': 1,
             'gallery': ['URL', 'URL'],
         },
         success: function(data) {
@@ -102,12 +102,10 @@ function addImage() {
 }
 
 function deleteGallery() {
+    var id = 24;
     $.ajax({
-        url: ROOT + 'gallery/deleteimage',
+        url: ROOT + 'gallery/deleteimage/' + id,
         type: 'Delete',
-        data: {
-            'ID': 18,
-        },
         success: function(data) {
             var obj = JSON.parse(data);
             console.log(obj);
@@ -117,12 +115,10 @@ function deleteGallery() {
 }
 
 function deleteProduct() {
+    var id = 19;
     $.ajax({
-        url: ROOT + 'product/deleteproduct',
+        url: ROOT + 'product/deleteproduct/' + id,
         type: 'delete',
-        data: {
-            'ID': 5,
-        },
         success: function(data) {
             var obj = JSON.parse(data);
             console.log(obj);
@@ -151,8 +147,6 @@ function createProduct() {
 
 <body>
     <button onclick="getProduct()">getByID</button>
-    <p></p>
-    <button onclick="getlistSale()">getSale</button>
     <p></p>
     <button onclick="getlistProduct()">getlist</button>
 

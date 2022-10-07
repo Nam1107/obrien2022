@@ -152,40 +152,30 @@ class Product
         exit();
     }
 
-    public static function deleteProduct()
+    public static function deleteProduct($id)
     {
         checkRequest('DELETE');
         $table = 'product';
         adminOnly();
         parse_str(file_get_contents("php://input"), $sent_vars);
-        if (isset($sent_vars['ID'])) {
-            $id['ID'] = $sent_vars['ID'];
-            $status = delete($table, $id);
-            if ($status == 1) {
-                $res['status'] = 1;
-                $res['msg'] = 'Success';
-                dd($res);
-                exit();
-            }
-            $res['status'] = 0;
-            $res['errors'] = 'Not found product by ID';
-
-            dd($res);
-            exit();
-        }
+        $productID['ID'] = $id;
+        delete($table, $productID);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        dd($res);
+        exit();
     }
-    public static function updateProduct()
+    public static function updateProduct($id)
     {
         checkRequest('PUT');
         $table = 'product';
         adminOnly();
 
         parse_str(file_get_contents("php://input"), $sent_vars);
-        $id['ID'] =  $sent_vars['ID'];
+        $productID['ID'] =  $id;
         $sent_vars['updatedAt'] = currentTime();
-        unset($sent_vars['ID']);
         $res['status'] = 1;
-        update($table, $id, $sent_vars);
+        update($table, $productID, $sent_vars);
         $res['msg'] = 'Success';
         $obj = custom("
             SELECT A.* , category.name AS category
