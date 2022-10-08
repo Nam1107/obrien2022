@@ -217,7 +217,7 @@ function removeFromCart() {
 }
 
 function incrementByOne() {
-    var id = 1;
+    var id = 6;
     $.ajax({
         url: ROOT + 'cart/incrementByOne/' + id,
         type: 'PUT',
@@ -230,7 +230,7 @@ function incrementByOne() {
 }
 
 function decrementByOne() {
-    var id = 1;
+    var id = 6;
     $.ajax({
         url: ROOT + 'cart/decrementByOne/' + id,
         type: 'PUT',
