@@ -11,7 +11,7 @@
 </head>
 <script>
 function getProduct() {
-    var id = 2;
+    var id = 6;
     $.ajax({
         url: ROOT + 'product/getproduct/' + id,
         type: 'get',

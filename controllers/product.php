@@ -94,6 +94,11 @@ class Product
         $table = 'product';
         $res['status'] = 1;
 
+        $userID = 0;
+        if (authenToken()) {
+            $userID = $_SESSION['user']['ID'];
+        }
+
         $obj = custom("
             SELECT A.* , category.name AS category
             FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
@@ -102,6 +107,18 @@ class Product
             AND A.ID = $id
         
         ");
+
+        $wish = custom("
+        SELECT *
+            FROM wishList
+            WHERE userID = $userID
+            AND productID = $id
+        ");
+
+        if (!$wish) {
+            $obj[0]['wishList'] = 0;
+        } else $obj[0]['wishList'] = 1;
+
 
         $gallery = selectAll('gallery', ['productID' => $id]);
         $obj[0]['gallery'] = $gallery;

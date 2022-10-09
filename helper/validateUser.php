@@ -4,7 +4,19 @@ function validateRegister($user)
 {
 
     $errors = array();
-    $existingUser = selectOne('user', ['email' => $user['email']]);
+    if (empty($user['email'])) {
+        array_push($errors, 'Email is required');
+        $email = '';
+    } else {
+        $email = $user['email'];
+    }
+    if (empty($user['password'])) {
+        array_push($errors, 'Password is required');
+    } elseif (strlen($user['password']) < 6) {
+        array_push($errors, 'Password must have more than 6 characters');
+    }
+    $existingUser = selectOne('user', ['email' => $email]);
+
     if (isset($existingUser)) {
         array_push($errors, 'Email is already registered ');
     }
