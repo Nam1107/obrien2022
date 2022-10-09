@@ -8,7 +8,11 @@ class Gallery
         checkRequest('POST');
         adminOnly();
         $table = 'gallery';
-        $urls = $_POST['gallery'];
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $urls = $sent_vars['gallery'];
         foreach ($urls as $key => $url) :
             $obj['productID'] = $id;
             $obj['URLImage'] =  $url;
@@ -54,7 +58,10 @@ class Gallery
         checkRequest('PUT');
         $table = 'gallery';
         adminOnly();
-        parse_str(file_get_contents("php://input"), $sent_vars);
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
         $image['ID'] =  $id;
         update($table, $image, $sent_vars);
         $product = selectOne($table, $image);

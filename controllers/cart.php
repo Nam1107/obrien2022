@@ -40,6 +40,8 @@ class cart
     {
         checkRequest('POST');
         userOnly();
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
         $condition = [
@@ -48,7 +50,7 @@ class cart
         ];
         $obj = selectOne($table, $condition);
         if (!$obj) {
-            $condition['quanity'] = $_POST['quanity'];
+            $condition['quanity'] = $sent_vars['quanity'];
             if ($condition['quanity'] > 6) {
                 $condition['quanity'] = 6;
             }
@@ -62,7 +64,7 @@ class cart
             dd($res);
             exit();
         }
-        $quanity['quanity'] = $obj['quanity'] + $_POST['quanity'];
+        $quanity['quanity'] = $obj['quanity'] + $sent_vars['quanity'];
         if ($quanity['quanity'] > 6) {
             $quanity['quanity'] = 6;
         }
@@ -74,7 +76,10 @@ class cart
     {
         checkRequest('DELETE');
         userOnly();
-        parse_str(file_get_contents("php://input"), $sent_vars);
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
         $table = 'shoppingCart';
         $condition = [
             'userID' => $_SESSION['user']['ID'],

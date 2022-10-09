@@ -10,36 +10,40 @@ class User
         adminOnly();
         $table = 'user';
 
+        $json = file_get_contents("php://input");
+
+        $sent_vars = json_decode($json, TRUE);
+
         $res['status'] = 1;
-        if (!isset($_GET['page']) || $_GET['page'] <= 0) {
+        if (!isset($sent_vars['page']) || $sent_vars['page'] <= 0) {
             $page = 1;
         } else {
-            $page = $_GET['page'];
+            $page = $sent_vars['page'];
         }
 
         $perPage = 10;
-        if (isset($_GET['perPage'])) {
-            $perPage = $_GET['perPage'];
+        if (isset($sent_vars['perPage'])) {
+            $perPage = $sent_vars['perPage'];
         }
 
         $search = '';
-        if (isset($_GET['search'])) {
-            $search = $_GET['search'];
+        if (isset($sent_vars['search'])) {
+            $search = $sent_vars['search'];
         }
 
         $searchValue = 'name';
-        if (isset($_GET['searchValue'])) {
-            $searchValue = $_GET['searchValue'];
+        if (isset($sent_vars['searchValue'])) {
+            $searchValue = $sent_vars['searchValue'];
         }
 
         $sortBy = 'name';
-        if (isset($_GET['sortBy'])) {
-            $sortBy = $_GET['sortBy'];
+        if (isset($sent_vars['sortBy'])) {
+            $sortBy = $sent_vars['sortBy'];
         }
 
         $sortType = 'ASC';
-        if (isset($_GET['sortType'])) {
-            $sortType = $_GET['sortType'];
+        if (isset($sent_vars['sortType'])) {
+            $sortType = $sent_vars['sortType'];
         }
 
         $condition = [
@@ -102,7 +106,10 @@ class User
         checkRequest('DELETE');
         adminOnly();
         $table = 'user';
-        parse_str(file_get_contents("php://input"), $sent_vars);
+        $json = file_get_contents("php://input");
+
+        $sent_vars = json_decode($json, TRUE);
+
         if ($id == $_SESSION['user']['ID']) {
             $res['status'] = 0;
             $res['errors'] = 'You cannot delete your account';
@@ -123,7 +130,10 @@ class User
         userOnly();
         $table = 'user';
         $res['status'] = 1;
-        parse_str(file_get_contents("php://input"), $sent_vars);
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+
         $id['ID'] = $_SESSION['user']['ID'];
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID'],  $sent_vars['role']);
@@ -139,7 +149,10 @@ class User
         adminOnly();
         $table = 'user';
         $res['status'] = 1;
-        parse_str(file_get_contents("php://input"), $sent_vars);
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
         $userID['ID'] =  $id;
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID']);
@@ -155,10 +168,13 @@ class User
         adminOnly();
         $table = 'user';
 
-        $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $sent_vars['password'] = password_hash($sent_vars['password'], PASSWORD_DEFAULT);
         $user['ID'] = $id;
         $var['updatedAt'] = currentTime();
-        $var['password'] = $_POST['password'];
+        $var['password'] = $sent_vars['password'];
         update('user', $user, $var);
         $res['status'] = 1;
         $res['msg'] = 'Success';
@@ -172,13 +188,16 @@ class User
         userOnly();
         $table = 'user';
 
-        $errors = validateChangePass($_POST);
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $errors = validateChangePass($sent_vars);
         if (count($errors) === 0) {
-            $_POST['newPass'] = password_hash($_POST['newPass'], PASSWORD_DEFAULT);
+            $sent_vars['newPass'] = password_hash($sent_vars['newPass'], PASSWORD_DEFAULT);
             $user['ID'] = $_SESSION['user']['ID'];
-            unset($_POST['confirmPass'], $_POST['ID']);
+            unset($sent_vars['confirmPass'], $sent_vars['ID']);
             $var['updatedAt'] = currentTime();
-            $var['password'] = $_POST['newPass'];
+            $var['password'] = $sent_vars['newPass'];
             update('user', $user, $var);
 
             $res['status'] = 1;

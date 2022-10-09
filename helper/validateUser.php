@@ -28,7 +28,7 @@ function validateChangePass($user)
 {
 
     $errors = array();
-    if (!password_verify($_POST['password'], $_SESSION['user']['password'])) {
+    if (!password_verify($user['password'], $_SESSION['user']['password'])) {
         array_push($errors, 'Wrong password');
     }
     return $errors;

@@ -10,40 +10,42 @@ class Product
         checkRequest('GET');
         $table = 'product';
         $res['status'] = 1;
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
 
-        if (!isset($_GET['page'])  || $_GET['page'] <= 0) {
+        if (!isset($sent_vars['page'])  || $sent_vars['page'] <= 0) {
             $page = 1;
         } else {
-            $page = $_GET['page'];
+            $page = $sent_vars['page'];
         }
         $perPage = 10;
-        if (isset($_GET['perPage'])) {
-            $perPage = $_GET['perPage'];
+        if (isset($sent_vars['perPage'])) {
+            $perPage = $sent_vars['perPage'];
         }
 
         $category = '';
-        if (isset($_GET['category'])) {
-            $category = $_GET['category'];
+        if (isset($sent_vars['category'])) {
+            $category = $sent_vars['category'];
         }
 
         $name = '';
-        if (isset($_GET['name'])) {
-            $name = $_GET['name'];
+        if (isset($sent_vars['name'])) {
+            $name = $sent_vars['name'];
         }
 
         $sale = '';
-        if (isset($_GET['sale'])) {
-            $sale = $_GET['sale'];
+        if (isset($sent_vars['sale'])) {
+            $sale = $sent_vars['sale'];
         }
 
         $sortBy = 'name';
-        if (isset($_GET['sortBy'])) {
-            $sortBy = $_GET['sortBy'];
+        if (isset($sent_vars['sortBy'])) {
+            $sortBy = $sent_vars['sortBy'];
         }
 
         $sortType = 'ASC';
-        if (isset($_GET['sortType'])) {
-            $sortType = $_GET['sortType'];
+        if (isset($sent_vars['sortType'])) {
+            $sortType = $sent_vars['sortType'];
         }
 
         $offset = $perPage * ($page - 1);
@@ -134,16 +136,20 @@ class Product
         adminOnly();
         $table = 'product';
         $res['status'] = 0;
-        $_POST['createdAt'] = currentTime();
-        $_POST['updatedAt'] = currentTime();
-        $cate = $_POST['category'];
-        $urls = $_POST['gallery'];
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $sent_vars['createdAt'] = currentTime();
+        $sent_vars['updatedAt'] = currentTime();
+        $cate = $sent_vars['category'];
+        $urls = $sent_vars['gallery'];
         $category = custom("
         SELECT * FROM category WHERE name LIKE '%$cate%' 
         ");
-        unset($_POST['category'], $_POST['gallery']);
-        $_POST['categoryID'] = $category[0]['ID'];
-        $id = create($table, $_POST);
+        unset($sent_vars['category'], $sent_vars['gallery']);
+        $sent_vars['categoryID'] = $category[0]['ID'];
+        $id = create($table, $sent_vars);
         $res['status'] = 1;
         $res['msg'] = 'Success';
         $obj = custom("
@@ -174,7 +180,10 @@ class Product
         checkRequest('DELETE');
         $table = 'product';
         adminOnly();
-        parse_str(file_get_contents("php://input"), $sent_vars);
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
         $productID['ID'] = $id;
         delete($table, $productID);
         $res['status'] = 1;
@@ -188,7 +197,9 @@ class Product
         $table = 'product';
         adminOnly();
 
-        parse_str(file_get_contents("php://input"), $sent_vars);
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
         $productID['ID'] =  $id;
         $sent_vars['updatedAt'] = currentTime();
         $res['status'] = 1;

@@ -19,11 +19,13 @@ class category
     {
         checkRequest('POST');
         adminOnly();
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
         $res['status'] = 1;
         $res['msg'] = 'Success';
         $condition = [
-            'name' => $_POST['name'],
-            'description' => $_POST['description'],
+            'name' => $sent_vars['name'],
+            'description' => $sent_vars['description'],
 
         ];
         create('category', $condition);
@@ -36,7 +38,8 @@ class category
         adminOnly();
         $res['status'] = 1;
         $res['msg'] = 'Success';
-        parse_str(file_get_contents("php://input"), $sent_vars);
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
         update('category', ['ID' => $id], $sent_vars);
         dd($res);
         exit();
