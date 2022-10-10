@@ -11,11 +11,12 @@ class cart
         }
 
         $shoppingCart = custom("
-        SELECT shoppingCart.* ,  A.unitPrice, unitPrice*quanity AS subTotal,IF(quanity<A.stock,1, 0) AS status
+        SELECT shoppingCart.productID,product.name,product.image ,shoppingCart.quanity,  A.unitPrice, unitPrice*quanity AS subTotal,IF(quanity<A.stock,1, 0) AS status
         FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(),product.priceSale, product.price) AS unitPrice
-        FROM product) AS A,shoppingCart
+        FROM product) AS A,shoppingCart,product
         WHERE A.ID = shoppingCart.productID
         AND userID = $id
+        AND shoppingCart.productID = product.ID
         ");
         $total = 0;
         foreach ($shoppingCart as $key => $val) {

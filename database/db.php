@@ -29,7 +29,7 @@ function executeQuerry($sql, $conditions = [])
 function selectAll($table, $conditions = [], $order = "")
 {
     global $conn;
-    $sql = "SELECT * FROM $table";
+    $sql = "SELECT * FROM `$table`";
     if (empty($conditions)) {
         $sql = $sql . $order;
         $stmt = $conn->prepare($sql);
@@ -80,7 +80,7 @@ function Search($table, $conditions = [], $order = "")
 }
 function selectOne($table, $conditions)
 {
-    $sql = "SELECT *   FROM $table";
+    $sql = "SELECT *   FROM `$table`";
     $i = 0;
     foreach ($conditions as $key => $value) {
         if ($i === 0) {
@@ -118,7 +118,7 @@ function create($table, $conditions)
     }
     $col = $col . " )";
     $val = $val . " )";
-    $sql = "INSERT INTO $table $col VALUES $val ";
+    $sql = "INSERT INTO `$table` $col VALUES $val ";
     $stmt = executeQuerry($sql, $conditions);
     $last_id = $conn->lastInsertId();
     return $last_id;
