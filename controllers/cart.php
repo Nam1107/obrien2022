@@ -45,6 +45,13 @@ class cart
         $sent_vars = json_decode($json, TRUE);
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
+        $pro = selectOne('product', ['ID' => $id]);
+        if (!$pro) {
+            $res['status'] = 0;
+            $res['errors'] = 'Not found product';
+            dd($res);
+            exit();
+        }
         $condition = [
             'userID' => $userID,
             'productID' => $id,

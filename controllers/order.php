@@ -38,6 +38,9 @@ class order
 
         delete('shoppingCart', ['userID' => $userID]);
         $sent_vars['userID'] = $userID;
+        $sent_vars['status'] = 'Waiting';
+        $sent_vars['createdAt'] = currentTime();
+
         $orderID = create('order', $sent_vars);
 
         foreach ($cart as $key => $val) {
@@ -49,8 +52,187 @@ class order
             ];
             create('orderDetail', $condition);
         }
+        $res['status'] = 1;
         $res['order'] = selectOne('order', ["ID" => $orderID]);
         $res['obj']  = selectAll('orderDetail', ['orderID' => $orderID]);
+        dd($res);
+        exit();
+    }
+
+    public static function myListOrder()
+    {
+        checkRequest('GET');
+        userOnly();
+        $userID = $_SESSION['user']['ID'];
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $sent_vars['userID'] = $userID;
+
+        $status = '';
+        if (isset($sent_vars['status'])) {
+            $status = $sent_vars['status'];
+        }
+
+        $order = custom("
+        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        FROM `order`,`orderDetail`	
+        WHERE `order`.ID = orderDetail.orderID
+        AND `order`.userID = $userID
+        AND `order`.status like '%$status%'
+        GROUP BY
+        `orderDetail`.orderID
+        ");
+
+        if (!$order) {
+            $res['status'] = 0;
+            $res['errors'] = "No orders yet";
+            dd($res);
+            exit();
+        }
+
+        foreach ($order as $key => $obj) {
+            $val = $obj['ID'];
+            $order[$key]['product'] = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
+            FROM `product`,`orderDetail`	
+            WHERE `product`.ID = orderDetail.productID
+            AND orderID = $val
+            ");
+        }
+        $res['status'] = 1;
+        $res['obj'] = $order;
+        dd($res);
+        exit();
+    }
+
+    public static function ListOrder($id)
+    {
+        checkRequest('GET');
+        adminOnly();
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $status = '';
+        if (isset($sent_vars['status'])) {
+            $status = $sent_vars['status'];
+        }
+
+        if (!isset($sent_vars['page'])  || $sent_vars['page'] <= 0) {
+            $page = 1;
+        } else {
+            $page = $sent_vars['page'];
+        }
+        $perPage = 10;
+        if (isset($sent_vars['perPage'])) {
+            $perPage = $sent_vars['perPage'];
+        }
+
+        $offset = $perPage * ($page - 1);
+
+        $order = custom("
+        SELECT `order`.ID,`order`.userID,user.name,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        FROM `order`,`orderDetail`,user
+        WHERE `order`.ID = orderDetail.orderID
+        AND `order`.status LIKE '%$status%'
+        AND user.ID = `order`.userID
+        GROUP BY `orderDetail`.orderID
+        ORDER BY `order`.createdAt DESC
+        LIMIT $perPage  OFFSET $offset 
+        ");
+        $res['status'] = 1;
+        $res['obj'] = $order;
+        dd($res);
+        exit();
+    }
+
+    public static function myOrderByID($id)
+    {
+        checkRequest('GET');
+        userOnly();
+        $userID = $_SESSION['user']['ID'];
+
+        $order = custom("
+        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        FROM `order`,`orderDetail`	
+        WHERE `order`.ID = orderDetail.orderID
+        AND `order`.userID = $userID
+        AND `order`.ID = $id
+        GROUP BY
+        `orderDetail`.orderID
+        ");
+
+        if (!$order) {
+            $res['status'] = 0;
+            $res['errors'] = "No orders yet";
+            dd($res);
+            exit();
+        }
+
+        $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
+        FROM `product`,`orderDetail`	
+        WHERE `product`.ID = orderDetail.productID
+        AND orderID = $id
+        ");
+
+        $res['status'] = 1;
+        $res['obj'] = $order[0];
+        $res['obj']['product'] = $product;
+        dd($res);
+        exit();
+    }
+
+    public static function OrderByID($id)
+    {
+        checkRequest('GET');
+        adminOnly();
+        $order = custom("
+        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        FROM `order`,`orderDetail`	
+        WHERE `order`.ID = orderDetail.orderID
+        AND `order`.ID = $id
+        GROUP BY
+        `orderDetail`.orderID
+        ");
+
+        if (!$order) {
+            $res['status'] = 0;
+            $res['errors'] = "No orders yet";
+            dd($res);
+            exit();
+        }
+
+        $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
+        FROM `product`,`orderDetail`	
+        WHERE `product`.ID = orderDetail.productID
+        AND orderID = $id
+        ");
+
+        $res['status'] = 1;
+        $res['obj'] = $order[0];
+        $res['obj']['product'] = $product;
+        dd($res);
+        exit();
+    }
+
+    public static function setStatusOrder($id)
+    {
+        checkRequest('GET');
+        adminOnly();
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        if (!isset($sent_vars['status'])) {
+            $res['status'] = 0;
+            $res['errors'] = "Not enough value";
+            dd($res);
+            exit();
+        }
+        $status = $sent_vars['status'];
+        update('order', ['ID' => $id], ['status' => $status]);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }

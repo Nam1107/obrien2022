@@ -9,10 +9,10 @@ define('BASE_URL',          'http://localhost/obrien');
 // define('DB_TABLE',          'obrien');
 
 define('DB_HOST',           'sql6.freesqldatabase.com');
-define('DB_USER',           'sql6524111');
-define('DB_PASS',           '6wwm4A7S2i');
+define('DB_USER',           'sql6525734');
+define('DB_PASS',           'bs4SfUqIYX');
 define('DB_NAME',           '');
-define('DB_TABLE',          'sql6524111');
+define('DB_TABLE',          'sql6525734');
 
 // define('PASSWORD_KEY',          'obrien');
 

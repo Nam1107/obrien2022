@@ -55,7 +55,7 @@ function selectAll($table, $conditions = [], $order = "")
 function Search($table, $conditions = [], $order = "")
 {
     global $conn;
-    $sql = "SELECT * FROM $table";
+    $sql = "SELECT * FROM `$table`";
     if (empty($conditions)) {
         $sql = $sql . $order;
         $stmt = $conn->prepare($sql);
@@ -125,7 +125,7 @@ function create($table, $conditions)
 }
 function update($table, $where, $conditions)
 {
-    $sql = "UPDATE $table SET ";
+    $sql = "UPDATE `$table` SET ";
     $i = 0;
     foreach ($conditions as $key => $val) {
         if ($i === 0) {
@@ -146,7 +146,7 @@ function update($table, $where, $conditions)
 
 function delete($table, $conditions)
 {
-    $sql = "DELETE FROM $table";
+    $sql = "DELETE FROM `$table`";
     $i = 0;
     foreach ($conditions as $key => $value) {
         if ($i === 0) {
