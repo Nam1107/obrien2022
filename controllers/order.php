@@ -37,11 +37,17 @@ class order
         $userID = $_SESSION['user']['ID'];
 
         delete('shoppingCart', ['userID' => $userID]);
-        $sent_vars['userID'] = $userID;
-        $sent_vars['status'] = 'Waiting';
-        $sent_vars['createdAt'] = currentTime();
 
-        $orderID = create('order', $sent_vars);
+        $order['userID'] = $userID;
+        $order['note'] = $sent_vars['note'];
+        $order['status'] = 'To Ship';
+        $order['email'] = $sent_vars['email'];
+        $order['phone'] = $sent_vars['phone'];
+        $order['address'] = $sent_vars['address'];
+        $order['address'] = currentTime();
+
+
+        $orderID = create('order', $order);
 
         foreach ($cart as $key => $val) {
             $condition = [
@@ -106,7 +112,7 @@ class order
         exit();
     }
 
-    public static function ListOrder($id)
+    public static function ListOrder()
     {
         checkRequest('GET');
         adminOnly();
@@ -187,13 +193,15 @@ class order
         checkRequest('GET');
         adminOnly();
         $order = custom("
-        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        SELECT `order`.ID,`order`.status ,`order`.userID, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`	
         WHERE `order`.ID = orderDetail.orderID
         AND `order`.ID = $id
         GROUP BY
         `orderDetail`.orderID
         ");
+
+        $user = selectOne('user', ['ID' => $order[0]['userID']]);
 
         if (!$order) {
             $res['status'] = 0;
@@ -211,13 +219,14 @@ class order
         $res['status'] = 1;
         $res['obj'] = $order[0];
         $res['obj']['product'] = $product;
+        $res['obj']['user'] = $user;
         dd($res);
         exit();
     }
 
     public static function setStatusOrder($id)
     {
-        checkRequest('GET');
+        checkRequest('PUT');
         adminOnly();
 
         $json = file_get_contents("php://input");
@@ -230,6 +239,19 @@ class order
             exit();
         }
         $status = $sent_vars['status'];
+        update('order', ['ID' => $id], ['status' => $status]);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        dd($res);
+        exit();
+    }
+
+    public static function cancelOrder($id)
+    {
+        checkRequest('PUT');
+        userOnly();
+
+        $status = 'Cancelled';
         update('order', ['ID' => $id], ['status' => $status]);
         $res['status'] = 1;
         $res['msg'] = 'Success';
