@@ -9,12 +9,27 @@ class review
         checkRequest('POST');
         userOnly();
 
+        $order = selectOne('order', ['ID' => $id]);
+        if (!$order) {
+            $res['status'] = 0;
+            $res['errors'] = ' No orders yet';
+            dd($res);
+            exit();
+        } elseif ($order['status'] != 'To Rate') {
+            $res['status'] = 0;
+            $res['errors'] = 'Rating is not activated';
+            dd($res);
+            exit();
+        }
+
+        update('order', ['ID' => $id], ['status' => 'Completed']);
+
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $userID = $_SESSION['user']['ID'];
 
         foreach ($sent_vars['review'] as $key => $val) {
-            $obj['productID'] = $val['productID'];
+            $proID = $obj['productID'] = $val['productID'];
             $obj['comment'] = $val['comment'];
             $obj['userName'] = $val['userName'];
             $obj['userID'] = $userID;
@@ -22,7 +37,7 @@ class review
             $rate = $obj['rate'];
             create('review', $obj);
             custom("
-            UPDATE product SET rate = (rate + $rate)/2, numOfReviews = (numOfReviews + 1) WHERE ID = $id
+            UPDATE product SET rate = (rate + $rate)/2, numOfReviews = (numOfReviews + 1) WHERE ID = $proID
             ");
         }
         $res['status'] = 1;
@@ -55,7 +70,7 @@ class review
         exit();
     }
 
-    public static function userReview()
+    public static function myReview()
     {
         checkRequest('GET');
         userOnly();

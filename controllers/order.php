@@ -229,6 +229,14 @@ class order
         checkRequest('PUT');
         adminOnly();
 
+        $order = selectOne('order', ['ID' => $id]);
+        if (!$order) {
+            $res['status'] = 0;
+            $res['errors'] = ' No orders yet';
+            dd($res);
+            exit();
+        }
+
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
@@ -252,10 +260,32 @@ class order
         userOnly();
 
         $status = 'Cancelled';
-        update('order', ['ID' => $id], ['status' => $status]);
-        $res['status'] = 1;
-        $res['msg'] = 'Success';
-        dd($res);
-        exit();
+        $order = selectOne('order', ['ID' => $id]);
+        if (!$order) {
+            $res['status'] = 0;
+            $res['errors'] = ' No orders yet';
+            dd($res);
+            exit();
+        }
+        switch ($order['status']) {
+            case 'To Ship':
+                update('order', ['ID' => $id], ['status' => $status]);
+                $res['status'] = 1;
+                $res['msg'] = 'Success';
+                dd($res);
+                exit();
+                break;
+            case 'To Recivie':
+                $res['status'] = 0;
+                $res['errors'] = ' The order is being shipped';
+                dd($res);
+                exit();
+                break;
+            default:
+                $res['status'] = 0;
+                $res['errors'] = ' The order has been delivered';
+                dd($res);
+                exit();
+        }
     }
 }

@@ -7,40 +7,24 @@ class Product
 
     public static function ListProduct()
     {
-        checkRequest('GET');
+        // checkRequest('GET');
         $table = 'product';
         $res['status'] = 1;
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        if (!isset($sent_vars['page'])  || $sent_vars['page'] <= 0) {
-            $page = 1;
-        } else {
-            $page = $sent_vars['page'];
-        }
-        $perPage = 10;
-        if (isset($sent_vars['perPage'])) {
-            $perPage = $sent_vars['perPage'];
-        }
-
-        $category = '';
-        if (isset($sent_vars['category'])) {
-            $category = $sent_vars['category'];
-        }
-
-        $name = '';
-        if (isset($sent_vars['name'])) {
-            $name = $sent_vars['name'];
-        }
-
-        $sale = '';
-        if (isset($sent_vars['sale'])) {
-            $sale = $sent_vars['sale'];
-        }
-
-        $sortBy = 'name';
-        if (isset($sent_vars['sortBy'])) {
-            $sortBy = $sent_vars['sortBy'];
+        $page = $sent_vars['page'];
+        $perPage = $sent_vars['perPage'];
+        $category = $sent_vars['category'];
+        $sale = $sent_vars['sale'];
+        $sortBy = $sent_vars['sortBy'];
+        switch ($sent_vars['name']) {
+            case 'price':
+                $name = 'curPrice';
+                break;
+            default:
+                $name = $sent_vars['name'];
+                break;
         }
 
         $sortType = 'ASC';
@@ -65,11 +49,8 @@ class Product
         );
 
         $check = ceil($total[0]['total'] / $perPage);
-        if ($page >= $check && $check > 0) {
-            $page = $check - 1;
-        }
         $obj = custom(
-            "SELECT A.* , category.name AS category
+            "SELECT A.* , category.name AS category, IF(A.statusSale = '1', A.priceSale, A.price) AS curPrice
             FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
             FROM product) AS A,category
             WHERE A.categoryID = category.ID
@@ -80,11 +61,10 @@ class Product
             LIMIT $perPage OFFSET $offset
             "
         );
-        $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM $table");
 
         $res['obj'] = $obj;
-        $res['totalCount'] = $totalCount[0]['totalCount'];
-        $res['numOfPage'] = ceil($check);
+        $res['totalCount'] = $total[0]['total'];
+        $res['numOfPage'] = $check;
         $res['page'] = $page;
 
         dd($res);
