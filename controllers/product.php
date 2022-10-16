@@ -62,10 +62,11 @@ class Product
             "
         );
 
-        $res['obj'] = $obj;
+
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
         $res['page'] = $page;
+        $res['obj'] = $obj;
 
         dd($res);
         exit();

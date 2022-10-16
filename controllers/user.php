@@ -11,58 +11,38 @@ class User
         $table = 'user';
 
         $json = file_get_contents("php://input");
-
         $sent_vars = json_decode($json, TRUE);
 
-        $res['status'] = 1;
-        if (!isset($sent_vars['page']) || $sent_vars['page'] <= 0) {
-            $page = 1;
-        } else {
-            $page = $sent_vars['page'];
-        }
-
-        $perPage = 10;
-        if (isset($sent_vars['perPage'])) {
-            $perPage = $sent_vars['perPage'];
-        }
-
-        $search = '';
-        if (isset($sent_vars['search'])) {
-            $search = $sent_vars['search'];
-        }
-
-        $searchValue = 'name';
-        if (isset($sent_vars['searchValue'])) {
-            $searchValue = $sent_vars['searchValue'];
-        }
-
-        $sortBy = 'name';
-        if (isset($sent_vars['sortBy'])) {
-            $sortBy = $sent_vars['sortBy'];
-        }
-
-        $sortType = 'ASC';
-        if (isset($sent_vars['sortType'])) {
-            $sortType = $sent_vars['sortType'];
-        }
-
+        $page = $sent_vars['page'];
+        $perPage = $sent_vars['perPage'];
+        $email = $sent_vars['email'];
+        $sortBy = $sent_vars['sortBy'];
+        $sortType = $sent_vars['sortType'];
         $condition = [
-            "$searchValue" => $search,
+            "email" => $email,
         ];
 
         $offset = $perPage * ($page - 1);
 
-        $total = count(selectAll($table, $condition, " ORDER BY $sortBy $sortType "));
-        $check = ceil($total / $perPage);
+        // $total = count(selectAll($table, $condition, " ORDER BY $sortBy $sortType "));
+        $total = custom("
+        SELECT COUNT(ID) as total
+        FROM (SELECT * FROM `user` WHERE email LIKE '%$email%' ORDER BY $sortBy $sortType) as B
+        ");
+        $check = ceil($total[0]['total'] / $perPage);
         if ($page >= $check && $check > 0) {
             $page = $check - 1;
         }
-        $obj = selectAll($table, $condition, " ORDER BY $sortBy $sortType LIMIT $perPage OFFSET $offset");
+        // $obj = selectAll($table, $condition, " ORDER BY $sortBy $sortType LIMIT $perPage OFFSET $offset");
+
+        $obj = custom("
+        SELECT * FROM `user` WHERE email LIKE '%$email%' ORDER BY $sortBy $sortType LIMIT $perPage OFFSET $offset
+        ");
         $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM $table");
-        $res['obj'] = $obj;
         $res['totalCount'] = $totalCount[0]['totalCount'];
         $res['numOfPage'] = ceil($check);
         $res['page'] = $page;
+        $res['obj'] = $obj;
 
         dd($res);
         exit();

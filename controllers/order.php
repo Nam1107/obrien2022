@@ -44,7 +44,7 @@ class order
         $order['email'] = $sent_vars['email'];
         $order['phone'] = $sent_vars['phone'];
         $order['address'] = $sent_vars['address'];
-        $order['address'] = currentTime();
+        $order['createdAt'] = currentTime();
 
 
         $orderID = create('order', $order);
@@ -119,22 +119,22 @@ class order
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        $status = '';
-        if (isset($sent_vars['status'])) {
-            $status = $sent_vars['status'];
-        }
-
-        if (!isset($sent_vars['page'])  || $sent_vars['page'] <= 0) {
-            $page = 1;
-        } else {
-            $page = $sent_vars['page'];
-        }
-        $perPage = 10;
-        if (isset($sent_vars['perPage'])) {
-            $perPage = $sent_vars['perPage'];
-        }
-
+        $status = $sent_vars['status'];
+        $page = $sent_vars['page'];
+        $perPage = $sent_vars['perPage'];
         $offset = $perPage * ($page - 1);
+
+        $total = custom(
+            "SELECT COUNT(ID) as total
+            FROM (
+                SELECT `order`.ID
+                FROM `order`
+                WHERE `order`.status LIKE '%$status%'
+            ) AS B
+        "
+        );
+
+        $check = ceil($total[0]['total'] / $perPage);
 
         $order = custom("
         SELECT `order`.ID,`order`.userID,user.name,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
@@ -146,6 +146,8 @@ class order
         ORDER BY `order`.createdAt DESC
         LIMIT $perPage  OFFSET $offset 
         ");
+        $res['totalCount'] = $total[0]['total'];
+        $res['numOfPage'] = $check;
         $res['status'] = 1;
         $res['obj'] = $order;
         dd($res);
@@ -286,6 +288,32 @@ class order
                 $res['errors'] = ' The order has been delivered';
                 dd($res);
                 exit();
+        }
+    }
+    public static function orderRecevied($id)
+    {
+        checkRequest('PUT');
+        userOnly();
+
+        $status = 'To Rate';
+        $order = selectOne('order', ['ID' => $id]);
+        if (!$order) {
+            $res['status'] = 0;
+            $res['errors'] = ' No orders yet';
+            dd($res);
+            exit();
+        }
+        if ($order['status'] == 'To Ship' || $order['status'] == 'To Recivie') {
+            update('order', ['ID' => $id], ['status' => $status]);
+            $res['status'] = 1;
+            $res['msg'] = 'Success';
+            dd($res);
+            exit();
+        } else {
+            $res['status'] = 0;
+            $res['errors'] = 'The order has been completed';
+            dd($res);
+            exit();
         }
     }
 }

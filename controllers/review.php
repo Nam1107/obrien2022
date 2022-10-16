@@ -34,10 +34,10 @@ class review
             $obj['userName'] = $val['userName'];
             $obj['userID'] = $userID;
             $obj['createdAt'] = currentTime();
-            $rate = $obj['rate'];
+            $rate = $obj['rate'] = $val['rate'];
             create('review', $obj);
             custom("
-            UPDATE product SET rate = (rate + $rate)/2, numOfReviews = (numOfReviews + 1) WHERE ID = $proID
+            UPDATE product SET rate = IF(rate = 0,$rate,(rate + $rate)/2), numOfReviews = (numOfReviews + 1) WHERE ID = $proID
             ");
         }
         $res['status'] = 1;
