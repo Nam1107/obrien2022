@@ -47,25 +47,37 @@ class review
         exit();
     }
 
-    public static function listReview($id)
+    public static function productReview($id)
     {
         checkRequest('GET');
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        $rate = '';
-        if (isset($sent_vars['rate'])) {
-            $rate = $sent_vars['rate'];
-        }
+        $rate = $sent_vars['rate'];
         // $rate = $sent_vars['rate'];
-        $num = custom("SELECT rate, COUNT(ID) AS num from review where productID = 1 GROUP BY rate ASC");
+        $page = $sent_vars['page'];
+        $perPage = $sent_vars['perPage'];
+        $offset = $perPage * ($page - 1);
+
+        $num = custom("SELECT rate, COUNT(ID) AS count from review where productID = 1 GROUP BY rate ASC");
+        $total = custom("
+        SELECT COUNT(ID) as total
+            FROM (
+                Select * from review where rate LIKE '%$rate%' and productID = $id
+            ) AS B
+        
+        ");
+        $check = ceil($total[0]['total'] / $perPage);
         $obj = custom("
         Select * from review where rate LIKE '%$rate%' and productID = $id
+        LIMIT $perPage OFFSET $offset
         ");
 
         $res['status'] = 1;
+        $res['page'] = $page;
+        $res['numOfPage'] = $check;
         $res['obj'] = $obj;
-        $res['numOfReviews'] = $num;
+        $res['countOfReviews'] = $num;
         dd($res);
         exit();
     }
@@ -76,11 +88,31 @@ class review
         userOnly();
         $userID = $_SESSION['user']['ID'];
 
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $page = $sent_vars['page'];
+        $perPage = $sent_vars['perPage'];
+        $offset = $perPage * ($page - 1);
+
+        $total = custom("
+        SELECT COUNT(ID) as total
+            FROM (
+                Select * from review where userID = $userID
+            ) AS B
+        
+        ");
+        $check = ceil($total[0]['total'] / $perPage);
+
         $obj = custom("
-        Select * from review where userID = $userID;
+        Select * from review where userID = $userID
+        LIMIT $perPage OFFSET $offset
         ");
 
         $res['status'] = 1;
+        $res['count'] = $total[0]['total'];
+        $res['page'] = $page;
+        $res['numOfPage'] = $check;
         $res['obj'] = $obj;
         dd($res);
         exit();
