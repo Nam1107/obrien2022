@@ -17,7 +17,7 @@ class review
             exit();
         } elseif ($order['status'] != 'To Rate') {
             $res['status'] = 0;
-            $res['errors'] = 'Rating is not activated';
+            $res['errors'] = 'Rating is not available';
             dd($res);
             exit();
         }
