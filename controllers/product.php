@@ -145,10 +145,12 @@ class Product
         foreach ($urls as $key => $url) :
             $image['productID'] = $id;
             $image['URLImage'] =  $url;
-            $image['Sort'] =  $key;
             create('gallery', $image);
         endforeach;
-        $gallery = selectAll('gallery', ['productID' => $id]);
+        // $gallery = selectAll('gallery', ['productID' => $id]);
+        $gallery = custom("
+        select ID,URLImage from gallery where productID = $id
+        ");
         $obj[0]['gallery'] = $gallery;
         $res['obj'] = $obj[0];
 

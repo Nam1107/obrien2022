@@ -31,6 +31,7 @@ class Auth
 
     public static function Logout()
     {
+        checkRequest('POST');
         userOnly();
         session_destroy();
         if (!isset($_COOKIE['token'])) exit();
@@ -39,14 +40,16 @@ class Auth
 
         delete('login_token', $token);
         setcookie('token', '', time() - 7 * 24 * 60 * 60, '/');
-        $res['msg'] = 'You have successfully logout';
+
         $res['status'] = 1;
+        $res['msg'] = 'You have successfully logout';
         dd($res);
         exit();
     }
 
     public static function Login()
     {
+        checkRequest('POST');
         guestsOnly();
 
         $json = file_get_contents("php://input");
@@ -82,6 +85,7 @@ class Auth
     }
     public static function Register()
     {
+        checkRequest('POST');
         guestsOnly();
         $table = 'user';
         $res['status'] = 0;
