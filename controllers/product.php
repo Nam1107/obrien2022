@@ -7,8 +7,76 @@ class Product
 
     public static function ListProduct()
     {
-        // checkRequest('GET');
-        $table = 'product';
+        checkRequest('GET');
+        $res['status'] = 1;
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $page = $sent_vars['page'];
+        $perPage = $sent_vars['perPage'];
+        $category = $sent_vars['category'];
+        $sale = $sent_vars['sale'];
+        $sortBy = $sent_vars['sortBy'];
+        switch ($sent_vars['name']) {
+            case 'price':
+                $name = 'curPrice';
+                break;
+            default:
+                $name = $sent_vars['name'];
+                break;
+        }
+
+        $sortType = 'ASC';
+        if (isset($sent_vars['sortType'])) {
+            $sortType = $sent_vars['sortType'];
+        }
+
+        $offset = $perPage * ($page - 1);
+
+        $total = custom(
+            "SELECT COUNT(ID) as total
+            FROM (
+                SELECT A.* , category.name AS category
+                FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+                FROM product) AS A,category
+                WHERE A.categoryID = category.ID
+                AND category.name LIKE '%$category%'
+                AND A.name LIKE '%$name%'
+                AND statusSale LIKE '%$sale%'
+                AND IsPublic LIKE '%1%'
+            ) AS B
+        "
+        );
+
+        $check = ceil($total[0]['total'] / $perPage);
+        $obj = custom(
+            "SELECT A.* , category.name AS category, IF(A.statusSale = '1', A.priceSale, A.price) AS curPrice
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            FROM product) AS A,category
+            WHERE A.categoryID = category.ID
+            AND category.name LIKE '%$category%'
+            AND A.name LIKE '%$name%'
+            AND statusSale LIKE '%$sale%'
+            AND IsPublic LIKE '%1%'
+            ORDER BY $sortBy $sortType
+            LIMIT $perPage OFFSET $offset
+            
+            
+            "
+        );
+
+        $res['totalCount'] = $total[0]['total'];
+        $res['numOfPage'] = $check;
+        $res['page'] = $page;
+        $res['obj'] = $obj;
+
+        dd($res);
+        exit();
+    }
+    public static function AdminListProduct()
+    {
+        checkRequest('GET');
+        adminOnly();
         $res['status'] = 1;
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
@@ -62,7 +130,6 @@ class Product
             "
         );
 
-
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
         $res['page'] = $page;
@@ -102,6 +169,28 @@ class Product
             $obj[0]['wishList'] = 0;
         } else $obj[0]['wishList'] = 1;
 
+
+        $gallery = selectAll('gallery', ['productID' => $id]);
+        $obj[0]['gallery'] = $gallery;
+        $res['obj'] = $obj[0];
+
+        dd($res);
+        exit();
+    }
+    public static function AdminGetProduct($id)
+    {
+        checkRequest('GET');
+        adminOnly();
+        $res['status'] = 1;
+
+        $obj = custom("
+            SELECT A.* , category.name AS category
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            FROM product) AS A,category
+            WHERE A.categoryID = category.ID
+            AND A.ID = $id
+        
+        ");
 
         $gallery = selectAll('gallery', ['productID' => $id]);
         $obj[0]['gallery'] = $gallery;

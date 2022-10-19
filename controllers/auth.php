@@ -70,8 +70,9 @@ class Auth
                 setcookie('token', $login_token['token'], time() + 7 * 24 * 60 * 60, '/');
                 create('login_token', $login_token);
                 $_SESSION['user'] = $user;
-                $res['msg'] = 'login success';
                 $res['status'] = 1;
+                $res['msg'] = 'login success';
+
                 dd($res);
                 exit();
             } else {

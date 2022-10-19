@@ -42,8 +42,9 @@ function userOnly()
 {
     $table = 'user';
     if (!authenToken()) {
-        $res['errors'] = 'You need to login first';
         $res['status'] = '0';
+        $res['errors'] = 'You need to login first';
+
         dd($res);
         exit();
     } else {
@@ -51,8 +52,9 @@ function userOnly()
         unset($_SESSION['user']);
         $obj = selectOne($table, ['ID' => $id]);
         if (!$obj) {
-            $res['errors'] = 'Not found your account';
             $res['status'] = '0';
+            $res['errors'] = 'Not found your account';
+
             dd($res);
             exit();
         } else $_SESSION['user'] = $obj;
@@ -62,8 +64,9 @@ function adminOnly()
 {
     userOnly();
     if ($_SESSION['user']['role'] != 1) {
-        $res['errors'] = 'You are not admin';
         $res['status'] = '0';
+        $res['errors'] = 'You are not admin';
+
         dd($res);
         exit();
     }
@@ -71,8 +74,9 @@ function adminOnly()
 function guestsOnly()
 {
     if (authenToken()) {
-        $res['errors'] = 'You have logged in';
         $res['status'] = '0';
+        $res['errors'] = 'You have logged in';
+
         dd($res);
         exit();
     }

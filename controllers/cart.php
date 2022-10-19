@@ -17,6 +17,7 @@ class cart
         WHERE A.ID = shoppingCart.productID
         AND userID = $id
         AND shoppingCart.productID = product.ID
+        AND product.IsPublic = 1
         ");
         $total = 0;
         foreach ($shoppingCart as $key => $val) {
@@ -45,7 +46,7 @@ class cart
         $sent_vars = json_decode($json, TRUE);
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
-        $pro = selectOne('product', ['ID' => $id]);
+        $pro = selectOne('product', ['ID' => $id, 'IsPublic' => '1']);
         if (!$pro) {
             $res['status'] = 0;
             $res['errors'] = 'Not found product';

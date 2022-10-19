@@ -154,7 +154,7 @@ class order
         exit();
     }
 
-    public static function myOrderByID($id)
+    public static function getMyOrder($id)
     {
         checkRequest('GET');
         userOnly();
@@ -190,7 +190,7 @@ class order
         exit();
     }
 
-    public static function OrderByID($id)
+    public static function getOrder($id)
     {
         checkRequest('GET');
         adminOnly();
