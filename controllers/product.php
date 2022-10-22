@@ -145,7 +145,8 @@ class Product
         $res['status'] = 1;
 
         $userID = 0;
-        if (authenToken()) {
+        $obj = authenToken();
+        if ($obj['status'] == 1) {
             $userID = $_SESSION['user']['ID'];
         }
 

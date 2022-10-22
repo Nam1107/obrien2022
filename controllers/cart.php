@@ -6,9 +6,12 @@ class cart
     public static function userCart()
     {
         $id = 0;
-        if (authenToken()) {
+        $obj = authenToken();
+        if ($obj['status'] == 1) {
             $id = $_SESSION['user']['ID'];
         }
+
+
 
         $shoppingCart = custom("
         SELECT shoppingCart.productID,product.name,product.image ,shoppingCart.quanity,  A.unitPrice, unitPrice*quanity AS subTotal,IF(quanity<A.stock,1, 0) AS status
@@ -41,7 +44,7 @@ class cart
     public static function addProduct($id)
     {
         checkRequest('POST');
-        userOnly();
+        adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $table = 'shoppingCart';

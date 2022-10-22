@@ -16,7 +16,6 @@ define('DB_TABLE',          'sql6525734');
 
 // define('PASSWORD_KEY',          'obrien');
 
-$keyadmin = 'qwertyuiop';
-$keyuser = 'asdfghjkl';
+define('TOKEN_SECRET',          'Sana961229');
 
 define('MD5_PRIVATE_KEY',   '2342kuhskdfsd23(&kusdhfjsgJYGJGsfdf384');

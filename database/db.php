@@ -7,6 +7,8 @@ function currentTime()
     $timezone = new DateTimeZone('Asia/Ho_Chi_Minh');
     $datetime->setTimezone($timezone);
     $time = $datetime->format('Y-m-d H:i:s');
+    // $time = date("Y-m-d H:i:s", time());
+    // $time = strtotime(currentTime());
     return $time;
 }
 function dd($value)

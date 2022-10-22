@@ -1,4 +1,12 @@
 <?php
+
+require './vendor/autoload.php';
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Firebase\JWT\SignatureInvalidException;
+use Firebase\JWT\ExpiredException;
+
 function md5Security($pwd)
 {
     return md5(md5($pwd) . MD5_PRIVATE_KEY);
@@ -7,25 +15,41 @@ function md5Security($pwd)
 function authenToken()
 {
     if (isset($_SESSION['user'])) {
-        return $_SESSION['user'];
+        $id = $_SESSION['user']['ID'];
+        $obj = custom("SELECT user.ID,user.role FROM user where ID = $id");
+        $res['status'] = 1;
+        $res['obj'] = $obj[0];
+        return $res;
     }
-
-
-    if (empty($_COOKIE['token'])) {
-        return null;
-    } else {
-        $token = $_COOKIE['token'];
+    $headers = apache_request_headers();
+    if (!isset($headers['Authorization'])) {
+        $res['status'] = 0;
+        $res['error'] = 'You need a token to access';
+        session_destroy();
+        return $res;
     }
-
-    $result   = custom("select user.* from user, login_token where user.ID = login_token.userID and login_token.token ='$token'");
-
-    if ($result != null && count($result) > 0) {
-        $_SESSION['user'] = $result[0];
-
-        return $result[0];
+    $token = $headers['Authorization'];
+    $check = explode(" ", $token);
+    try {
+        $jwt = JWT::decode($check[1],  new Key(TOKEN_SECRET, 'HS256'));
+        $data = json_decode(json_encode($jwt), true);
+        $id = $data['data']['id'];
+        $obj = custom("SELECT user.ID,user.role FROM user where ID = $id");
+        $_SESSION['user'] = $obj;
+        $res['status'] = 1;
+        $res['obj'] = $obj[0];
+        return $res;
+    } catch (SignatureInvalidException) {
+        $res['status'] = 0;
+        $res['error'] = 'Token verification failed';
+        session_destroy();
+        return $res;
+    } catch (ExpiredException) {
+        $res['status'] = 0;
+        $res['error'] = 'Expired token';
+        session_destroy();
+        return $res;
     }
-
-    return null;
 }
 
 function checkRequest($req)
@@ -40,24 +64,10 @@ function checkRequest($req)
 
 function userOnly()
 {
-    $table = 'user';
-    if (!authenToken()) {
-        $res['status'] = '0';
-        $res['errors'] = 'You need to login first';
-
-        dd($res);
+    $obj = authenToken();
+    if ($obj['status'] == 0) {
+        dd($obj);
         exit();
-    } else {
-        $id = $_SESSION['user']['ID'];
-        unset($_SESSION['user']);
-        $obj = selectOne($table, ['ID' => $id]);
-        if (!$obj) {
-            $res['status'] = '0';
-            $res['errors'] = 'Not found your account';
-
-            dd($res);
-            exit();
-        } else $_SESSION['user'] = $obj;
     }
 }
 function adminOnly()
@@ -66,17 +76,15 @@ function adminOnly()
     if ($_SESSION['user']['role'] != 1) {
         $res['status'] = '0';
         $res['errors'] = 'You are not admin';
-
         dd($res);
         exit();
     }
 }
 function guestsOnly()
 {
-    if (authenToken()) {
+    if (isset($_SESSION['userID'])) {
         $res['status'] = '0';
         $res['errors'] = 'You have logged in';
-
         dd($res);
         exit();
     }

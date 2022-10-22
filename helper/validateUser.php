@@ -28,7 +28,9 @@ function validateChangePass($user)
 {
 
     $errors = array();
-    if (!password_verify($user['password'], $_SESSION['user']['password'])) {
+    $id = $_SESSION['user']['ID'];
+    $pass = custom("SELECT user.password FROM user where ID = $id");
+    if (!password_verify($user['password'], $pass[0])) {
         array_push($errors, 'Wrong password');
     }
     return $errors;
