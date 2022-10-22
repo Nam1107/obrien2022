@@ -16,6 +16,7 @@ function authenToken()
 {
     if (isset($_SESSION['user'])) {
         $id = $_SESSION['user']['ID'];
+        session_destroy();
         $obj = custom("SELECT user.ID,user.role FROM user where ID = $id");
         $res['status'] = 1;
         $res['obj'] = $obj[0];
@@ -35,7 +36,7 @@ function authenToken()
         $data = json_decode(json_encode($jwt), true);
         $id = $data['data']['id'];
         $obj = custom("SELECT user.ID,user.role FROM user where ID = $id");
-        $_SESSION['user'] = $obj;
+        $_SESSION['user'] = $obj[0];
         $res['status'] = 1;
         $res['obj'] = $obj[0];
         return $res;

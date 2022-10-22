@@ -9,6 +9,18 @@ class slider
         checkRequest('GET');
         $res['status'] = 1;
         $obj = custom("
+            SELECT * from slider WHERE IsPublic = 1
+        ");
+        $res['obj'] = $obj;
+        dd($res);
+        exit();
+    }
+    public static function adminlistslider()
+    {
+        checkRequest('GET');
+        adminOnly();
+        $res['status'] = 1;
+        $obj = custom("
             SELECT * from slider
         ");
         $res['obj'] = $obj;
