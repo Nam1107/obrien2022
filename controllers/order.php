@@ -41,20 +41,25 @@ class order
         $order['userID'] = $userID;
         $order['note'] = $sent_vars['note'];
         $order['status'] = 'To Ship';
-        $order['email'] = $sent_vars['email'];
         $order['phone'] = $sent_vars['phone'];
         $order['address'] = $sent_vars['address'];
         $order['createdAt'] = currentTime();
 
-
         $orderID = create('order', $order);
+        $shipping = [
+            "orderID" => $orderID,
+            "description" => "Order has been created",
+            "createdAt" => currentTime()
+        ];
+        create('shippingDetail', $shipping);
 
         foreach ($cart as $key => $val) {
             $condition = [
                 "orderID" => $orderID,
                 "productID" => $val['productID'],
                 "unitPrice" => $val['unitPrice'],
-                "quanity" => $val["quanity"]
+                "quanity" => $val["quanity"],
+                "createdAt" => currentTime()
             ];
             create('orderDetail', $condition);
         }
@@ -82,11 +87,18 @@ class order
         }
 
         $order = custom("
-        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
-        FROM `order`,`orderDetail`	
+        SELECT `order`.ID,`order`.status ,C.description,C.createdAt AS lastUpdated, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        FROM `order`,`orderDetail`	,(
+        SELECT shippingDetail.*
+        FROM (SELECT max(ID) AS curID
+        from shippingDetail
+        group by orderID) AS B, shippingDetail
+        WHERE curID = ID
+        ) AS C
         WHERE `order`.ID = orderDetail.orderID
         AND `order`.userID = $userID
         AND `order`.status like '%$status%'
+        AND C.orderID = `order`.ID
         GROUP BY
         `orderDetail`.orderID
         ");
@@ -112,7 +124,7 @@ class order
         exit();
     }
 
-    public static function ListOrder()
+    public static function adminListOrder()
     {
         checkRequest('GET');
         adminOnly();
@@ -177,6 +189,11 @@ class order
             exit();
         }
 
+        $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
+        from shippingDetail
+        WHERE orderID =  $id
+        ");
+
         $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
         FROM `product`,`orderDetail`	
         WHERE `product`.ID = orderDetail.productID
@@ -185,12 +202,13 @@ class order
 
         $res['status'] = 1;
         $res['obj'] = $order[0];
+        $res['obj']['shipping'] = $shipping;
         $res['obj']['product'] = $product;
         dd($res);
         exit();
     }
 
-    public static function getOrder($id)
+    public static function adminGetOrder($id)
     {
         checkRequest('GET');
         adminOnly();
@@ -212,6 +230,11 @@ class order
             exit();
         }
 
+        $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
+        from shippingDetail
+        WHERE orderID =  $id
+        ");
+
         $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
         FROM `product`,`orderDetail`	
         WHERE `product`.ID = orderDetail.productID
@@ -220,8 +243,10 @@ class order
 
         $res['status'] = 1;
         $res['obj'] = $order[0];
-        $res['obj']['product'] = $product;
         $res['obj']['user'] = $user;
+        $res['obj']['shipping'] = $shipping;
+        $res['obj']['product'] = $product;
+
         dd($res);
         exit();
     }
@@ -241,6 +266,7 @@ class order
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
+        $desc = $sent_vars['description'];
 
         if (!isset($sent_vars['status'])) {
             $res['status'] = 0;
@@ -250,6 +276,12 @@ class order
         }
         $status = $sent_vars['status'];
         update('order', ['ID' => $id], ['status' => $status]);
+        $shipping = [
+            "orderID" => $id,
+            "description" => $desc,
+            "createdAt" => currentTime()
+        ];
+        create('shippingDetail', $shipping);
         $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
@@ -263,6 +295,10 @@ class order
 
         $status = 'Cancelled';
         $order = selectOne('order', ['ID' => $id]);
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+        $reason = $sent_vars['season'];
+        $reason = "Reason for Cancellation : " . $reason;
         if (!$order) {
             $res['status'] = 0;
             $res['errors'] = ' No orders yet';
@@ -272,6 +308,12 @@ class order
         switch ($order['status']) {
             case 'To Ship':
                 update('order', ['ID' => $id], ['status' => $status]);
+                $shipping = [
+                    "orderID" => $id,
+                    "description" => $reason,
+                    "createdAt" => currentTime()
+                ];
+                create('shippingDetail', $shipping);
                 $res['status'] = 1;
                 $res['msg'] = 'Success';
                 dd($res);

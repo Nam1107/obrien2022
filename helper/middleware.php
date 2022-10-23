@@ -14,14 +14,6 @@ function md5Security($pwd)
 
 function authenToken()
 {
-    if (isset($_SESSION['user'])) {
-        $id = $_SESSION['user']['ID'];
-        session_destroy();
-        $obj = custom("SELECT user.ID,user.role FROM user where ID = $id");
-        $res['status'] = 1;
-        $res['obj'] = $obj[0];
-        return $res;
-    }
     $headers = apache_request_headers();
     if (!isset($headers['Authorization'])) {
         $res['status'] = 0;

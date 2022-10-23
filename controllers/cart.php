@@ -44,7 +44,7 @@ class cart
     public static function addProduct($id)
     {
         checkRequest('POST');
-        adminOnly();
+        userOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $table = 'shoppingCart';
