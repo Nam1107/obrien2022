@@ -65,7 +65,6 @@ class Auth
                 $id = $sessionUser['ID'] = $user['ID'];
                 $email = $user['email'];
                 $role = $sessionUser['role'] = $user['role'];
-                $_SESSION['user'] = $sessionUser;
 
                 $payload = [
                     'iss' => 'obrien',

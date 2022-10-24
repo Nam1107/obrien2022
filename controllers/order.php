@@ -38,6 +38,13 @@ class order
 
         delete('shoppingCart', ['userID' => $userID]);
 
+        if (!isset($sent_vars['note']) || !isset($sent_vars['phone']) || !isset($sent_vars['address'])) {
+            $res['status'] = 0;
+            $res['errors'] = "Not enough parameters ";
+            dd($res);
+            exit();
+        }
+
         $order['userID'] = $userID;
         $order['note'] = $sent_vars['note'];
         $order['status'] = 'To Ship';
@@ -85,6 +92,22 @@ class order
         if (isset($sent_vars['status'])) {
             $status = $sent_vars['status'];
         }
+        $page = $sent_vars['page'];
+        $perPage = $sent_vars['perPage'];
+        $offset = $perPage * ($page - 1);
+
+        $total = custom(
+            "SELECT COUNT(ID) as total
+            FROM (
+                SELECT `order`.ID
+                FROM `order`
+                WHERE `order`.status LIKE '%$status%'
+                AND `order`.userID = $userID
+            ) AS B
+        "
+        );
+
+        $check = ceil($total[0]['total'] / $perPage);
 
         $order = custom("
         SELECT `order`.ID,`order`.status ,C.description,C.createdAt AS lastUpdated, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
@@ -101,6 +124,7 @@ class order
         AND C.orderID = `order`.ID
         GROUP BY
         `orderDetail`.orderID
+        LIMIT $perPage  OFFSET $offset 
         ");
 
         if (!$order) {
@@ -119,6 +143,8 @@ class order
             ");
         }
         $res['status'] = 1;
+        $res['totalCount'] = $total[0]['total'];
+        $res['numOfPage'] = $check;
         $res['obj'] = $order;
         dd($res);
         exit();
@@ -132,9 +158,13 @@ class order
         $sent_vars = json_decode($json, TRUE);
 
         $status = $sent_vars['status'];
+        $startDate = $sent_vars['startDate'];
+        $endDate = $sent_vars['endDate'];
+
         $page = $sent_vars['page'];
         $perPage = $sent_vars['perPage'];
         $offset = $perPage * ($page - 1);
+
 
         $total = custom(
             "SELECT COUNT(ID) as total
@@ -142,6 +172,7 @@ class order
                 SELECT `order`.ID
                 FROM `order`
                 WHERE `order`.status LIKE '%$status%'
+                AND `order`.createdAt > $startDate AND  `order`.createdAt < $endDate
             ) AS B
         "
         );
@@ -154,13 +185,15 @@ class order
         WHERE `order`.ID = orderDetail.orderID
         AND `order`.status LIKE '%$status%'
         AND user.ID = `order`.userID
+        AND `order`.createdAt > $startDate AND  `order`.createdAt < $endDate
         GROUP BY `orderDetail`.orderID
         ORDER BY `order`.createdAt DESC
         LIMIT $perPage  OFFSET $offset 
         ");
+        $res['status'] = 1;
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
-        $res['status'] = 1;
+
         $res['obj'] = $order;
         dd($res);
         exit();
@@ -297,8 +330,14 @@ class order
         $order = selectOne('order', ['ID' => $id]);
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-        $reason = $sent_vars['season'];
+        $reason = $sent_vars['reason'];
         $reason = "Reason for Cancellation : " . $reason;
+        if (!isset($sent_vars['reason'])) {
+            $res['status'] = 0;
+            $res['errors'] = "Not enough parameters ";
+            dd($res);
+            exit();
+        }
         if (!$order) {
             $res['status'] = 0;
             $res['errors'] = ' No orders yet';
