@@ -104,10 +104,11 @@ class Auth
     }
     public static function refreshToken()
     {
+        checkRequest('GET');
         $headers = apache_request_headers();
         if (!isset($headers['Authorization'])) {
             $res['status'] = 0;
-            $res['error'] = 'You need a refresh token to access';
+            $res['errors'] = 'You need a refresh token to access';
             dd($res);
             exit();
         }
@@ -127,7 +128,7 @@ class Auth
                 'data' => [
                     'id' => $id,
                     'email' => $email,
-                    'role' => $role,
+                    'role' => $role
                 ],
             ];
             $token = JWT::encode($payload, TOKEN_SECRET, 'HS256');

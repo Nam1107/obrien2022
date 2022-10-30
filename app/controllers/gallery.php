@@ -22,9 +22,6 @@ class Gallery
         update('product', ['ID' => $id], ['updatedAt' => currentTime()]);
         $res['status'] = 1;
         $res['msg'] = 'Success';
-        $res['obj'] = custom("
-        SELECT * from gallery where productID = $id
-        ");
         dd($res);
         exit();
     }

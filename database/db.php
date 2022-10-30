@@ -143,7 +143,7 @@ function update($table, $where, $conditions)
     }
     $conditions = $conditions + $where;
     $stmt = executeQuerry($sql, $conditions);
-    return $stmt->rowCount();
+    return $stmt;
 }
 
 function delete($table, $conditions)
