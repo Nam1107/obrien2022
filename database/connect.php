@@ -1,6 +1,5 @@
 <?php
-require './path.php';
-session_start();
+
 global $conn;
 try {
    $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_TABLE,  DB_USER, DB_PASS);

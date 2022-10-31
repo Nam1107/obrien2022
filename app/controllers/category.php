@@ -1,11 +1,18 @@
 <?php
-require './database/db.php';
-require './helper/middleware.php';
-class category
+
+class category extends Controllers
 {
-    public static function listCategory()
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
     {
-        checkRequest('GET');
+        $this->wishlist_model = $this->model('categoryModel');
+        $this->middle_ware = new middleware();
+    }
+    public function listCategory()
+    {
+        $this->middle_ware->checkRequest('GET');
         $res['status'] = 1;
         $res['msg'] = 'Success';
         $obj = custom("
@@ -15,10 +22,10 @@ class category
         dd($res);
         exit();
     }
-    public static function addCategory()
+    public function addCategory()
     {
-        checkRequest('POST');
-        adminOnly();
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $res['status'] = 1;
@@ -32,10 +39,10 @@ class category
         dd($res);
         exit();
     }
-    public static function updateCategory($id)
+    public function updateCategory($id)
     {
-        checkRequest('PUT');
-        adminOnly();
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->adminOnly();
         $res['status'] = 1;
         $res['msg'] = 'Success';
         $json = file_get_contents("php://input");

@@ -1,13 +1,19 @@
 <?php
-require './database/db.php';
-require './helper/middleware.php';
 
-class review
+class review extends Controllers
 {
-    public static function addReview($id)
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
     {
-        checkRequest('POST');
-        userOnly();
+        $this->wishlist_model = $this->model('reviewModel');
+        $this->middle_ware = new middleware();
+    }
+    public function addReview($id)
+    {
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->userOnly();
 
         $order = selectOne('order', ['ID' => $id]);
         if (!$order) {
@@ -47,19 +53,18 @@ class review
         exit();
     }
 
-    public static function productReview($id)
+    public function productReview($id = 0)
     {
-        checkRequest('GET');
+        $this->middle_ware->checkRequest('GET');
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        $rate = $sent_vars['rate'];
-        // $rate = $sent_vars['rate'];
-        $page = $sent_vars['page'];
-        $perPage = $sent_vars['perPage'];
+        $rate = !empty($sent_vars['rate']) ? $sent_vars['rate'] : '';
+        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
+        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
         $offset = $perPage * ($page - 1);
 
-        $num = custom("SELECT rate, COUNT(ID) AS count from review where productID = 1 GROUP BY rate ASC");
+        $num = custom("SELECT rate, COUNT(ID) AS count from review where productID = $id GROUP BY rate ASC");
         $total = custom("
         SELECT COUNT(ID) as total
             FROM (
@@ -69,7 +74,10 @@ class review
         ");
         $check = ceil($total[0]['total'] / $perPage);
         $obj = custom("
-        Select * from review where rate LIKE '%$rate%' and productID = $id
+        SELECT review.*,`user`.email,`user`.name,`user`.avatar 
+        from review, `user`
+        where rate LIKE '%$rate%' and productID = $id
+        AND review.userID = `user`.ID
         LIMIT $perPage OFFSET $offset
         ");
 
@@ -82,10 +90,10 @@ class review
         exit();
     }
 
-    public static function myReview()
+    public function myReview()
     {
-        checkRequest('GET');
-        userOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
 
         $json = file_get_contents("php://input");

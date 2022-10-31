@@ -1,12 +1,19 @@
 <?php
-require './database/db.php';
-require './helper/middleware.php';
-class Gallery
+
+class Gallery extends Controllers
 {
-    public static function addImage($id)
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
     {
-        checkRequest('POST');
-        adminOnly();
+        $this->wishlist_model = $this->model('galleryModel');
+        $this->middle_ware = new middleware();
+    }
+    public function addImage($id)
+    {
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->adminOnly();
         $table = 'gallery';
 
         $json = file_get_contents("php://input");
@@ -26,11 +33,11 @@ class Gallery
         exit();
     }
 
-    public static function deleteImage($id)
+    public function deleteImage($id)
     {
-        checkRequest('DELETE');
+        $this->middle_ware->checkRequest('DELETE');
         $table = 'gallery';
-        adminOnly();
+        $this->middle_ware->adminOnly();
         $image['ID'] = $id;
         $product = selectOne($table, $image);
         if ($product) {
@@ -50,11 +57,11 @@ class Gallery
         dd($res);
         exit();
     }
-    public static function updateGallery($id)
+    public function updateGallery($id)
     {
-        checkRequest('PUT');
+        $this->middle_ware->checkRequest('PUT');
         $table = 'gallery';
-        adminOnly();
+        $this->middle_ware->adminOnly();
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);

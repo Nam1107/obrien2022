@@ -1,14 +1,20 @@
 <?php
-require './database/db.php';
-require './helper/middleware.php';
 
-class wishList
+class wishList extends Controllers
 {
-
-    public static function getWishList()
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
     {
-        checkRequest('GET');
-        userOnly();
+        $this->wishlist_model = $this->model('wishListModel');
+        $this->middle_ware = new middleware();
+    }
+
+    public function getWishList()
+    {
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
@@ -36,6 +42,7 @@ class wishList
         WHERE A.categoryID = category.ID
         AND A.ID = wishList.productID
         AND wishList.userID = $userID
+        LIMIT $perPage OFFSET $offset
         ");
 
         $res['status'] = 1;
@@ -46,10 +53,10 @@ class wishList
         exit();
     }
 
-    public static function removeProduct($id)
+    public function removeProduct($id)
     {
-        checkRequest('DELETE');
-        userOnly();
+        $this->middle_ware->checkRequest('DELETE');
+        $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
         $condition = [
             "userID" => $userID,
@@ -77,10 +84,10 @@ class wishList
         exit();
     }
 
-    public static function addProduct($id)
+    public function addProduct($id)
     {
-        checkRequest('POST');
-        userOnly();
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->userOnly();
         $check = selectOne('product', ['ID' => $id]);
         if (!$check) {
             $res['status'] = 0;

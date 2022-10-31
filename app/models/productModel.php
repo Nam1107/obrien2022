@@ -3,11 +3,17 @@
 class productModel
 {
     protected $table = 'product';
+    public $model_product;
+    public $middle;
+    public function __construct()
+    {
+        $this->middle = new middleware();
+    }
 
     public function getDetail($id, $IsPublic)
     {
         $userID = 0;
-        $obj = authenToken();
+        $obj = $this->middle->authenToken();
         if ($obj['status'] == 1) {
             $userID = $_SESSION['user']['ID'];
         }

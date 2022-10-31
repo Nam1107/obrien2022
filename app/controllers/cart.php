@@ -1,17 +1,22 @@
 <?php
-require './database/db.php';
-require './helper/middleware.php';
-class cart
+
+class cart extends Controllers
 {
-    public static function userCart()
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
+    {
+        $this->wishlist_model = $this->model('categoryModel');
+        $this->middle_ware = new middleware();
+    }
+    public function userCart()
     {
         $id = 0;
-        $obj = authenToken();
+        $obj = $this->middle_ware->authenToken();
         if ($obj['status'] == 1) {
             $id = $_SESSION['user']['ID'];
         }
-
-
 
         $shoppingCart = custom("
         SELECT shoppingCart.productID,product.name,product.image ,shoppingCart.quanity,  A.unitPrice, unitPrice*quanity AS subTotal,IF(quanity<A.stock,1, 0) AS status
@@ -26,25 +31,26 @@ class cart
         foreach ($shoppingCart as $key => $val) {
             $total = $total + $val['subTotal'];
         }
-        $res['obj'] = $shoppingCart;
         $res['total'] = $total;
+        $res['obj'] = $shoppingCart;
+
         return $res;
     }
 
-    public static function getCart()
+    public function getCart()
     {
         $res['status'] = 1;
-        $cart = cart::userCart();
+        $cart = $this->userCart();
         $res['obj'] = $cart['obj'];
         $res['total'] = $cart['total'];
         dd($res);
         exit();
     }
 
-    public static function addProduct($id)
+    public function addProduct($id)
     {
-        checkRequest('POST');
-        userOnly();
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->userOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $table = 'shoppingCart';
@@ -67,7 +73,7 @@ class cart
                 $condition['quanity'] = 6;
             }
             create($table, $condition);
-            cart::getCart();
+            $this->getCart();
         }
 
         if ($obj['quanity'] > 5) {
@@ -81,13 +87,13 @@ class cart
             $quanity['quanity'] = 6;
         }
         update($table, ['ID' => $obj['ID']], $quanity);
-        cart::getCart();
+        $this->getCart();
     }
 
-    public static function removeProduct($id)
+    public function removeProduct($id)
     {
-        checkRequest('DELETE');
-        userOnly();
+        $this->middle_ware->checkRequest('DELETE');
+        $this->middle_ware->userOnly();
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
@@ -99,13 +105,13 @@ class cart
 
         ];
         delete($table, $condition);
-        cart::getCart();
+        $this->getCart();
     }
 
-    public static function incrementByOne($id)
+    public function incrementByOne($id)
     {
-        checkRequest('PUT');
-        userOnly();
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->userOnly();
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
         $condition = [
@@ -128,13 +134,13 @@ class cart
         custom("
         UPDATE shoppingCart SET quanity = if(quanity < 6,quanity + 1, 6) WHERE userID = $userID AND productID = $id
         ");
-        cart::getCart();
+        $this->getCart();
     }
 
-    public static function decrementByOne($id)
+    public function decrementByOne($id)
     {
-        checkRequest('PUT');
-        userOnly();
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->userOnly();
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
         $condition = [
@@ -151,6 +157,6 @@ class cart
         custom("
         UPDATE shoppingCart SET quanity = if(quanity > 1 ,quanity - 1, 1) WHERE userID = $userID AND productID = $id
         ");
-        cart::getCart();
+        $this->getCart();
     }
 }

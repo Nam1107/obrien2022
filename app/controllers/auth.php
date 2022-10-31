@@ -4,17 +4,21 @@ require './vendor/autoload.php';
 
 use Firebase\JWT\JWT;
 
-require './database/db.php';
-require './helper/middleware.php';
-require './helper/validateUser.php';
 
-
-class Auth
+class Auth extends Controllers
 {
-
-    public static function Logout()
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
     {
-        checkRequest('POST');
+        // $this->wishlist_model = $this->model('categoryModel');
+        $this->middle_ware = new middleware();
+    }
+
+    public function Logout()
+    {
+        $this->middle_ware->checkRequest('POST');
         session_destroy();
         $headers = apache_request_headers();
         if (!isset($headers['Authorization'])) {
@@ -43,10 +47,10 @@ class Auth
         }
     }
 
-    public static function Login()
+    public function Login()
     {
-        checkRequest('POST');
-        guestsOnly();
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->guestsOnly();
         $key = 'privatekey';
 
         $json = file_get_contents("php://input");
@@ -102,9 +106,9 @@ class Auth
         dd($res);
         exit();
     }
-    public static function refreshToken()
+    public function refreshToken()
     {
-        checkRequest('GET');
+        $this->middle_ware->checkRequest('GET');
         $headers = apache_request_headers();
         if (!isset($headers['Authorization'])) {
             $res['status'] = 0;
@@ -143,10 +147,10 @@ class Auth
             exit();
         }
     }
-    public static function Register()
+    public function Register()
     {
-        checkRequest('POST');
-        guestsOnly();
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->guestsOnly();
         $table = 'user';
         $res['status'] = 0;
 

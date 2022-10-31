@@ -1,14 +1,21 @@
 <?php
-require './app/controllers/cart.php';
 
-class order
+class order extends Controllers
 {
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
+    {
+        $this->wishlist_model = $this->model('wishListModel');
+        $this->middle_ware = new middleware();
+    }
 
-    public static function createOrder()
+    public function createOrder()
     {
         # code...
-        checkRequest('POST');
-        userOnly();
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->userOnly();
         $cart = cart::userCart()['obj'];
         if (!$cart) {
             $res['status'] = 0;
@@ -77,10 +84,10 @@ class order
         exit();
     }
 
-    public static function myListOrder()
+    public function myListOrder()
     {
-        checkRequest('GET');
-        userOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
 
         $json = file_get_contents("php://input");
@@ -150,10 +157,10 @@ class order
         exit();
     }
 
-    public static function adminListOrder()
+    public function adminListOrder()
     {
-        checkRequest('GET');
-        adminOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
@@ -199,10 +206,10 @@ class order
         exit();
     }
 
-    public static function getMyOrder($id)
+    public function getMyOrder($id)
     {
-        checkRequest('GET');
-        userOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
 
         $order = custom("
@@ -241,10 +248,10 @@ class order
         exit();
     }
 
-    public static function adminGetOrder($id)
+    public function adminGetOrder($id)
     {
-        checkRequest('GET');
-        adminOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
         $order = custom("
         SELECT `order`.ID,`order`.status ,`order`.userID, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`	
@@ -284,10 +291,10 @@ class order
         exit();
     }
 
-    public static function setStatusOrder($id)
+    public function setStatusOrder($id)
     {
-        checkRequest('PUT');
-        adminOnly();
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->adminOnly();
 
         $order = selectOne('order', ['ID' => $id]);
         if (!$order) {
@@ -321,10 +328,10 @@ class order
         exit();
     }
 
-    public static function cancelOrder($id)
+    public function cancelOrder($id)
     {
-        checkRequest('PUT');
-        userOnly();
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->userOnly();
 
         $status = 'Cancelled';
         $order = selectOne('order', ['ID' => $id]);
@@ -371,10 +378,10 @@ class order
                 exit();
         }
     }
-    public static function orderRecevied($id)
+    public function orderRecevied($id)
     {
-        checkRequest('PUT');
-        userOnly();
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->userOnly();
 
         $status = 'To Rate';
         $order = selectOne('order', ['ID' => $id]);

@@ -1,32 +1,29 @@
 <?php
-require './app/models/productModel.php';
-require './app/models/wishListModel.php';
-require './database/db.php';
-require './helper/middleware.php';
-
 
 class Product extends Controllers
 {
     public $model_product;
+    public $middle_ware;
     public function __construct()
     {
         $this->model_product = $this->model('productModel');
+        $this->middle_ware = new middleware();
     }
 
     public function ListProduct()
     {
-        checkRequest('GET');
+        $this->middle_ware->checkRequest('GET');
         $res['status'] = 1;
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        $page = isset($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = isset($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
-        $category = isset($sent_vars['category']) ? $sent_vars['category'] : '';
-        $sale = isset($sent_vars['sale']) ? $sent_vars['sale'] : '';
-        $sortBy = isset($sent_vars['sortBy']) ? $sent_vars['sortBy'] : 'name';
-        $sortType = isset($sent_vars['sortType']) ? $sent_vars['sortType'] : 'ASC';
-        $name = isset($sent_vars['name']) ? $sent_vars['name'] : '';
+        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
+        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
+        $category = !empty($sent_vars['category']) ? $sent_vars['category'] : '';
+        $sale = !empty($sent_vars['sale']) ? $sent_vars['sale'] : '';
+        $sortBy = !empty($sent_vars['sortBy']) ? $sent_vars['sortBy'] : 'name';
+        $sortType = !empty($sent_vars['sortType']) ? $sent_vars['sortType'] : 'ASC';
+        $name = !empty($sent_vars['name']) ? $sent_vars['name'] : '';
 
         $IsPublic = 1;
 
@@ -39,8 +36,8 @@ class Product extends Controllers
     }
     public function AdminListProduct()
     {
-        checkRequest('GET');
-        adminOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
         $res['status'] = 1;
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
@@ -62,17 +59,17 @@ class Product extends Controllers
         dd($res);
         exit();
     }
-    public function getProduct($id)
+    public function getProduct($id = 0)
     {
-        checkRequest('GET');
+        $this->middle_ware->checkRequest('GET');
         $res = $this->model_product->getDetail($id, '1');
         dd($res);
         exit();
     }
-    public function AdminGetProduct($id)
+    public function AdminGetProduct($id = 0)
     {
-        checkRequest('GET');
-        adminOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
         $res = $this->model_product->getDetail($id, '');
         dd($res);
         exit();
@@ -80,8 +77,8 @@ class Product extends Controllers
 
     public function createProduct()
     {
-        checkRequest('POST');
-        adminOnly();
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $res = $this->model_product->create($sent_vars);
@@ -89,23 +86,20 @@ class Product extends Controllers
         exit();
     }
 
-    public function deleteProduct($id)
+    public function deleteProduct($id = 0)
     {
-        checkRequest('DELETE');
-        adminOnly();
+        $this->middle_ware->checkRequest('DELETE');
+        $this->middle_ware->adminOnly();
         $res = $this->model_product->delete($id);
         dd($res);
         exit();
     }
-    public function updateProduct($id)
+    public function updateProduct($id = 0)
     {
-        checkRequest('PUT');
-        $table = 'product';
-        adminOnly();
-
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-
         $res = $this->model_product->update($id, $sent_vars);
         dd($res);
         exit();

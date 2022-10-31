@@ -1,12 +1,19 @@
 <?php
-require './database/db.php';
-require './helper/middleware.php';
-class dashboard
+
+class dashboard extends Controllers
 {
+    public $validate_user;
+    public $middle_ware;
+    public $wishlist_model;
+    public function __construct()
+    {
+        $this->wishlist_model = $this->model('dashboardModel');
+        $this->middle_ware = new middleware();
+    }
     public function report()
     {
-        checkRequest('GET');
-        adminOnly();
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
