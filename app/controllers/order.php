@@ -99,7 +99,7 @@ class order extends Controllers
         exit();
     }
 
-    public function getMyOrder($id)
+    public function getMyOrder($id = 0)
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->userOnly();
@@ -108,47 +108,16 @@ class order extends Controllers
         exit();
     }
 
-    public function adminGetOrder($id)
+    public function adminGetOrder($id = 0)
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        $order = custom("
-        SELECT `order`.ID,`order`.status ,`order`.userID, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
-        FROM `order`,`orderDetail`	
-        WHERE `order`.ID = orderDetail.orderID
-        AND `order`.ID = $id
-        GROUP BY
-        `orderDetail`.orderID
-        ");
-
-        $user = selectOne('user', ['ID' => $order[0]['userID']]);
-
-        if (!$order) {
-            $this->loadErrors(400, 'No orders yet');
-        }
-
-        $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
-        from shippingDetail
-        WHERE orderID =  $id
-        ");
-
-        $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
-        FROM `product`,`orderDetail`	
-        WHERE `product`.ID = orderDetail.productID
-        AND orderID = $id
-        ");
-
-        $res['status'] = 1;
-        $res['obj'] = $order[0];
-        $res['obj']['user'] = $user;
-        $res['obj']['shipping'] = $shipping;
-        $res['obj']['product'] = $product;
-
+        $res = $this->order_model->getDetail($id);
         dd($res);
         exit();
     }
 
-    public function setStatusOrder($id)
+    public function setStatusOrder($id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->adminOnly();
@@ -160,26 +129,19 @@ class order extends Controllers
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-        $desc = $sent_vars['description'];
 
-        if (!isset($sent_vars['status'])) {
+        if (empty($sent_vars['status']) || empty($sent_vars['description'])) {
             $this->loadErrors(400, 'Not enough value');
         }
-        $status = $sent_vars['status'];
-        update('order', ['ID' => $id], ['status' => $status]);
-        $shipping = [
-            "orderID" => $id,
-            "description" => $desc,
-            "createdAt" => currentTime()
-        ];
-        create('shippingDetail', $shipping);
+
+        $this->order_model->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
         $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
         exit();
     }
 
-    public function cancelOrder($id)
+    public function cancelOrder($id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->userOnly();
@@ -198,13 +160,7 @@ class order extends Controllers
         }
         switch ($order['status']) {
             case 'To Ship':
-                update('order', ['ID' => $id], ['status' => $status]);
-                $shipping = [
-                    "orderID" => $id,
-                    "description" => $reason,
-                    "createdAt" => currentTime()
-                ];
-                create('shippingDetail', $shipping);
+                $this->order_model->updateStatus($id, $status, $reason);
                 $res['status'] = 1;
                 $res['msg'] = 'Success';
                 dd($res);
@@ -212,13 +168,15 @@ class order extends Controllers
                 break;
             case 'To Recivie':
                 $this->loadErrors(400, 'The order is being shipped');
+                exit;
                 break;
             default:
                 $this->loadErrors(400, 'The order has been delivered');
+                exit;
                 break;
         }
     }
-    public function orderRecevied($id)
+    public function orderRecevied($id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->userOnly();
@@ -229,15 +187,20 @@ class order extends Controllers
             $this->loadErrors(400, 'No orders yet');
             exit();
         }
-        if ($order['status'] == 'To Ship' || $order['status'] == 'To Recivie') {
-            update('order', ['ID' => $id], ['status' => $status]);
-            $res['status'] = 1;
-            $res['msg'] = 'Success';
-            dd($res);
-            exit();
-        } else {
-            $this->loadErrors(400, 'The order has been completed');
-            exit();
+
+        switch ($order['status']) {
+            case 'To Recivie':
+                $this->order_model->updateStatus($id, $status, "Confirm Receipt of an Order from a Customer");
+                $res['status'] = 1;
+                $res['msg'] = 'Success';
+                dd($res);
+                exit();
+            case 'To Ship':
+                $this->loadErrors(400, 'Orders are being prepared');
+                exit();
+            default:
+                $this->loadErrors(400, 'The order has been completed');
+                exit();
         }
     }
 }

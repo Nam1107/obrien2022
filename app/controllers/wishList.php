@@ -19,57 +19,28 @@ class wishList extends Controllers
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        $page = $sent_vars['page'];
-        $perPage = $sent_vars['perPage'];
-        $offset = $perPage * ($page - 1);
+        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
+        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
 
-        $total = custom(
-            "SELECT COUNT(ID) as total
-            FROM (
-                SELECT wishList.ID
-                FROM `wishList`
-                WHERE wishList.userID = $userID
-            ) AS B
-        "
-        );
+        $res = $this->wishlist_model->getList($userID, $page, $perPage);
 
-        $check = ceil($total[0]['total'] / $perPage);
-
-        $wishList = custom("
-        SELECT A.* , category.name AS category
-        FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
-        FROM product) AS A,category,wishList
-        WHERE A.categoryID = category.ID
-        AND A.ID = wishList.productID
-        AND wishList.userID = $userID
-        LIMIT $perPage OFFSET $offset
-        ");
-
-        $res['status'] = 1;
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] = $check;
-        $res['obj'] = $wishList;
         dd($res);
         exit();
     }
 
-    public function removeProduct($id)
+    public function removeProduct($id = 0)
     {
         $this->middle_ware->checkRequest('DELETE');
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
-        $condition = [
-            "userID" => $userID,
-            "productID" => $id
-        ];
-        $check = selectOne('wishList', $condition);
+        $check = $this->wishlist_model->getDetail($userID, $id);
         if (!$check) {
             $res['status'] = 0;
             $res['errors'] = 'Not found this product in your wishlist';
             dd($res);
             exit();
         }
-        delete('wishList', $condition);
+        $this->wishlist_model->delete($userID, $id);
         $wishList = custom("
         SELECT A.* , category.name AS category
         FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
@@ -84,7 +55,7 @@ class wishList extends Controllers
         exit();
     }
 
-    public function addProduct($id)
+    public function addProduct($id = 0)
     {
         $this->middle_ware->checkRequest('POST');
         $this->middle_ware->userOnly();
@@ -102,7 +73,7 @@ class wishList extends Controllers
             "productID" => $id
         ];
         $check = selectOne('wishList', $condition);
-        if (!$check && $id != 0) {
+        if (!$check) {
             $condition['createdAt'] = currentTime();
             create('wishList', $condition);
             $wishList = custom("

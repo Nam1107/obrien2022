@@ -20,4 +20,19 @@ class Controllers
         dd($res);
         exit();
     }
+    public function loadDetail($obj)
+    {
+        $res['status'] = 1;
+        $res['obj'] = $obj;
+        return $res;
+    }
+    public function loadList($totalCount, $numOfPage, $page, $obj)
+    {
+        $res['status'] = 1;
+        $res['totalCount'] = $totalCount;
+        $res['numOfPage'] =  $numOfPage;
+        $res['page'] = $page;
+        $res['obj'] = $obj;
+        return $res;
+    }
 }

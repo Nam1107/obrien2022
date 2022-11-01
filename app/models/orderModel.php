@@ -4,9 +4,6 @@ class orderModel extends Controllers
 {
     function getDetail($orderID)
     {
-        // $res['obj'] = selectOne('order', ["ID" => $orderID]);
-        // $res['obj']['product']  = selectAll('orderDetail', ['orderID' => $orderID]);
-        // return ($res);
         $order = custom("
         SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`	
@@ -64,11 +61,8 @@ class orderModel extends Controllers
         ORDER BY `order`.createdAt DESC
         LIMIT $perPage  OFFSET $offset 
         ");
-        $res['status'] = 1;
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] = $check;
 
-        $res['obj'] = $order;
+        $res = $this->loadList($total[0]['total'], $check, $page, $order);
         return $res;
     }
     function myListOrder($userID, $status, $page, $perPage)
@@ -146,5 +140,15 @@ class orderModel extends Controllers
             "createdAt" => currentTime()
         ];
         create('orderDetail', $condition);
+    }
+    public function updateStatus($orderID, $status, $description)
+    {
+        update('order', ['ID' => $orderID], ['status' => $status]);
+        $shipping = [
+            "orderID" => $orderID,
+            "description" => $description,
+            "createdAt" => currentTime()
+        ];
+        create('shippingDetail', $shipping);
     }
 }
