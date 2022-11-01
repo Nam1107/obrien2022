@@ -6,8 +6,9 @@ class Product extends Controllers
     public $middle_ware;
     public function __construct()
     {
-        $this->model_product = $this->model('productModel');
+
         $this->middle_ware = new middleware();
+        $this->model_product = $this->model('productModel');
     }
 
     public function ListProduct()

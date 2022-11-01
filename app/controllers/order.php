@@ -4,10 +4,11 @@ class order extends Controllers
 {
     public $validate_user;
     public $middle_ware;
-    public $wishlist_model;
+    public $order_model;
     public function __construct()
     {
-        $this->wishlist_model = $this->model('wishListModel');
+        $this->order_model = $this->model('orderModel');
+        $this->cart_model = $this->model('cartModel');
         $this->middle_ware = new middleware();
     }
 
@@ -16,19 +17,15 @@ class order extends Controllers
         # code...
         $this->middle_ware->checkRequest('POST');
         $this->middle_ware->userOnly();
-        $cart = cart::userCart()['obj'];
+
+        $userID = $_SESSION['user']['ID'];
+        $cart = $this->cart_model->getCart($userID)['obj'];
         if (!$cart) {
-            $res['status'] = 0;
-            $res['errors'] = 'Your cart is empty ';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'Your cart is empty');
         }
         foreach ($cart as $key => $val) {
             if ($val['status'] === 0) {
-                $res['status'] = 0;
-                $res['errors'] = 'Some items in your cart has sold out ';
-                dd($res);
-                exit();
+                $this->loadErrors(400, 'Some items in your cart has sold out');
             }
         }
         foreach ($cart as $key => $val) {
@@ -45,21 +42,11 @@ class order extends Controllers
 
         delete('shoppingCart', ['userID' => $userID]);
 
-        if (!isset($sent_vars['note']) || !isset($sent_vars['phone']) || !isset($sent_vars['address'])) {
-            $res['status'] = 0;
-            $res['errors'] = "Not enough parameters ";
-            dd($res);
-            exit();
+        if (!empty($sent_vars['note']) || !empty($sent_vars['phone']) || !empty($sent_vars['address'])) {
+            $this->loadErrors(400, 'Not enough parameters');
         }
 
-        $order['userID'] = $userID;
-        $order['note'] = $sent_vars['note'];
-        $order['status'] = 'To Ship';
-        $order['phone'] = $sent_vars['phone'];
-        $order['address'] = $sent_vars['address'];
-        $order['createdAt'] = currentTime();
-
-        $orderID = create('order', $order);
+        $orderID = $this->order_model->createOrder($userID, $sent_vars['note'], $sent_vars['phone'], $sent_vars['address']);
         $shipping = [
             "orderID" => $orderID,
             "description" => "Order has been created",
@@ -68,14 +55,7 @@ class order extends Controllers
         create('shippingDetail', $shipping);
 
         foreach ($cart as $key => $val) {
-            $condition = [
-                "orderID" => $orderID,
-                "productID" => $val['productID'],
-                "unitPrice" => $val['unitPrice'],
-                "quanity" => $val["quanity"],
-                "createdAt" => currentTime()
-            ];
-            create('orderDetail', $condition);
+            $this->order_model->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quanity"]);
         }
         $res['status'] = 1;
         $res['order'] = selectOne('order', ["ID" => $orderID]);
@@ -135,10 +115,7 @@ class order extends Controllers
         ");
 
         if (!$order) {
-            $res['status'] = 0;
-            $res['errors'] = "No orders yet";
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'No orders yet');
         }
 
         foreach ($order as $key => $obj) {
@@ -223,10 +200,7 @@ class order extends Controllers
         ");
 
         if (!$order) {
-            $res['status'] = 0;
-            $res['errors'] = "No orders yet";
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'No orders yet');
         }
 
         $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
@@ -264,10 +238,7 @@ class order extends Controllers
         $user = selectOne('user', ['ID' => $order[0]['userID']]);
 
         if (!$order) {
-            $res['status'] = 0;
-            $res['errors'] = "No orders yet";
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'No orders yet');
         }
 
         $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
@@ -298,10 +269,7 @@ class order extends Controllers
 
         $order = selectOne('order', ['ID' => $id]);
         if (!$order) {
-            $res['status'] = 0;
-            $res['errors'] = ' No orders yet';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'No orders yet');
         }
 
         $json = file_get_contents("php://input");
@@ -309,10 +277,7 @@ class order extends Controllers
         $desc = $sent_vars['description'];
 
         if (!isset($sent_vars['status'])) {
-            $res['status'] = 0;
-            $res['errors'] = "Not enough value";
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'Not enough value');
         }
         $status = $sent_vars['status'];
         update('order', ['ID' => $id], ['status' => $status]);
@@ -340,16 +305,10 @@ class order extends Controllers
         $reason = $sent_vars['reason'];
         $reason = "Reason for Cancellation : " . $reason;
         if (!isset($sent_vars['reason'])) {
-            $res['status'] = 0;
-            $res['errors'] = "Not enough parameters ";
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'Not enough parameters');
         }
         if (!$order) {
-            $res['status'] = 0;
-            $res['errors'] = ' No orders yet';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'No orders yet');
         }
         switch ($order['status']) {
             case 'To Ship':
@@ -366,16 +325,11 @@ class order extends Controllers
                 exit();
                 break;
             case 'To Recivie':
-                $res['status'] = 0;
-                $res['errors'] = ' The order is being shipped';
-                dd($res);
-                exit();
+                $this->loadErrors(400, 'The order is being shipped');
                 break;
             default:
-                $res['status'] = 0;
-                $res['errors'] = ' The order has been delivered';
-                dd($res);
-                exit();
+                $this->loadErrors(400, 'The order has been delivered');
+                break;
         }
     }
     public function orderRecevied($id)
@@ -386,9 +340,7 @@ class order extends Controllers
         $status = 'To Rate';
         $order = selectOne('order', ['ID' => $id]);
         if (!$order) {
-            $res['status'] = 0;
-            $res['errors'] = ' No orders yet';
-            dd($res);
+            $this->loadErrors(400, 'No orders yet');
             exit();
         }
         if ($order['status'] == 'To Ship' || $order['status'] == 'To Recivie') {
@@ -398,9 +350,7 @@ class order extends Controllers
             dd($res);
             exit();
         } else {
-            $res['status'] = 0;
-            $res['errors'] = 'The order has been completed';
-            dd($res);
+            $this->loadErrors(400, 'The order has been completed');
             exit();
         }
     }

@@ -1,6 +1,6 @@
 <?php
 require "./core/Controllers.php";
-class Application
+class Application extends Controllers
 {
     private $controller;
     private $action;
@@ -19,7 +19,7 @@ class Application
     {
         $arr = $this->UrlProcess();
         if (empty($arr[0]) || empty($arr[1])) {
-            $this->loadError(404);
+            $this->loadErrors(404, "Not enough paramester");
         }
 
         if (file_exists("./app/controllers/" . $arr[0] . ".php")) {
@@ -28,14 +28,14 @@ class Application
             $this->controller = new $this->controller();
             unset($arr[0]);
         } else {
-            $this->loadError(404);
+            $this->loadErrors(404, "Not found '$arr[0]'");
         }
 
         if (method_exists($this->controller, $arr[1])) {
             $this->action = $arr[1];
             unset($arr[1]);
         } else {
-            $this->loadError(404);
+            $this->loadErrors(404, "Not found '$arr[1]'");
         }
 
         $this->prarams = array_values($arr);
@@ -53,12 +53,5 @@ class Application
         $urlArr = array_filter(explode('/', $url));
         $urlArr = array_values($urlArr);
         return $urlArr;
-    }
-    public function loadError($error)
-    {
-        $res['status'] = 0;
-        $res['errors'] = 'Not found';
-        http_response_code($error);
-        exit;
     }
 }

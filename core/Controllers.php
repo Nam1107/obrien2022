@@ -12,4 +12,12 @@ class Controllers
         }
         return false;
     }
+    public function loadErrors($code, $errors)
+    {
+        http_response_code($code);
+        $res['status'] = 0;
+        $res['errors'] = $errors;
+        dd($res);
+        exit();
+    }
 }

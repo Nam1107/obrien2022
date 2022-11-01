@@ -4,21 +4,16 @@ class category extends Controllers
 {
     public $validate_user;
     public $middle_ware;
-    public $wishlist_model;
+    public $category_model;
     public function __construct()
     {
-        $this->wishlist_model = $this->model('categoryModel');
+        $this->category_model = $this->model('categoryModel');
         $this->middle_ware = new middleware();
     }
     public function listCategory()
     {
         $this->middle_ware->checkRequest('GET');
-        $res['status'] = 1;
-        $res['msg'] = 'Success';
-        $obj = custom("
-            SELECT * from category
-        ");
-        $res['obj'] = $obj;
+        $res = $this->category_model->getList();
         dd($res);
         exit();
     }
@@ -26,16 +21,18 @@ class category extends Controllers
     {
         $this->middle_ware->checkRequest('POST');
         $this->middle_ware->adminOnly();
+
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-        $res['status'] = 1;
-        $res['msg'] = 'Success';
-        $condition = [
-            'name' => $sent_vars['name'],
-            'description' => $sent_vars['description'],
 
-        ];
-        create('category', $condition);
+        if (empty($sent_vars['name'])) {
+            $this->loadErrors(400, 'Not enough value');
+        }
+
+        $name = $sent_vars['name'];
+        $desc = $sent_vars['description'];
+
+        $res = $this->category_model->create($name, $desc);
         dd($res);
         exit();
     }

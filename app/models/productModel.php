@@ -10,6 +10,17 @@ class productModel
         $this->middle = new middleware();
     }
 
+    public function checkProduct($id, $IsPublic)
+    {
+        $pro = selectOne('product', ['ID' => $id, 'IsPublic' => $IsPublic]);
+        if (!$pro) {
+            $res['status'] = 0;
+            $res['errors'] = 'Not found product';
+            dd($res);
+            exit();
+        }
+    }
+
     public function getDetail($id, $IsPublic)
     {
         $userID = 0;

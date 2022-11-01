@@ -3,7 +3,6 @@
 class userModel
 {
     protected $table = 'user';
-    public $model_product;
     public $middle;
     public function __construct()
     {

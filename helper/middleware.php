@@ -7,8 +7,9 @@ use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\ExpiredException;
 
-class middleware
+class middleware extends Controllers
 {
+
     function md5Security($pwd)
     {
         return md5(md5($pwd) . MD5_PRIVATE_KEY);
@@ -18,10 +19,8 @@ class middleware
     {
         $headers = apache_request_headers();
         if (!isset($headers['Authorization'])) {
-            $res['status'] = 0;
-            $res['error'] = 'You need a token to access';
             session_destroy();
-            return $res;
+            $this->loadErrors(400, 'You need a token to access');
         }
         $token = $headers['Authorization'];
         $check = explode(" ", $token);
@@ -35,25 +34,18 @@ class middleware
             $res['obj'] = $obj[0];
             return $res;
         } catch (SignatureInvalidException) {
-            $res['status'] = 0;
-            $res['error'] = 'Token verification failed';
             session_destroy();
-            return $res;
+            $this->loadErrors(400, 'Token verification failed');
         } catch (ExpiredException) {
-            $res['status'] = 0;
-            $res['error'] = 'Expired token';
             session_destroy();
-            return $res;
+            $this->loadErrors(400, 'Expired token');
         }
     }
 
     function checkRequest($req)
     {
         if ($_SERVER['REQUEST_METHOD'] !== $req) {
-            $res['status'] = 0;
-            $res['errors'] = 'Wrong method';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'Wrong method');
         }
     }
 
@@ -69,19 +61,13 @@ class middleware
     {
         $this->userOnly();
         if ($_SESSION['user']['role'] != 1) {
-            $res['status'] = '0';
-            $res['errors'] = 'You are not admin';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'You are not admin');
         }
     }
     function guestsOnly()
     {
         if (isset($_SESSION['userID'])) {
-            $res['status'] = '0';
-            $res['errors'] = 'You have logged in';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'You have logged in');
         }
     }
 }

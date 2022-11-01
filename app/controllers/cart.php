@@ -4,50 +4,27 @@ class cart extends Controllers
 {
     public $validate_user;
     public $middle_ware;
-    public $wishlist_model;
+    public $cart_model;
     public function __construct()
     {
-        $this->wishlist_model = $this->model('categoryModel');
+        $this->cart_model = $this->model('cartModel');
+        $this->product_model = $this->model('productModel');
         $this->middle_ware = new middleware();
     }
-    public function userCart()
-    {
-        $id = 0;
-        $obj = $this->middle_ware->authenToken();
-        if ($obj['status'] == 1) {
-            $id = $_SESSION['user']['ID'];
-        }
-
-        $shoppingCart = custom("
-        SELECT shoppingCart.productID,product.name,product.image ,shoppingCart.quanity,  A.unitPrice, unitPrice*quanity AS subTotal,IF(quanity<A.stock,1, 0) AS status
-        FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(),product.priceSale, product.price) AS unitPrice
-        FROM product) AS A,shoppingCart,product
-        WHERE A.ID = shoppingCart.productID
-        AND userID = $id
-        AND shoppingCart.productID = product.ID
-        AND product.IsPublic = 1
-        ");
-        $total = 0;
-        foreach ($shoppingCart as $key => $val) {
-            $total = $total + $val['subTotal'];
-        }
-        $res['total'] = $total;
-        $res['obj'] = $shoppingCart;
-
-        return $res;
-    }
-
     public function getCart()
     {
-        $res['status'] = 1;
-        $cart = $this->userCart();
-        $res['obj'] = $cart['obj'];
-        $res['total'] = $cart['total'];
+        $userID = 0;
+        $obj = $this->middle_ware->authenToken();
+        if ($obj['status'] == 1) {
+            $userID = $_SESSION['user']['ID'];
+        }
+
+        $res = $this->cart_model->getCart($userID);
         dd($res);
         exit();
     }
 
-    public function addProduct($id)
+    public function addProduct($id = 0)
     {
         $this->middle_ware->checkRequest('POST');
         $this->middle_ware->userOnly();
@@ -55,25 +32,23 @@ class cart extends Controllers
         $sent_vars = json_decode($json, TRUE);
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
-        $pro = selectOne('product', ['ID' => $id, 'IsPublic' => '1']);
-        if (!$pro) {
-            $res['status'] = 0;
-            $res['errors'] = 'Not found product';
-            dd($res);
-            exit();
-        }
+        $this->product_model->checkProduct($id, 1);
+
         $condition = [
             'userID' => $userID,
             'productID' => $id,
         ];
-        $obj = selectOne($table, $condition);
+        $obj = selectOne('shoppingCart', $condition);
+
         if (!$obj) {
             $condition['quanity'] = $sent_vars['quanity'];
             if ($condition['quanity'] > 6) {
                 $condition['quanity'] = 6;
             }
             create($table, $condition);
-            $this->getCart();
+            $res = $this->cart_model->getCart($userID);
+            dd($res);
+            exit();
         }
 
         if ($obj['quanity'] > 5) {
@@ -82,81 +57,64 @@ class cart extends Controllers
             dd($res);
             exit();
         }
+
         $quanity['quanity'] = $obj['quanity'] + $sent_vars['quanity'];
         if ($quanity['quanity'] > 6) {
             $quanity['quanity'] = 6;
         }
         update($table, ['ID' => $obj['ID']], $quanity);
-        $this->getCart();
+        $res = $this->cart_model->getCart($userID);
+        dd($res);
+        exit();
     }
 
-    public function removeProduct($id)
+    public function removeProduct($id = 0)
     {
         $this->middle_ware->checkRequest('DELETE');
         $this->middle_ware->userOnly();
-
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        $userID = $_SESSION['user']['ID'];
+        $this->product_model->checkProduct($id, 1);
+        $obj = $this->cart_model->getProductInCart($userID, $id);
 
         $table = 'shoppingCart';
         $condition = [
-            'userID' => $_SESSION['user']['ID'],
+            'userID' => $userID,
             'productID' => $id,
 
         ];
         delete($table, $condition);
-        $this->getCart();
+        $res = $this->cart_model->getCart($userID);
+        dd($res);
+        exit();
     }
 
-    public function incrementByOne($id)
+    public function incrementByOne($id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->userOnly();
-        $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
-        $condition = [
-            'userID' => $userID,
-            'productID' => $id,
-        ];
-        $obj = selectOne($table, $condition);
-        if (!$obj) {
-            $res['status'] = 0;
-            $res['errors'] = 'Cannot found product in your cart';
-            dd($res);
-            exit();
-        }
-        if ($obj['quanity'] > 5) {
-            $res['status'] = 0;
-            $res['errors'] = 'You cannot add more than 6 quantities of this product';
-            dd($res);
-            exit();
-        }
+        $obj = $this->cart_model->getProductInCart($userID, $id);
         custom("
         UPDATE shoppingCart SET quanity = if(quanity < 6,quanity + 1, 6) WHERE userID = $userID AND productID = $id
         ");
-        $this->getCart();
+        $res = $this->cart_model->getCart($id);
+        dd($res);
+        exit();
     }
 
-    public function decrementByOne($id)
+    public function decrementByOne($id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->userOnly();
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
-        $condition = [
-            'userID' => $userID,
-            'productID' => $id,
-        ];
-        $obj = selectOne($table, $condition);
-        if (!$obj) {
-            $res['status'] = 0;
-            $res['errors'] = 'Cannot found product in your cart';
-            dd($res);
-            exit();
-        }
+        $obj = $this->cart_model->getProductInCart($userID, $id);
+
         custom("
         UPDATE shoppingCart SET quanity = if(quanity > 1 ,quanity - 1, 1) WHERE userID = $userID AND productID = $id
         ");
-        $this->getCart();
+        $res = $this->cart_model->getCart($id);
+        dd($res);
+        exit();
     }
 }

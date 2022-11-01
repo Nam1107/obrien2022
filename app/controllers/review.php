@@ -4,10 +4,10 @@ class review extends Controllers
 {
     public $validate_user;
     public $middle_ware;
-    public $wishlist_model;
+    public $review_model;
     public function __construct()
     {
-        $this->wishlist_model = $this->model('reviewModel');
+        $this->review_model = $this->model('reviewModel');
         $this->middle_ware = new middleware();
     }
     public function addReview($id)
@@ -64,7 +64,10 @@ class review extends Controllers
         $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
         $offset = $perPage * ($page - 1);
 
+
+
         $num = custom("SELECT rate, COUNT(ID) AS count from review where productID = $id GROUP BY rate ASC");
+
         $total = custom("
         SELECT COUNT(ID) as total
             FROM (
@@ -72,21 +75,26 @@ class review extends Controllers
             ) AS B
         
         ");
+
         $check = ceil($total[0]['total'] / $perPage);
+
         $obj = custom("
-        SELECT review.*,`user`.email,`user`.name,`user`.avatar 
-        from review, `user`
-        where rate LIKE '%$rate%' and productID = $id
-        AND review.userID = `user`.ID
+        SELECT review.*,user.email,user.name,user.avatar 
+        FROM review,user
+        WHERE rate LIKE '%$rate%'
+        AND productID = $id
+        AND review.userID = user.ID
         LIMIT $perPage OFFSET $offset
         ");
 
         $res['status'] = 1;
         $res['page'] = $page;
         $res['numOfPage'] = $check;
-        $res['obj'] = $obj;
         $res['countOfReviews'] = $num;
+        $res['obj'] = $obj;
         dd($res);
+
+
         exit();
     }
 

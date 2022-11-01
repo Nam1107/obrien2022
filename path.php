@@ -13,7 +13,7 @@ define('DB_USER',           'sql6525734');
 define('DB_PASS',           'bs4SfUqIYX');
 define('DB_NAME',           '');
 define('DB_TABLE',          'sql6525734');
-
+define('DB_CHARSET',          'utf8');
 // define('PASSWORD_KEY',          'obrien');
 
 define('TOKEN_SECRET',          'Sana961229');
