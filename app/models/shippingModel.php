@@ -10,4 +10,7 @@ class shippingModel
         ];
         create('shippingDetail', $shipping);
     }
+    function setStatus()
+    {
+    }
 }
