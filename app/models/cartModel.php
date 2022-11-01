@@ -1,12 +1,15 @@
 <?php
 
-class cartModel
+class cartModel extends Controllers
 {
-    protected $table = 'user';
     public $middle;
     public function __construct()
     {
         $this->middle = new middleware();
+    }
+    function delete($userID)
+    {
+        delete('shoppingCart', ['userID' => $userID]);
     }
     public function getCart($id)
     {
@@ -38,16 +41,10 @@ class cartModel
         ];
         $obj = selectOne('shoppingCart', $condition);
         if (!$obj) {
-            $res['status'] = 0;
-            $res['errors'] = 'Cannot found product in your cart';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'Cannot found product in your cart');
         }
         if ($obj['quanity'] > 5) {
-            $res['status'] = 0;
-            $res['errors'] = 'You cannot add more than 6 quantities of this product';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
         }
         return $obj;
     }

@@ -18,7 +18,6 @@ class cart extends Controllers
         if ($obj['status'] == 1) {
             $userID = $_SESSION['user']['ID'];
         }
-
         $res = $this->cart_model->getCart($userID);
         dd($res);
         exit();
@@ -30,6 +29,10 @@ class cart extends Controllers
         $this->middle_ware->userOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
+
+        if (empty($sent_vars['quanity'])) {
+            $this->loadErrors(400, 'Not enough value');
+        }
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
         $this->product_model->checkProduct($id, 1);
@@ -40,7 +43,14 @@ class cart extends Controllers
         ];
         $obj = selectOne('shoppingCart', $condition);
 
+
+
         if (!$obj) {
+            $res = $this->cart_model->getCart($userID);
+            if (count($res) > 10) {
+                $this->loadErrors(400, 'Your cart is full of slot');
+            }
+
             $condition['quanity'] = $sent_vars['quanity'];
             if ($condition['quanity'] > 6) {
                 $condition['quanity'] = 6;
@@ -52,10 +62,7 @@ class cart extends Controllers
         }
 
         if ($obj['quanity'] > 5) {
-            $res['status'] = 0;
-            $res['errors'] = 'You cannot add more than 6 quantities of this product';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
         }
 
         $quanity['quanity'] = $obj['quanity'] + $sent_vars['quanity'];
@@ -80,7 +87,6 @@ class cart extends Controllers
         $condition = [
             'userID' => $userID,
             'productID' => $id,
-
         ];
         delete($table, $condition);
         $res = $this->cart_model->getCart($userID);

@@ -2,6 +2,12 @@
 
 class orderModel
 {
+    function getDetail($orderID)
+    {
+        $res['obj'] = selectOne('order', ["ID" => $orderID]);
+        $res['obj']['product']  = selectAll('orderDetail', ['orderID' => $orderID]);
+        dd($res);
+    }
     public function createOrder($userID, $note, $phone, $address)
     {
         $order['userID'] = $userID;

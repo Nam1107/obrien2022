@@ -9,6 +9,7 @@ class order extends Controllers
     {
         $this->order_model = $this->model('orderModel');
         $this->cart_model = $this->model('cartModel');
+        $this->shipping_model = $this->model('shippingModel');
         $this->middle_ware = new middleware();
     }
 
@@ -19,6 +20,13 @@ class order extends Controllers
         $this->middle_ware->userOnly();
 
         $userID = $_SESSION['user']['ID'];
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        #check...
+        if (!isset($sent_vars['note']) || empty($sent_vars['phone']) || empty($sent_vars['address'])) {
+            $this->loadErrors(400, 'Not enough parameters');
+        }
         $cart = $this->cart_model->getCart($userID)['obj'];
         if (!$cart) {
             $this->loadErrors(400, 'Your cart is empty');
@@ -28,6 +36,8 @@ class order extends Controllers
                 $this->loadErrors(400, 'Some items in your cart has sold out');
             }
         }
+
+        #update sold of product
         foreach ($cart as $key => $val) {
             $quanity = $val['quanity'];
             $productID = $val['productID'];
@@ -35,31 +45,19 @@ class order extends Controllers
             UPDATE product SET stock = if(stock < $quanity,0, stock - $quanity), sold = if(sold IS NULL, $quanity , sold + $quanity) WHERE ID = $productID
             ");
         }
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        #delete cart
+        $this->cart_model->delete($userID);
 
-        $userID = $_SESSION['user']['ID'];
-
-        delete('shoppingCart', ['userID' => $userID]);
-
-        if (!empty($sent_vars['note']) || !empty($sent_vars['phone']) || !empty($sent_vars['address'])) {
-            $this->loadErrors(400, 'Not enough parameters');
-        }
-
+        #create order
         $orderID = $this->order_model->createOrder($userID, $sent_vars['note'], $sent_vars['phone'], $sent_vars['address']);
-        $shipping = [
-            "orderID" => $orderID,
-            "description" => "Order has been created",
-            "createdAt" => currentTime()
-        ];
-        create('shippingDetail', $shipping);
+
+        $this->shipping_model->create($orderID);
 
         foreach ($cart as $key => $val) {
             $this->order_model->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quanity"]);
         }
         $res['status'] = 1;
-        $res['order'] = selectOne('order', ["ID" => $orderID]);
-        $res['obj']  = selectAll('orderDetail', ['orderID' => $orderID]);
+        $res['obj'] = $this->order_model->getDetail($orderID);
         dd($res);
         exit();
     }

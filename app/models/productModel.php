@@ -1,6 +1,6 @@
 <?php
 
-class productModel
+class productModel extends Controllers
 {
     protected $table = 'product';
     public $model_product;
@@ -14,9 +14,7 @@ class productModel
     {
         $pro = selectOne('product', ['ID' => $id, 'IsPublic' => $IsPublic]);
         if (!$pro) {
-            $res['status'] = 0;
-            $res['errors'] = 'Not found product';
-            dd($res);
+            $this->loadErrors(404, 'Not found product');
             exit();
         }
     }
