@@ -5,7 +5,7 @@ class orderModel extends Controllers
     function getDetail($orderID)
     {
         $order = custom("
-        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`	
         WHERE `order`.ID = orderDetail.orderID
         AND `order`.ID = $orderID
@@ -22,7 +22,7 @@ class orderModel extends Controllers
         WHERE orderID =  $orderID
         ");
 
-        $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
+        $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quantity
         FROM `product`,`orderDetail`	
         WHERE `product`.ID = orderDetail.productID
         AND orderID = $orderID
@@ -51,7 +51,7 @@ class orderModel extends Controllers
         $check = ceil($total[0]['total'] / $perPage);
 
         $order = custom("
-        SELECT `order`.ID,`order`.userID,user.name,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        SELECT `order`.ID,`order`.userID,user.name,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`,user
         WHERE `order`.ID = orderDetail.orderID
         AND `order`.status LIKE '%$status%'
@@ -83,7 +83,7 @@ class orderModel extends Controllers
         $check = ceil($total[0]['total'] / $perPage);
 
         $order = custom("
-        SELECT `order`.ID,`order`.status ,C.description,C.createdAt AS lastUpdated, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quanity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        SELECT `order`.ID,`order`.status ,C.description,C.createdAt AS lastUpdated, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`	,(
         SELECT shippingDetail.*
         FROM (SELECT max(ID) AS curID
@@ -106,7 +106,7 @@ class orderModel extends Controllers
 
         foreach ($order as $key => $obj) {
             $val = $obj['ID'];
-            $order[$key]['product'] = custom("SELECT product.ID, product.image,product.name,unitPrice,quanity
+            $order[$key]['product'] = custom("SELECT product.ID, product.image,product.name,unitPrice,quantity
             FROM `product`,`orderDetail`	
             WHERE `product`.ID = orderDetail.productID
             AND orderID = $val
@@ -130,13 +130,13 @@ class orderModel extends Controllers
         $orderID = create('order', $order);
         return $orderID;
     }
-    public function createOrderDetail($orderID, $productID, $unitPrice, $quanity)
+    public function createOrderDetail($orderID, $productID, $unitPrice, $quantity)
     {
         $condition = [
             "orderID" => $orderID,
             "productID" => $productID,
             "unitPrice" => $unitPrice,
-            "quanity" => $quanity,
+            "quantity" => $quantity,
             "createdAt" => currentTime()
         ];
         create('orderDetail', $condition);

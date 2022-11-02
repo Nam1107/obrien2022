@@ -1,11 +1,15 @@
 <?php
 
-require './vendor/autoload.php';
+require_once './src/JWT.php';
+require_once './src/Key.php';
+require_once './src/SignatureInvalidException.php';
+require_once './src/ExpiredException.php';
 
-use Firebase\JWT\JWT;
+
 use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWT;
 
 class middleware extends Controllers
 {

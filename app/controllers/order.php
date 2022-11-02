@@ -39,10 +39,10 @@ class order extends Controllers
 
         #update sold of product
         foreach ($cart as $key => $val) {
-            $quanity = $val['quanity'];
+            $quantity = $val['quantity'];
             $productID = $val['productID'];
             custom("
-            UPDATE product SET stock = if(stock < $quanity,0, stock - $quanity), sold = if(sold IS NULL, $quanity , sold + $quanity) WHERE ID = $productID
+            UPDATE product SET stock = if(stock < $quantity,0, stock - $quantity), sold = if(sold IS NULL, $quantity , sold + $quantity) WHERE ID = $productID
             ");
         }
         #delete cart
@@ -54,7 +54,7 @@ class order extends Controllers
         $this->shipping_model->create($orderID);
 
         foreach ($cart as $key => $val) {
-            $this->order_model->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quanity"]);
+            $this->order_model->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quantity"]);
         }
         $res = $this->order_model->getDetail($orderID);
         dd($res);

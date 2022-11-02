@@ -14,7 +14,7 @@ class cartModel extends Controllers
     public function getCart($id)
     {
         $shoppingCart = custom("
-        SELECT shoppingCart.productID,product.name,product.image ,shoppingCart.quanity,  A.unitPrice, unitPrice*quanity AS subTotal,IF(quanity<A.stock,1, 0) AS status
+        SELECT shoppingCart.productID,product.name,product.image ,shoppingCart.quantity,  A.unitPrice, unitPrice*quantity AS subTotal,IF(quantity<A.stock,1, 0) AS status
         FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(),product.priceSale, product.price) AS unitPrice
         FROM product) AS A,shoppingCart,product
         WHERE A.ID = shoppingCart.productID
@@ -43,7 +43,7 @@ class cartModel extends Controllers
         if (!$obj) {
             $this->loadErrors(400, 'Cannot found product in your cart');
         }
-        if ($obj['quanity'] > 5) {
+        if ($obj['quantity'] > 5) {
             $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
         }
         return $obj;

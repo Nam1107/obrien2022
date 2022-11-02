@@ -193,7 +193,7 @@ function addToCart() {
         url: ROOT + 'cart/addProduct/' + id,
         type: 'POST',
         data: {
-            'quanity': 2,
+            'quantity': 2,
         },
         success: function(data) {
             var obj = JSON.parse(data);

@@ -30,7 +30,7 @@ class cart extends Controllers
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        if (empty($sent_vars['quanity'])) {
+        if (empty($sent_vars['quantity'])) {
             $this->loadErrors(400, 'Not enough value');
         }
         $table = 'shoppingCart';
@@ -51,9 +51,9 @@ class cart extends Controllers
                 $this->loadErrors(400, 'Your cart is full of slot');
             }
 
-            $condition['quanity'] = $sent_vars['quanity'];
-            if ($condition['quanity'] > 6) {
-                $condition['quanity'] = 6;
+            $condition['quantity'] = $sent_vars['quantity'];
+            if ($condition['quantity'] > 6) {
+                $condition['quantity'] = 6;
             }
             create($table, $condition);
             $res = $this->cart_model->getCart($userID);
@@ -61,15 +61,15 @@ class cart extends Controllers
             exit();
         }
 
-        if ($obj['quanity'] > 5) {
+        if ($obj['quantity'] > 5) {
             $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
         }
 
-        $quanity['quanity'] = $obj['quanity'] + $sent_vars['quanity'];
-        if ($quanity['quanity'] > 6) {
-            $quanity['quanity'] = 6;
+        $quantity['quantity'] = $obj['quantity'] + $sent_vars['quantity'];
+        if ($quantity['quantity'] > 6) {
+            $quantity['quantity'] = 6;
         }
-        update($table, ['ID' => $obj['ID']], $quanity);
+        update($table, ['ID' => $obj['ID']], $quantity);
         $res = $this->cart_model->getCart($userID);
         dd($res);
         exit();
@@ -101,7 +101,7 @@ class cart extends Controllers
         $userID = $_SESSION['user']['ID'];
         $obj = $this->cart_model->getProductInCart($userID, $id);
         custom("
-        UPDATE shoppingCart SET quanity = if(quanity < 6,quanity + 1, 6) WHERE userID = $userID AND productID = $id
+        UPDATE shoppingCart SET quantity = if(quantity < 6,quantity + 1, 6) WHERE userID = $userID AND productID = $id
         ");
         $res = $this->cart_model->getCart($id);
         dd($res);
@@ -117,7 +117,7 @@ class cart extends Controllers
         $obj = $this->cart_model->getProductInCart($userID, $id);
 
         custom("
-        UPDATE shoppingCart SET quanity = if(quanity > 1 ,quanity - 1, 1) WHERE userID = $userID AND productID = $id
+        UPDATE shoppingCart SET quantity = if(quantity > 1 ,quantity - 1, 1) WHERE userID = $userID AND productID = $id
         ");
         $res = $this->cart_model->getCart($id);
         dd($res);

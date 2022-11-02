@@ -1,20 +1,13 @@
 <?php
-
-// require './vendor/autoload.php';
-
-// use Firebase\JWT\JWT;
+require_once './src/JWT.php';
 
 use Firebase\JWT\JWT;
-
-// require_once './src/JWT.php';
-
 
 class Auth extends Controllers
 {
     public $validate_user;
     public $middle_ware;
     public $wishlist_model;
-    public $JWT;
     public function __construct()
     {
         // $this->wishlist_model = $this->model('categoryModel');

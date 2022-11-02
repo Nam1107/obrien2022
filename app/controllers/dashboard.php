@@ -23,7 +23,7 @@ class dashboard extends Controllers
 
         $report = custom("SELECT A.status,SUM(A.total) AS total,COUNT(A.ID) AS num
         FROM 
-        (SELECT `order`.ID,`order`.status,`order`.createdAt,SUM(unitPrice*quanity) AS total
+        (SELECT `order`.ID,`order`.status,`order`.createdAt,SUM(unitPrice*quantity) AS total
         FROM orderDetail,`order`
         WHERE orderID = `order`.ID
         AND `order`.createdAt > '$startDate' AND  `order`.createdAt < '$endDate'
