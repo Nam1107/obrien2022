@@ -106,7 +106,7 @@ class cart extends Controllers
         custom("
         UPDATE shoppingCart SET quantity = if(quantity < 6,quantity + 1, 6) WHERE userID = $userID AND productID = $id
         ");
-        $res = $this->cart_model->getCart($id);
+        $res = $this->cart_model->getCart($userID);
         dd($res);
         exit();
     }
@@ -122,7 +122,7 @@ class cart extends Controllers
         custom("
         UPDATE shoppingCart SET quantity = if(quantity > 1 ,quantity - 1, 1) WHERE userID = $userID AND productID = $id
         ");
-        $res = $this->cart_model->getCart($id);
+        $res = $this->cart_model->getCart($userID);
         dd($res);
         exit();
     }
