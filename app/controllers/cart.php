@@ -100,6 +100,9 @@ class cart extends Controllers
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
         $obj = $this->cart_model->getProductInCart($userID, $id);
+        if ($obj['quantity'] > 5) {
+            $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
+        }
         custom("
         UPDATE shoppingCart SET quantity = if(quantity < 6,quantity + 1, 6) WHERE userID = $userID AND productID = $id
         ");

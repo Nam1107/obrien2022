@@ -43,9 +43,7 @@ class cartModel extends Controllers
         if (!$obj) {
             $this->loadErrors(400, 'Cannot found product in your cart');
         }
-        if ($obj['quantity'] > 5) {
-            $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
-        }
+
         return $obj;
     }
 }
