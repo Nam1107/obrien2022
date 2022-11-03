@@ -2,16 +2,22 @@
 
 class reviewModel
 {
+    function getDetail($reviewID)
+    {
+        $res = selectOne('review', ['ID' => $reviewID]);
+        return $res;
+    }
     function create($productID, $userID, $rate, $comment)
     {
         $obj['productID'] = $productID;
         $obj['comment'] =  $comment;
         $obj['userID'] = $userID;
+        $obj['IsPublic'] = 1;
         $obj['createdAt'] = currentTime();
         $rate = $obj['rate'] = $rate;
         create('review', $obj);
     }
-    function listByProduct($productID, $page, $perPage, $rate)
+    function listByProduct($productID, $page, $perPage, $rate, $IsPublic)
     {
         $offset = $perPage * ($page - 1);
 
@@ -20,7 +26,7 @@ class reviewModel
         $total = custom("
         SELECT COUNT(ID) as total
             FROM (
-                Select * from review where rate LIKE '%$rate%' and productID = $productID
+                Select * from review where rate LIKE '%$rate%' and productID = $productID and IsPublic Like '%$IsPublic%'
             ) AS B
         
         ");
@@ -33,6 +39,7 @@ class reviewModel
         WHERE rate LIKE '%$rate%'
         AND productID = $productID
         AND review.userID = user.ID
+        AND IsPublic Like '%$IsPublic%'
         LIMIT $perPage OFFSET $offset
         ");
 
@@ -43,13 +50,13 @@ class reviewModel
         $res['obj'] = $obj;
         return $res;
     }
-    function listByUser($userID, $page, $perPage)
+    function listByUser($userID, $page, $perPage, $IsPublic)
     {
         $offset = $perPage * ($page - 1);
         $total = custom("
         SELECT COUNT(ID) as total
             FROM (
-                Select * from review where userID = $userID
+                Select * from review where userID = $userID AND IsPublic Like '%$IsPublic%'
             ) AS B
         
         ");
@@ -60,6 +67,7 @@ class reviewModel
         from review,product
         where userID = $userID
         AND product.ID=review.productID
+        AND IsPublic Like '%$IsPublic%'
         LIMIT $perPage OFFSET $offset
         ");
 

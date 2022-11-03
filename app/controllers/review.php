@@ -51,7 +51,38 @@ class review extends Controllers
         $rate = !empty($sent_vars['rate']) ? $sent_vars['rate'] : '';
         $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
         $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
-        $res = $this->review_model->listByProduct($id, $page, $perPage, $rate);
+        $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, 1);
+        dd($res);
+        exit();
+    }
+
+    public function adminProductReview($id = 0)
+    {
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+
+
+        $rate = !empty($sent_vars['rate']) ? $sent_vars['rate'] : '';
+        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
+        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
+        $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, '');
+        dd($res);
+        exit();
+    }
+
+    public function adminSetStatus($id = 0)
+    {
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->adminOnly();
+
+        $obj = $this->review_model->getDetail($id);
+        $IsPublic = !$obj['IsPublic'];
+        update('review', ['ID' => $id], ['IsPublic' => $IsPublic]);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }
@@ -69,7 +100,7 @@ class review extends Controllers
         $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
 
 
-        $res = $this->review_model->listByUser($userID, $page, $perPage);
+        $res = $this->review_model->listByUser($userID, $page, $perPage, 1);
 
         dd($res);
     }

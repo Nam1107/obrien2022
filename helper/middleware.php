@@ -24,7 +24,10 @@ class middleware extends Controllers
         $headers = apache_request_headers();
         if (!isset($headers['Authorization'])) {
             session_destroy();
-            $this->loadErrors(400, 'You need a token to access');
+            $res['status'] = 0;
+            $res['errors'] = 'You need a token to access';
+            return $res;
+            // $this->loadErrors(400, 'You need a token to access');
         }
         $token = $headers['Authorization'];
         $check = explode(" ", $token);
@@ -39,10 +42,16 @@ class middleware extends Controllers
             return $res;
         } catch (SignatureInvalidException) {
             session_destroy();
-            $this->loadErrors(400, 'Token verification failed');
+            $res['status'] = 0;
+            $res['errors'] = 'Token verification failed';
+            return $res;
+            // $this->loadErrors(400, 'Token verification failed');
         } catch (ExpiredException) {
             session_destroy();
-            $this->loadErrors(400, 'Expired token');
+            $res['status'] = 0;
+            $res['errors'] = 'Expired token';
+            return $res;
+            // $this->loadErrors(400, 'Expired token');
         }
     }
 
