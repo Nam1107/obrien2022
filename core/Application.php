@@ -9,8 +9,8 @@ class Application extends Controllers
     public function __construct()
     {
         global $router;
-        $this->controller;
-        $this->action;
+        $this->controller = '';
+        $this->action = '';
         $this->prarams = [];
         $this->handleUrl();
     }
@@ -31,7 +31,7 @@ class Application extends Controllers
             $this->loadErrors(404, "Not found '$arr[0]'");
         }
 
-        if (!empty($arr[0])) {
+        if (!empty($arr[1])) {
             if (method_exists($this->controller, $arr[1])) {
                 $this->action = $arr[1];
                 unset($arr[1]);
