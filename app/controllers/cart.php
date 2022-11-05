@@ -13,6 +13,7 @@ class cart extends Controllers
     }
     public function getCart()
     {
+        $this->middle_ware->checkRequest('GET');
         $userID = 0;
         $obj = $this->middle_ware->authenToken();
         if ($obj['status'] == 1) {
@@ -31,7 +32,7 @@ class cart extends Controllers
         $sent_vars = json_decode($json, TRUE);
 
         if (empty($sent_vars['quantity'])) {
-            $this->loadErrors(400, 'Not enough value');
+            $this->loadErrors(400, 'Error: input is invalid');
         }
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];

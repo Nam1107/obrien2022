@@ -25,12 +25,12 @@ class category extends Controllers
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        if (empty($sent_vars['name'])) {
-            $this->loadErrors(400, 'Not enough value');
+        try {
+            $name = $sent_vars['name'];
+            $desc = $sent_vars['description'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
         }
-
-        $name = $sent_vars['name'];
-        $desc = $sent_vars['description'];
 
         $res = $this->category_model->create($name, $desc);
         dd($res);
@@ -44,6 +44,12 @@ class category extends Controllers
         $res['msg'] = 'Success';
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
+        try {
+            $name = $sent_vars['name'];
+            $desc = $sent_vars['description'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         update('category', ['ID' => $id], $sent_vars);
         dd($res);
         exit();

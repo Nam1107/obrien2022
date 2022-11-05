@@ -38,13 +38,17 @@ class slider extends Controllers
         $this->middle_ware->adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-        $res['status'] = 1;
-        $condition = [
-            'description' => $sent_vars['description'],
-            'URLImage' => $sent_vars['URLImage'],
-            'URLPage' => $sent_vars['URLPage'],
-            'sort' => $sent_vars['sort'],
-        ];
+        try {
+            $res['status'] = 1;
+            $condition = [
+                'description' => $sent_vars['description'],
+                'URLImage' => $sent_vars['URLImage'],
+                'URLPage' => $sent_vars['URLPage'],
+                'sort' => $sent_vars['sort'],
+            ];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         create('slider', $condition);
         $res['msg'] = 'Success';
         dd($res);
@@ -57,12 +61,16 @@ class slider extends Controllers
         $res['status'] = 1;
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-        $condition = [
-            'description' => $sent_vars['description'],
-            'URLImage' => $sent_vars['URLImage'],
-            'URLPage' => $sent_vars['URLPage'],
-            'sort' => $sent_vars['sort'],
-        ];
+        try {
+            $condition = [
+                'description' => $sent_vars['description'],
+                'URLImage' => $sent_vars['URLImage'],
+                'URLPage' => $sent_vars['URLPage'],
+                'sort' => $sent_vars['sort'],
+            ];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         $check = update('slider', ['ID' => $id], $condition);
         if ($check == 1) {
             $res['status'] = 1;

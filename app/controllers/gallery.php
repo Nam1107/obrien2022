@@ -18,8 +18,11 @@ class Gallery extends Controllers
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-
-        $urls = $sent_vars['gallery'];
+        try {
+            $urls = $sent_vars['gallery'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         foreach ($urls as $key => $url) :
             $obj['productID'] = $id;
             $obj['URLImage'] =  $url;

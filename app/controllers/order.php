@@ -11,6 +11,9 @@ class order extends Controllers
         $this->cart_model = $this->model('cartModel');
         $this->shipping_model = $this->model('shippingModel');
         $this->middle_ware = new middleware();
+        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
+            throw new ErrorException($err_msg, 0, $err_severity, $err_file, $err_line);
+        }, E_WARNING);
     }
 
     public function createOrder()
@@ -25,7 +28,7 @@ class order extends Controllers
 
         #check...
         if (!isset($sent_vars['note']) || empty($sent_vars['phone']) || empty($sent_vars['address'])) {
-            $this->loadErrors(400, 'Not enough parameters');
+            $this->loadErrors(400, 'Error: input is invalid');
         }
         $cart = $this->cart_model->getCart($userID)['obj'];
         if (!$cart) {
@@ -67,14 +70,18 @@ class order extends Controllers
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
 
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        // $json = file_get_contents("php://input");
+        // $sent_vars = json_decode($json, TRUE);
 
-        $sent_vars['userID'] = $userID;
+        $sent_vars = $_GET;
 
-        $status = !empty($sent_vars['status']) ? $sent_vars['status'] : '';
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
+        try {
+            $status = $sent_vars['status'];
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
 
         $res = $this->order_model->myListOrder($userID, $status, $page, $perPage);
         dd($res);
@@ -85,14 +92,18 @@ class order extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
-
-        $status = !empty($sent_vars['status']) ? $sent_vars['status'] : '';
-        $startDate = !empty($sent_vars['startDate']) ? $sent_vars['startDate'] : '1999-11-01';
-        $endDate = !empty($sent_vars['endDate']) ? $sent_vars['endDate'] : '2100-11-02';
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
+        // $json = file_get_contents("php://input");
+        // $sent_vars = json_decode($json, TRUE);
+        $sent_vars = $_GET;
+        try {
+            $status = $sent_vars['status'];
+            $startDate = $sent_vars['startDate'];
+            $endDate = $sent_vars['endDate'];
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
 
         $res = $this->order_model->listOrder($status, $page, $perPage, $startDate, $endDate);
         dd($res);
@@ -153,7 +164,7 @@ class order extends Controllers
         $reason = $sent_vars['reason'];
         $reason = "Reason for Cancellation : " . $reason;
         if (!isset($sent_vars['reason'])) {
-            $this->loadErrors(400, 'Not enough parameters');
+            $this->loadErrors(400, 'Error: input is invalid');
         }
         if (!$order) {
             $this->loadErrors(400, 'No orders yet');

@@ -18,10 +18,12 @@ class wishList extends Controllers
         $userID = $_SESSION['user']['ID'];
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
-
+        try {
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         $res = $this->wishlist_model->getList($userID, $page, $perPage);
 
         dd($res);

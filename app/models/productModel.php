@@ -104,20 +104,11 @@ class productModel extends Controllers
         return $res;
     }
 
-    public function create($sent_vars)
+    public function create($sent_vars, $gallery)
     {
         $sent_vars['createdAt'] = currentTime();
         $sent_vars['updatedAt'] = currentTime();
-        $cate = $sent_vars['category'];
-        $urls = $sent_vars['gallery'];
 
-        $category = custom("
-        SELECT * FROM category WHERE name LIKE '%$cate%' 
-        ");
-
-        unset($sent_vars['category'], $sent_vars['gallery']);
-
-        $sent_vars['categoryID'] = $category[0]['ID'];
         $id = create('product', $sent_vars);
 
         if ($id == 0) {
@@ -126,7 +117,7 @@ class productModel extends Controllers
             return $res;
         }
 
-        foreach ($urls as $key => $url) :
+        foreach ($gallery as $key => $url) :
             $image['productID'] = $id;
             $image['URLImage'] =  $url;
             create('gallery', $image);
@@ -134,7 +125,6 @@ class productModel extends Controllers
 
         $res['status'] = 1;
         $res['msg'] = 'Success';
-
 
         return $res;
     }

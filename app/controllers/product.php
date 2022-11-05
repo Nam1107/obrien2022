@@ -9,22 +9,31 @@ class Product extends Controllers
 
         $this->middle_ware = new middleware();
         $this->model_product = $this->model('productModel');
+        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
+            throw new ErrorException($err_msg, 0, $err_severity, $err_file, $err_line);
+        }, E_WARNING);
     }
 
     public function ListProduct()
     {
         $this->middle_ware->checkRequest('GET');
         $res['status'] = 1;
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        // $json = file_get_contents("php://input");
+        // $sent_vars = json_decode($json, TRUE);
 
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
-        $category = !empty($sent_vars['category']) ? $sent_vars['category'] : '';
-        $sale = !empty($sent_vars['sale']) ? $sent_vars['sale'] : '';
-        $sortBy = !empty($sent_vars['sortBy']) ? $sent_vars['sortBy'] : 'name';
-        $sortType = !empty($sent_vars['sortType']) ? $sent_vars['sortType'] : 'ASC';
-        $name = !empty($sent_vars['name']) ? $sent_vars['name'] : '';
+        $sent_vars = $_GET;
+
+        try {
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+            $category = $sent_vars['category'];
+            $sale = $sent_vars['sale'];
+            $sortBy = $sent_vars['sortBy'];
+            $sortType = $sent_vars['sortType'];
+            $name = $sent_vars['name'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
 
         $IsPublic = 1;
 
@@ -40,21 +49,26 @@ class Product extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
         $res['status'] = 1;
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        // $json = file_get_contents("php://input");
+        // $sent_vars = json_decode($json, TRUE);
 
-        $page = isset($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = isset($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
-        $category = isset($sent_vars['category']) ? $sent_vars['category'] : '';
-        $sale = isset($sent_vars['sale']) ? $sent_vars['sale'] : '';
-        $sortBy = isset($sent_vars['sortBy']) ? $sent_vars['sortBy'] : 'name';
-        $sortType = isset($sent_vars['sortType']) ? $sent_vars['sortType'] : 'ASC';
+        $sent_vars = $_GET;
 
-        $IsPublic = '';
 
-        $name = isset($sent_vars['name']) ? $sent_vars['name'] : 'name';
+        try {
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+            $category = $sent_vars['category'];
+            $sale = $sent_vars['sale'];
+            $sortBy = $sent_vars['sortBy'];
+            $sortType = $sent_vars['sortType'];
+            $name = $sent_vars['name'];
+            if ($name == 'price') $name = 'curPrice';
+            $IsPublic = '';
+        } catch (Error) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
 
-        if ($name == 'price') $name = 'curPrice';
         $res = $this->model_product->getList($page, $perPage, $name, $category, $IsPublic, $sale, $sortBy,  $sortType);
 
         dd($res);
@@ -82,7 +96,32 @@ class Product extends Controllers
         $this->middle_ware->adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-        $res = $this->model_product->create($sent_vars);
+
+        try {
+            $cate = $sent_vars['category'];
+            $gallery = $sent_vars['gallery'];
+            $category = custom("
+                SELECT * FROM category WHERE name LIKE '%$cate%' 
+            ");
+
+            if (empty($category)) {
+                throw new Error();
+            }
+
+            $product = [
+                'categoryID' => $category[0]['ID'],
+                'name' =>  $sent_vars['name'],
+                'price' => $sent_vars['price'],
+                'image' => $sent_vars['image'],
+                'description' => $sent_vars['description'],
+                'stock' => $sent_vars['stock'],
+                'IsPublic' => $sent_vars['IsPublic'],
+            ];
+        } catch (Error) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
+
+        $res = $this->model_product->create($product, $gallery);
         dd($res);
         exit();
     }

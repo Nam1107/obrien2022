@@ -16,12 +16,15 @@ class User extends Controllers
         $this->middle_ware->adminOnly();
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
-        $email = !empty($sent_vars['email']) ? $sent_vars['email'] : '';
-        $sortBy = !empty($sent_vars['sortBy']) ? $sent_vars['sortBy'] : 'name';
-        $sortType = !empty($sent_vars['sortType']) ? $sent_vars['sortType'] : 'ASC';
+        try {
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+            $email = $sent_vars['email'];
+            $sortBy = $sent_vars['sortBy'];
+            $sortType = $sent_vars['sortType'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
 
         $res = $this->user_model->getList($page, $perPage, $email, $sortBy, $sortType);
         dd($res);
@@ -71,10 +74,13 @@ class User extends Controllers
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-
-        $id['ID'] = $_SESSION['user']['ID'];
-        $sent_vars['updatedAt'] = currentTime();
-        unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID'],  $sent_vars['role']);
+        try {
+            $id['ID'] = $_SESSION['user']['ID'];
+            $sent_vars['updatedAt'] = currentTime();
+            unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID'],  $sent_vars['role']);
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         $res = $this->user_model->update($id, $sent_vars);
 
         dd($res);
@@ -105,12 +111,14 @@ class User extends Controllers
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
+        try {
+            $sent_vars['password'] = password_hash($sent_vars['password'], PASSWORD_DEFAULT);
 
-        $sent_vars['password'] = password_hash($sent_vars['password'], PASSWORD_DEFAULT);
-
-        $var['updatedAt'] = currentTime();
-        $var['password'] = $sent_vars['password'];
-
+            $var['updatedAt'] = currentTime();
+            $var['password'] = $sent_vars['password'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         $res = $this->user_model->update($id, $var);
         dd($res);
         exit();
@@ -124,24 +132,27 @@ class User extends Controllers
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
+        try {
+            $errors = validateChangePass($sent_vars);
+            if (count($errors) === 0) {
+                $sent_vars['newPass'] = password_hash($sent_vars['newPass'], PASSWORD_DEFAULT);
+                $id = $_SESSION['user']['ID'];
+                unset($sent_vars['confirmPass'], $sent_vars['ID']);
 
-        $errors = validateChangePass($sent_vars);
-        if (count($errors) === 0) {
-            $sent_vars['newPass'] = password_hash($sent_vars['newPass'], PASSWORD_DEFAULT);
-            $id = $_SESSION['user']['ID'];
-            unset($sent_vars['confirmPass'], $sent_vars['ID']);
+                $var['updatedAt'] = currentTime();
+                $var['password'] = $sent_vars['newPass'];
 
-            $var['updatedAt'] = currentTime();
-            $var['password'] = $sent_vars['newPass'];
-
-            $res = $this->user_model->update($id, $var);
-            dd($res);
-            exit();
-        } else {
-            $res['status'] = 0;
-            $res['msg'] = $errors;
-            dd($res);
-            exit();
+                $res = $this->user_model->update($id, $var);
+                dd($res);
+                exit();
+            } else {
+                $res['status'] = 0;
+                $res['msg'] = $errors;
+                dd($res);
+                exit();
+            }
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
         }
     }
 }

@@ -27,14 +27,17 @@ class review extends Controllers
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $userID = $_SESSION['user']['ID'];
-
-        foreach ($sent_vars['review'] as $key => $val) {
-            $proID = $val['productID'];
-            $rate = $val['rate'];
-            $this->review_model->create($proID, $userID, $rate, $val['comment']);
-            custom("
+        try {
+            foreach ($sent_vars['review'] as $key => $val) {
+                $proID = $val['productID'];
+                $rate = $val['rate'];
+                $this->review_model->create($proID, $userID, $rate, $val['comment']);
+                custom("
             UPDATE product SET rate = IF(rate = 0,$rate,(rate + $rate)/2), numOfReviews = (numOfReviews + 1) WHERE ID = $proID
             ");
+            }
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
         }
         $res['status'] = 1;
         $res['msg'] = "Success";
@@ -47,10 +50,13 @@ class review extends Controllers
         $this->middle_ware->checkRequest('GET');
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-
-        $rate = !empty($sent_vars['rate']) ? $sent_vars['rate'] : '';
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
+        try {
+            $rate = $sent_vars['rate'];
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, 1);
         dd($res);
         exit();
@@ -64,16 +70,19 @@ class review extends Controllers
         $sent_vars = json_decode($json, TRUE);
 
 
-
-        $rate = !empty($sent_vars['rate']) ? $sent_vars['rate'] : '';
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
+        try {
+            $rate = $sent_vars['rate'];
+            $page =  $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
         $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, '');
         dd($res);
         exit();
     }
 
-    public function adminSetStatus($id = 0)
+    public function adminSetPublic($id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->adminOnly();
@@ -95,10 +104,12 @@ class review extends Controllers
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
-
-        $page = !empty($sent_vars['page']) ? $sent_vars['page'] : 1;
-        $perPage = !empty($sent_vars['perPage']) ? $sent_vars['perPage'] : 10;
-
+        try {
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+        } catch (Error $e) {
+            $this->loadErrors(400, 'Error: input is invalid');
+        }
 
         $res = $this->review_model->listByUser($userID, $page, $perPage, 1);
 
