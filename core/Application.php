@@ -18,7 +18,7 @@ class Application extends Controllers
     public function handleUrl()
     {
         $arr = $this->UrlProcess();
-        if (empty($arr[0]) || empty($arr[1])) {
+        if (empty($arr[0])) {
             $this->loadErrors(404, "Not enough paramester");
         }
 
@@ -31,11 +31,13 @@ class Application extends Controllers
             $this->loadErrors(404, "Not found '$arr[0]'");
         }
 
-        if (method_exists($this->controller, $arr[1])) {
-            $this->action = $arr[1];
-            unset($arr[1]);
-        } else {
-            $this->loadErrors(404, "Not found '$arr[1]'");
+        if (!empty($arr[0])) {
+            if (method_exists($this->controller, $arr[1])) {
+                $this->action = $arr[1];
+                unset($arr[1]);
+            } else {
+                $this->loadErrors(404, "Not found '$arr[1]'");
+            }
         }
 
         $this->prarams = array_values($arr);

@@ -18,8 +18,8 @@ class dashboard extends Controllers
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        $startDate = $sent_vars['startDate'];
-        $endDate = $sent_vars['endDate'];
+        $startDate = !empty($sent_vars['startDate']) ? $sent_vars['startDate'] : '2000-01-01';
+        $endDate = !empty($sent_vars['endDate']) ? $sent_vars['endDate'] : '2099-01-01';
 
         $report = custom("SELECT A.status,SUM(A.total) AS total,COUNT(A.ID) AS num
         FROM 

@@ -32,15 +32,15 @@ function getlistProduct() {
     $.ajax({
         url: ROOT + 'product/listproduct',
         type: 'get',
-        data: {
+        data: JSON.stringify({
             'page': 1,
             'perPage': 4,
             'category': '',
             'name': '',
             'sale': '',
             'sortType': 'ASC',
-            'sortBy': 'name',
-        },
+            'sortBy': 'name'
+        }),
         success: function(data) {
             var obj = JSON.parse(data);
             // $('#textShow').append(obj);
