@@ -2,6 +2,11 @@
 
 class orderModel extends Controllers
 {
+    public $shipping_model;
+    public function __construct()
+    {
+        $this->shipping_model = $this->model('shippingModel');
+    }
     function getDetail($orderID)
     {
         $order = custom("
@@ -17,10 +22,7 @@ class orderModel extends Controllers
             $this->loadErrors(400, 'No orders yet');
         }
 
-        $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
-        from shippingDetail
-        WHERE orderID =  $orderID
-        ");
+        $shipping = $this->shipping_model->getList($orderID);
 
         $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quantity
         FROM `product`,`orderDetail`	

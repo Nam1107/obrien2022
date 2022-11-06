@@ -70,7 +70,7 @@ class Auth extends Controllers
 
                 $payload = [
                     'iss' => 'obrien',
-                    'exp' => time() + 60,
+                    'exp' => time() + 30 * 60,
                     'data' => [
                         'id' => $id,
                         'email' => $email,
@@ -124,7 +124,7 @@ class Auth extends Controllers
             $role = $result[0]['role'];
             $payload = [
                 'iss' => 'obrien',
-                'exp' => time() + 60,
+                'exp' => time() + 30 * 60,
                 'data' => [
                     'id' => $id,
                     'email' => $email,
