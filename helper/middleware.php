@@ -7,7 +7,6 @@ require_once './src/ExpiredException.php';
 
 
 use Firebase\JWT\Key;
-use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 
@@ -40,18 +39,18 @@ class middleware extends Controllers
             $res['status'] = 1;
             $res['obj'] = $obj[0];
             return $res;
-        } catch (SignatureInvalidException) {
-            session_destroy();
-            $res['status'] = 0;
-            $res['errors'] = 'Token verification failed';
-            return $res;
-            // $this->loadErrors(400, 'Token verification failed');
         } catch (ExpiredException) {
             session_destroy();
             $res['status'] = 0;
             $res['errors'] = 'Expired token';
             return $res;
             // $this->loadErrors(400, 'Expired token');
+        } catch (Exception) {
+            session_destroy();
+            $res['status'] = 0;
+            $res['errors'] = 'Token verification failed';
+            return $res;
+            // $this->loadErrors(400, 'Token verification failed');
         }
     }
 

@@ -138,7 +138,7 @@ class Auth extends Controllers
             exit();
         } else {
             $res['status'] = 0;
-            $res['error'] = 'Refresh token has expired. You must login again';
+            $res['error'] = 'Refresh token not invalid. You must login again';
             dd($res);
             exit();
         }
