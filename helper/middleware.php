@@ -65,8 +65,9 @@ class middleware extends Controllers
     {
         $obj = $this->authenToken();
         if ($obj['status'] == 0) {
-            dd($obj);
-            exit();
+            // dd($obj);
+            $this->loadErrors(400, $obj['errors']);
+            // exit();
         }
     }
     function adminOnly()
