@@ -80,16 +80,14 @@ class Auth extends Controllers
 
 
                 $token = JWT::encode($payload, TOKEN_SECRET, 'HS256');
-                $refresh_token = JWT::encode($payload, TOKEN_SECRET, 'HS256');
 
-                $login_token['token'] = $refresh_token;
+                $login_token['token'] = $token;
                 $login_token['userID'] = $user['ID'];
                 $login_token['createdAt'] = currentTime();
                 // setcookie('token', $login_token['token'], time() + 7 * 24 * 60 * 60, '/');
                 create('login_token', $login_token);
 
                 $res['status'] = 1;
-                $res['msg'] = 'login success';
                 $res['token'] = $token;
                 $res['refreshToken'] = $token;
 

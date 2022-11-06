@@ -4,11 +4,15 @@ function validateRegister($user)
 {
 
     $errors = array();
+    $email = '';
     if (empty($user['email'])) {
         array_push($errors, 'Email is required');
-        $email = '';
     } else {
-        $email = $user['email'];
+        if (!filter_var($user['email'], FILTER_VALIDATE_EMAIL)) {
+            array_push($errors, "Invalid email format");
+        } else {
+            $email = $user['email'];
+        }
     }
     if (empty($user['password'])) {
         array_push($errors, 'Password is required');
@@ -42,6 +46,10 @@ function validateLogin($user)
 
     if (empty($user['email']) || !isset($user['email'])) {
         array_push($errors, 'Email is required');
+    } else {
+        if (!filter_var($user['email'], FILTER_VALIDATE_EMAIL)) {
+            array_push($errors, "Invalid email format");
+        }
     }
     if (empty($user['password']) || !isset($user['password'])) {
         array_push($errors, 'Password is required');
