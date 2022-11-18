@@ -11,9 +11,68 @@ class order extends Controllers
         $this->cart_model = $this->model('cartModel');
         $this->shipping_model = $this->model('shippingModel');
         $this->middle_ware = new middleware();
-        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
-            throw new ErrorException($err_msg, 0, $err_severity, $err_file, $err_line);
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
+    }
+    function listStatus()
+    {
+        $this->middle_ware->checkRequest('GET');
+        dd(status_order);
+        exit();
+    }
+    function report()
+    {
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
+        $sent_vars = $_GET;
+
+
+        try {
+            $startDate = $sent_vars['startDate'];
+            $endDate = $sent_vars['endDate'];
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+
+        $report = custom("SELECT A.status,SUM(A.total) AS total,COUNT(A.ID) AS numOfOrder
+        FROM 
+        (SELECT `order`.ID,`order`.status,`order`.createdAt,SUM(unitPrice*quantity) AS total
+        FROM orderDetail,`order`
+        WHERE orderID = `order`.ID
+        AND `order`.createdAt > '$startDate' AND  `order`.createdAt < '$endDate'
+        GROUP BY orderID) AS A
+        GROUP BY A.status
+        ");
+
+
+        $status = array_column($report, 'status');
+
+        $obj = array();
+
+        // $key = 1;
+
+        foreach (status_order as $key => $val) {
+            $check = $this->find(status_order[$key], $status);
+            if ($check !== null) {
+                $value['status'] = status_order[$key];
+                $value['total'] = $report[$check]['total'];
+                $value['numOfOrder'] = $report[$check]['numOfOrder'];
+                // $value['numOfProduct'] = $report[$check]['numOfProduct'];
+            } else {
+                $value['status'] = status_order[$key];
+                $value['total'] = 0;
+                $value['numOfOrder'] = 0;
+                // $value['numOfProduct'] = 0;
+            }
+            array_push($obj, $value);
+        }
+
+
+        $res['status'] = 1;
+        $res['report'] = $obj;
+        dd($res);
+        exit;
     }
 
     public function createOrder()
@@ -70,20 +129,17 @@ class order extends Controllers
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
 
-        // $json = file_get_contents("php://input");
-        // $sent_vars = json_decode($json, TRUE);
-
         $sent_vars = $_GET;
 
         try {
             $status = $sent_vars['status'];
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
-        $res = $this->order_model->myListOrder($userID, $status, $page, $perPage);
+        $res = $this->order_model->ListOrderByUser($userID, $status, $page, $perPage);
         dd($res);
         exit();
     }
@@ -101,8 +157,8 @@ class order extends Controllers
             $endDate = $sent_vars['endDate'];
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->order_model->listOrder($status, $page, $perPage, $startDate, $endDate);
@@ -123,7 +179,7 @@ class order extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        $res = $this->order_model->getDetail($id);
+        $res = $this->order_model->getDetail($id, 1);
         dd($res);
         exit();
     }

@@ -9,8 +9,8 @@ class wishList extends Controllers
     {
         $this->wishlist_model = $this->model('wishListModel');
         $this->middle_ware = new middleware();
-        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
-            throw new ErrorException($err_msg, 0, $err_severity, $err_file, $err_line);
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
     }
 
@@ -24,8 +24,8 @@ class wishList extends Controllers
         try {
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->wishlist_model->getList($userID, $page, $perPage);
 

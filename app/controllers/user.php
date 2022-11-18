@@ -9,8 +9,8 @@ class User extends Controllers
     {
         $this->user_model = $this->model('userModel');
         $this->middle_ware = new middleware();
-        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
-            throw new ErrorException($err_msg, 0, $err_severity, $err_file, $err_line);
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
     }
     public function ListUser()
@@ -26,8 +26,8 @@ class User extends Controllers
             $email = $sent_vars['email'];
             $sortBy = $sent_vars['sortBy'];
             $sortType = $sent_vars['sortType'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->user_model->getList($page, $perPage, $email, $sortBy, $sortType);
@@ -40,8 +40,10 @@ class User extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->userOnly();
         $id = $_SESSION['user']['ID'];
-        $res = $this->user_model->getDetail($id);
-        dd($res);
+        $obj = $this->user_model->getDetail($id);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        $res['obj'] = $obj;
         exit();
     }
 
@@ -49,7 +51,10 @@ class User extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        $res = $this->user_model->getDetail($id);
+        $obj = $this->user_model->getDetail($id);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        $res['obj'] = $obj;
         dd($res);
         exit();
     }
@@ -82,8 +87,8 @@ class User extends Controllers
             $id['ID'] = $_SESSION['user']['ID'];
             $sent_vars['updatedAt'] = currentTime();
             unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID'],  $sent_vars['role']);
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->user_model->update($id, $sent_vars);
 
@@ -120,8 +125,8 @@ class User extends Controllers
 
             $var['updatedAt'] = currentTime();
             $var['password'] = $sent_vars['password'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->user_model->update($id, $var);
         dd($res);
@@ -155,8 +160,8 @@ class User extends Controllers
                 dd($res);
                 exit();
             }
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
     }
 }

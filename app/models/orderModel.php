@@ -2,12 +2,7 @@
 
 class orderModel extends Controllers
 {
-    public $shipping_model;
-    public function __construct()
-    {
-        $this->shipping_model = $this->model('shippingModel');
-    }
-    function getDetail($orderID)
+    function getDetail($orderID, $all = 0)
     {
         $order = custom("
         SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
@@ -22,7 +17,13 @@ class orderModel extends Controllers
             $this->loadErrors(400, 'No orders yet');
         }
 
-        $shipping = $this->shipping_model->getList($orderID);
+        $res['obj'] = $order[0];
+
+
+        $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
+        from shippingDetail
+        WHERE orderID =  $orderID
+        ");
 
         $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quantity
         FROM `product`,`orderDetail`	
@@ -30,8 +31,20 @@ class orderModel extends Controllers
         AND orderID = $orderID
         ");
 
-        $res['status'] = 1;
-        $res['obj'] = $order[0];
+
+        if ($all == 1) {
+            $user = custom("
+                SELECT `user`.*
+                FROM `user`,`order`
+                WHERE order.ID = $orderID
+                AND user.ID = `order`.userID
+            ");
+            if (!$user) {
+                $res['obj']['user'] = null;
+            } else {
+                $res['obj']['user'] = $user[0];
+            }
+        }
         $res['obj']['shipping'] = $shipping;
         $res['obj']['product'] = $product;
         return $res;
@@ -63,11 +76,14 @@ class orderModel extends Controllers
         ORDER BY `order`.createdAt DESC
         LIMIT $perPage  OFFSET $offset 
         ");
-
-        $res = $this->loadList($total[0]['total'], $check, $page, $order);
+        $res['totalCount'] = $total[0]['total'];
+        $res['numOfPage'] = $check;
+        $res['page'] = $page;
+        $res['obj'] = $order;
+        // $res = $this->loadList($total[0]['total'], $check, $page, $order);
         return $res;
     }
-    function myListOrder($userID, $status, $page, $perPage)
+    function ListOrderByUser($userID, $status, $page, $perPage)
     {
         $offset = $perPage * ($page - 1);
 
@@ -117,6 +133,7 @@ class orderModel extends Controllers
         $res['status'] = 1;
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
+        $res['page'] = $page;
         $res['obj'] = $order;
         return $res;
     }

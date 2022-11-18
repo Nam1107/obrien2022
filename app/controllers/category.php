@@ -9,6 +9,9 @@ class category extends Controllers
     {
         $this->category_model = $this->model('categoryModel');
         $this->middle_ware = new middleware();
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        }, E_WARNING);
     }
     public function listCategory()
     {
@@ -28,8 +31,8 @@ class category extends Controllers
         try {
             $name = $sent_vars['name'];
             $desc = $sent_vars['description'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->category_model->create($name, $desc);
@@ -40,17 +43,22 @@ class category extends Controllers
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->adminOnly();
-        $res['status'] = 1;
-        $res['msg'] = 'Success';
+
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         try {
             $name = $sent_vars['name'];
             $desc = $sent_vars['description'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+            $input = [
+                'name' => $name,
+                'description' => $desc
+            ];
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        update('category', ['ID' => $id], $sent_vars);
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        update('category', ['ID' => $id], $input);
         dd($res);
         exit();
     }

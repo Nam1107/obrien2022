@@ -9,6 +9,9 @@ class Gallery extends Controllers
     {
         $this->wishlist_model = $this->model('galleryModel');
         $this->middle_ware = new middleware();
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        }, E_WARNING);
     }
     public function addImage($id)
     {
@@ -20,8 +23,8 @@ class Gallery extends Controllers
         $sent_vars = json_decode($json, TRUE);
         try {
             $urls = $sent_vars['gallery'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         foreach ($urls as $key => $url) :
             $obj['productID'] = $id;

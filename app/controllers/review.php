@@ -9,8 +9,8 @@ class review extends Controllers
     {
         $this->review_model = $this->model('reviewModel');
         $this->middle_ware = new middleware();
-        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
-            throw new ErrorException($err_msg, 0, $err_severity, $err_file, $err_line);
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
     }
     public function addReview($id)
@@ -39,8 +39,8 @@ class review extends Controllers
             UPDATE product SET rate = IF(rate = 0,$rate,(rate + $rate)/2), numOfReviews = (numOfReviews + 1) WHERE ID = $proID
             ");
             }
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['status'] = 1;
         $res['msg'] = "Success";
@@ -57,8 +57,8 @@ class review extends Controllers
             $rate = $sent_vars['rate'];
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, 1);
         dd($res);
@@ -77,8 +77,8 @@ class review extends Controllers
             $rate = $sent_vars['rate'];
             $page =  $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, '');
         dd($res);
@@ -110,8 +110,8 @@ class review extends Controllers
         try {
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->review_model->listByUser($userID, $page, $perPage, 1);

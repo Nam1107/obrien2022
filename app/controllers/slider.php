@@ -8,6 +8,9 @@ class slider extends Controllers
     {
         $this->user_model = $this->model('sliderModel');
         $this->middle_ware = new middleware();
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        }, E_WARNING);
     }
     public function listslider()
     {
@@ -46,8 +49,8 @@ class slider extends Controllers
                 'URLPage' => $sent_vars['URLPage'],
                 'sort' => $sent_vars['sort'],
             ];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         create('slider', $condition);
         $res['msg'] = 'Success';
@@ -68,8 +71,8 @@ class slider extends Controllers
                 'URLPage' => $sent_vars['URLPage'],
                 'sort' => $sent_vars['sort'],
             ];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $check = update('slider', ['ID' => $id], $condition);
         if ($check == 1) {

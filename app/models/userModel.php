@@ -32,19 +32,22 @@ class userModel
         return ($res);
     }
 
-    public function getDetail($id)
+    public function getDetail($id, $value = '*')
     {
-        $obj = selectOne('user', ['ID' => $id]);
+        // $obj = selectOne('user', ['ID' => $id]);
+        $obj = custom("
+        SELECT ID,email,name,phone,avatar
+        FROM user
+        WHERE ID = $id
+        ");
+
         if (!$obj) {
-            http_response_code(404);
-            $res['status'] = 0;
-            $res['errors'] = 'Not found user by ID';
-            return $res;
+            return null;
+        } else {
+            $obj = $obj[0];
         }
-        $res['status'] = 1;
-        $res['msg'] = 'Success';
-        $res['obj'] = $obj;
-        return $res;
+
+        return $obj;
     }
 
     public function delete($id)

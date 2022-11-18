@@ -10,16 +10,9 @@ class productModel extends Controllers
         $this->middle = new middleware();
     }
 
-    public function checkProduct($id, $IsPublic)
-    {
-        $pro = selectOne('product', ['ID' => $id, 'IsPublic' => $IsPublic]);
-        if (!$pro) {
-            $this->loadErrors(404, 'Not found product');
-            exit();
-        }
-    }
 
-    public function getDetail($id, $IsPublic)
+
+    public function getDetail($id, $IsPublic = '')
     {
         $userID = 0;
         $obj = $this->middle->authenToken();
@@ -36,11 +29,6 @@ class productModel extends Controllers
             AND A.ID = $id
         
         ");
-        if (empty($obj)) {
-            $res['status'] = 0;
-            $res['errors'] = "Not found product with ID = $id";
-            return ($res);
-        }
 
         $wish = custom("
         SELECT *
@@ -143,8 +131,7 @@ class productModel extends Controllers
     public function update($id, $sent_vars)
     {
         $sent_vars['updatedAt'] = currentTime();
-
-        $res['obj'] = update('product', ['ID' => $id], $sent_vars);
+        update('product', ['ID' => $id], $sent_vars);
         $res['status'] = 1;
         $res['msg'] = 'Success';
         return ($res);

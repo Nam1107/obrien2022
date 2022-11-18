@@ -9,6 +9,9 @@ class dashboard extends Controllers
     {
         $this->wishlist_model = $this->model('dashboardModel');
         $this->middle_ware = new middleware();
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        }, E_WARNING);
     }
     public function report()
     {
@@ -22,8 +25,8 @@ class dashboard extends Controllers
         try {
             $startDate = $sent_vars['startDate'];
             $endDate = $sent_vars['endDate'];
-        } catch (Error $e) {
-            $this->loadErrors(400, 'Error: input is invalid');
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $report = custom("SELECT A.status,SUM(A.total) AS total,COUNT(A.ID) AS num

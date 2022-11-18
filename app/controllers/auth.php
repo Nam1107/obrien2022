@@ -70,11 +70,9 @@ class Auth extends Controllers
 
                 $payload = [
                     'iss' => 'obrien',
-                    'exp' => time() + 30 * 60,
+                    'exp' => time() + 60,
                     'data' => [
-                        'id' => $id,
-                        'email' => $email,
-                        'role' => $role
+                        'id' => $id
                     ]
                 ];
 
@@ -124,11 +122,9 @@ class Auth extends Controllers
             $role = $result[0]['role'];
             $payload = [
                 'iss' => 'obrien',
-                'exp' => time() + 30 * 60,
+                'exp' => time() + 60,
                 'data' => [
-                    'id' => $id,
-                    'email' => $email,
-                    'role' => $role
+                    'id' => $id
                 ],
             ];
             $token = JWT::encode($payload, TOKEN_SECRET, 'HS256');
