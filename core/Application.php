@@ -12,14 +12,19 @@ class Application extends Controllers
         $this->controller = '';
         $this->action = '';
         $this->prarams = [];
+        $this->route = new Route();
         $this->handleUrl();
     }
 
     public function handleUrl()
     {
         $arr = $this->UrlProcess();
+
+        $this->route->handleRoute($arr);
         if (empty($arr[0])) {
             $this->loadErrors(404, "Not enough paramester");
+        } else {
+            $arr[0] = $arr[0] . "Controller";
         }
 
         if (file_exists("./app/controllers/" . $arr[0] . ".php")) {

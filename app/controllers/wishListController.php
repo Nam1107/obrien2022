@@ -1,6 +1,6 @@
 <?php
 
-class wishList extends Controllers
+class wishListController extends Controllers
 {
     public $validate_user;
     public $middle_ware;

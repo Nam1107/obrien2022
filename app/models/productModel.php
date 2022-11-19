@@ -10,8 +10,6 @@ class productModel extends Controllers
         $this->middle = new middleware();
     }
 
-
-
     public function getDetail($id, $IsPublic = '')
     {
         $userID = 0;

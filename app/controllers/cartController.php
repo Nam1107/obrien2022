@@ -1,6 +1,6 @@
 <?php
 
-class cart extends Controllers
+class cartController extends Controllers
 {
     public $validate_user;
     public $middle_ware;

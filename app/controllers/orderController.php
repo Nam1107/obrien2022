@@ -1,6 +1,6 @@
 <?php
 
-class order extends Controllers
+class orderController extends Controllers
 {
     public $validate_user;
     public $middle_ware;

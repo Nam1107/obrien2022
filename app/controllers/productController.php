@@ -1,6 +1,6 @@
 <?php
 
-class Product extends Controllers
+class ProductController extends Controllers
 {
     public $product_model;
     public $middle_ware;
@@ -75,7 +75,6 @@ class Product extends Controllers
             $sortBy = $sent_vars['sortBy'];
             $sortType = $sent_vars['sortType'];
             $name = $sent_vars['name'];
-            if ($name == 'price') $name = 'curPrice';
             $IsPublic = '';
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
@@ -86,6 +85,7 @@ class Product extends Controllers
         dd($res);
         exit();
     }
+
     public function getProduct($id = 0)
     {
         $this->middle_ware->checkRequest('GET');
@@ -217,5 +217,159 @@ class Product extends Controllers
         $res = $this->product_model->update($id, $input);
         dd($res);
         exit();
+    }
+
+    function listStockInput()
+    {
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
+        $sent_vars = $_GET;
+
+
+        try {
+            $startDate = $sent_vars['startDate'];
+            $endDate = $sent_vars['endDate'];
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+
+            $offset = $perPage * ($page - 1);
+            $total = custom(
+                "SELECT COUNT(ID) as total
+                FROM (
+                    SELECT ID
+                    FROM stock_input
+                    WHERE createdAt > '$startDate' AND  createdAt < '$endDate'
+                ) AS B
+            "
+            );
+
+            $check = ceil($total[0]['total'] / $perPage);
+            $report = custom("
+            SELECT * 
+            FROM stock_input
+            WHERE createdAt > '$startDate' AND createdAt < '$endDate'
+            LIMIT $perPage  OFFSET $offset 
+            ");
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+        $res['totalCount'] = $total[0]['total'];
+        $res['numOfPage'] = $check;
+        $res['page'] = $page;
+        $res['obj'] = $report;
+        dd($res);
+        exit;
+    }
+
+    function stockInput($id = 0)
+    {
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->adminOnly();
+        $product = $this->checkProduct($id);
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        $userID = $_SESSION['user']['ID'];
+
+        try {
+
+            if ($sent_vars['quantity'] <= 0) {
+                $this->loadErrors(400, "Error: quantity invalid");
+            }
+            $quantity = $sent_vars['quantity'] + $product['stock'];
+            $input = [
+                'quantity' => $sent_vars['quantity'],
+                'description' => $sent_vars['description'],
+                'createdAt' => currentTime(),
+                'productID' => $id,
+                'userID' => $userID
+            ];
+            create('stock_input', $input);
+            update('product', ['ID' => $id], ['stock' => $quantity]);
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        dd($res);
+        exit;
+    }
+    function stockExpiry($id = 0)
+    {
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->adminOnly();
+        $product = $this->checkProduct($id);
+        $userID = $_SESSION['user']['ID'];
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        try {
+
+            if ($sent_vars['quantity'] <= 0) {
+                $this->loadErrors(400, "Error: quantity invalid");
+            }
+            $quantity = $product['stock'] - $sent_vars['quantity'];
+            if ($quantity < 0) {
+                $this->loadErrors(400, "Error: quantity invalid");
+            }
+            $input = [
+                'quantity' => $sent_vars['quantity'],
+                'description' => $sent_vars['description'],
+                'createdAt' => currentTime(),
+                'productID' => $id,
+                'userID' => $userID
+            ];
+            create('stock_expiry', $input);
+            update('product', ['ID' => $id], ['stock' => $quantity]);
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+        $res['status'] = 1;
+        $res['msg'] = 'Success';
+        dd($res);
+        exit;
+    }
+    function listStockExpiry()
+    {
+        $this->middle_ware->checkRequest('GET');
+        $this->middle_ware->adminOnly();
+        $sent_vars = $_GET;
+
+
+        try {
+            $startDate = $sent_vars['startDate'];
+            $endDate = $sent_vars['endDate'];
+            $page = $sent_vars['page'];
+            $perPage = $sent_vars['perPage'];
+
+            $offset = $perPage * ($page - 1);
+            $total = custom(
+                "SELECT COUNT(ID) as total
+                FROM (
+                    SELECT ID
+                    FROM stock_expiry
+                    WHERE createdAt > '$startDate' AND  createdAt < '$endDate'
+                ) AS B
+            "
+            );
+
+            $check = ceil($total[0]['total'] / $perPage);
+            $report = custom("
+            SELECT * 
+            FROM stock_expiry
+            WHERE createdAt > '$startDate' AND createdAt < '$endDate'
+            LIMIT $perPage  OFFSET $offset 
+            ");
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+        $res['totalCount'] = $total[0]['total'];
+        $res['numOfPage'] = $check;
+        $res['page'] = $page;
+        $res['obj'] = $report;
+        dd($res);
+        exit;
     }
 }

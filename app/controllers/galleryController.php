@@ -1,6 +1,6 @@
 <?php
 
-class Gallery extends Controllers
+class GalleryController extends Controllers
 {
     public $validate_user;
     public $middle_ware;

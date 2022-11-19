@@ -1,6 +1,6 @@
 <?php
 
-class User extends Controllers
+class UserController extends Controllers
 {
     public $validate_user;
     public $middle_ware;

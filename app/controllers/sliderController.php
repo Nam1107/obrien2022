@@ -1,5 +1,5 @@
 <?php
-class slider extends Controllers
+class sliderController extends Controllers
 {
     public $validate_user;
     public $middle_ware;

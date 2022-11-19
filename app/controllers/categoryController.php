@@ -1,6 +1,6 @@
 <?php
 
-class category extends Controllers
+class categoryController extends Controllers
 {
     public $validate_user;
     public $middle_ware;

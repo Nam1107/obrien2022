@@ -1,6 +1,6 @@
 <?php
 
-class review extends Controllers
+class reviewController extends Controllers
 {
     public $validate_user;
     public $middle_ware;
