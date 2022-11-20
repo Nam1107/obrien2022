@@ -41,7 +41,7 @@ class productModel extends Controllers
 
 
         $gallery = selectAll('gallery', ['productID' => $id]);
-        $res['status'] = 1;
+
         $obj[0]['gallery'] = $gallery;
         $res['obj'] = $obj[0];
 
@@ -82,7 +82,7 @@ class productModel extends Controllers
             
             "
         );
-        $res['status'] = 1;
+
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
         $res['page'] = $page;
@@ -109,7 +109,7 @@ class productModel extends Controllers
             create('gallery', $image);
         endforeach;
 
-        $res['status'] = 1;
+
         $res['msg'] = 'Success';
 
         return $res;
@@ -122,7 +122,7 @@ class productModel extends Controllers
             return ($obj);
         };
         delete('product', ['ID' => $id]);
-        $res['status'] = 1;
+
         $res['msg'] = 'Success';
         return $res;
     }
@@ -130,7 +130,7 @@ class productModel extends Controllers
     {
         $sent_vars['updatedAt'] = currentTime();
         update('product', ['ID' => $id], $sent_vars);
-        $res['status'] = 1;
+
         $res['msg'] = 'Success';
         return ($res);
     }

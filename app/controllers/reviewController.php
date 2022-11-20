@@ -42,7 +42,6 @@ class reviewController extends Controllers
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res['status'] = 1;
         $res['msg'] = "Success";
         dd($res);
         exit();
@@ -93,7 +92,6 @@ class reviewController extends Controllers
         $obj = $this->review_model->getDetail($id);
         $IsPublic = !$obj['IsPublic'];
         update('review', ['ID' => $id], ['IsPublic' => $IsPublic]);
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
         exit();

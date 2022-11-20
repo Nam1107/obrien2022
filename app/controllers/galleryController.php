@@ -33,7 +33,6 @@ class GalleryController extends Controllers
             create($table, $obj);
         endforeach;
         update('product', ['ID' => $id], ['updatedAt' => currentTime()]);
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
         exit();
@@ -50,7 +49,6 @@ class GalleryController extends Controllers
             delete($table, $image);
             $productID = $product['productID'];
             update('product', ['ID' => $product['productID']], ['updatedAt' => currentTime()]);
-            $res['status'] = 1;
             $res['msg'] = 'Success';
             $res['obj'] = custom("
             SELECT * from gallery where productID = $productID
@@ -58,10 +56,7 @@ class GalleryController extends Controllers
             dd($res);
             exit();
         }
-        $res['status'] = 0;
-        $res['errors'] = 'Not found image by ID';
-        dd($res);
-        exit();
+        $this->loadErrors(404, 'Not found image by ID');
     }
     public function updateGallery($id)
     {
@@ -80,7 +75,6 @@ class GalleryController extends Controllers
         $res['obj'] = custom("
             SELECT * from gallery where productID = $productID
             ");
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
         exit();

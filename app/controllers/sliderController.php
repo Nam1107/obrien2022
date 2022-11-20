@@ -15,7 +15,6 @@ class sliderController extends Controllers
     public function listslider()
     {
         $this->middle_ware->checkRequest('GET');
-        $res['status'] = 1;
         $obj = custom("
             SELECT * from slider WHERE IsPublic = 1
         ");
@@ -27,7 +26,6 @@ class sliderController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        $res['status'] = 1;
         $obj = custom("
             SELECT * from slider
         ");
@@ -42,7 +40,6 @@ class sliderController extends Controllers
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         try {
-            $res['status'] = 1;
             $condition = [
                 'description' => $sent_vars['description'],
                 'URLImage' => $sent_vars['URLImage'],
@@ -61,7 +58,6 @@ class sliderController extends Controllers
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->adminOnly();
-        $res['status'] = 1;
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         try {
@@ -76,15 +72,11 @@ class sliderController extends Controllers
         }
         $check = update('slider', ['ID' => $id], $condition);
         if ($check == 1) {
-            $res['status'] = 1;
             $res['msg'] = 'Success';
             dd($res);
             exit();
         } else {
-            $res['status'] = 0;
-            $res['msg'] = 'Not found slider';
-            dd($res);
-            exit();
+            $this->loadErrors(404, 'Not found');
         }
     }
     public function deleteSlider($id)
@@ -94,15 +86,11 @@ class sliderController extends Controllers
 
         $check = delete('slider', ['ID' => $id]);
         if ($check == 1) {
-            $res['status'] = 1;
             $res['msg'] = 'Success';
             dd($res);
             exit();
         } else {
-            $res['status'] = 0;
-            $res['msg'] = 'Not found slider';
-            dd($res);
-            exit();
+            $this->loadErrors(404, 'Not found slider');
         }
     }
 }

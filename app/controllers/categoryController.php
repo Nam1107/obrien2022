@@ -56,7 +56,6 @@ class categoryController extends Controllers
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         update('category', ['ID' => $id], $input);
         dd($res);

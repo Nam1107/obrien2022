@@ -40,10 +40,7 @@ class wishListController extends Controllers
         $userID = $_SESSION['user']['ID'];
         $check = $this->wishlist_model->getDetail($userID, $id);
         if (!$check) {
-            $res['status'] = 0;
-            $res['errors'] = 'Not found this product in your wishlist';
-            dd($res);
-            exit();
+            $this->loadErrors(404, 'Not found this product in your wishlist');
         }
         $this->wishlist_model->delete($userID, $id);
         $wishList = custom("
@@ -54,7 +51,6 @@ class wishListController extends Controllers
         AND A.ID = wishList.productID
         AND wishList.userID = $userID
         ");
-        $res['status'] = 1;
         $res['obj'] = $wishList;
         dd($res);
         exit();
@@ -66,10 +62,7 @@ class wishListController extends Controllers
         $this->middle_ware->userOnly();
         $check = selectOne('product', ['ID' => $id]);
         if (!$check) {
-            $res['status'] = 0;
-            $res['errors'] = 'This product does not exist';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'This product does not exist');
         }
         $userID = $_SESSION['user']['ID'];
 
@@ -89,15 +82,11 @@ class wishListController extends Controllers
             AND A.ID = wishList.productID
             AND wishList.userID = $userID
             ");
-            $res['status'] = 1;
             $res['obj'] = $wishList;
             dd($res);
             exit();
         } else {
-            $res['status'] = 0;
-            $res['errors'] = 'This product has exists in your list';
-            dd($res);
-            exit();
+            $this->loadErrors(400, 'This product has exists in your list');
         }
     }
 }

@@ -23,7 +23,7 @@ class userModel
         ");
         $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM  `user`");
 
-        $res['status'] = 1;
+
         $res['totalCount'] = $totalCount[0]['totalCount'];
         $res['numOfPage'] = ceil($check);
         $res['page'] = $page;
@@ -61,14 +61,14 @@ class userModel
         }
         $userID['ID'] = $id;
         delete('user', $userID);
-        $res['status'] = 1;
+
         $res['msg'] = 'Success';
         return $res;
     }
     public function update($id, $sent_vars)
     {
         update('user', ['ID' => $id], $sent_vars);
-        $res['status'] = 1;
+
         $res['msg'] = 'Success';
         return $res;
     }
@@ -76,7 +76,7 @@ class userModel
     public function changePass($id, $var)
     {
         update('user', ['ID' => $id], $var);
-        $res['status'] = 1;
+
         $res['msg'] = 'Success';
         return $res;
     }

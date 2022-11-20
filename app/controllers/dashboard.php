@@ -38,7 +38,6 @@ class dashboard extends Controllers
         GROUP BY orderID) AS A
         GROUP BY A.status
         ");
-        $res['status'] = 1;
         $res['report'] = $report;
         dd($res);
         exit;

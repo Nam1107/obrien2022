@@ -68,8 +68,6 @@ class orderController extends Controllers
             array_push($obj, $value);
         }
 
-
-        $res['status'] = 1;
         $res['report'] = $obj;
         dd($res);
         exit;
@@ -202,7 +200,6 @@ class orderController extends Controllers
         }
 
         $this->order_model->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
         exit();
@@ -228,7 +225,6 @@ class orderController extends Controllers
         switch ($order['status']) {
             case 'To Ship':
                 $this->order_model->updateStatus($id, $status, $reason);
-                $res['status'] = 1;
                 $res['msg'] = 'Success';
                 dd($res);
                 exit();
@@ -258,7 +254,6 @@ class orderController extends Controllers
         switch ($order['status']) {
             case 'To Recivie':
                 $this->order_model->updateStatus($id, $status, "Confirm Receipt of an Order from a Customer");
-                $res['status'] = 1;
                 $res['msg'] = 'Success';
                 dd($res);
                 exit();

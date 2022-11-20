@@ -31,7 +31,6 @@ class ProductController extends Controllers
     public function ListProduct()
     {
         $this->middle_ware->checkRequest('GET');
-        $res['status'] = 1;
 
         $sent_vars = $_GET;
 
@@ -60,7 +59,6 @@ class ProductController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        $res['status'] = 1;
         // $json = file_get_contents("php://input");
         // $sent_vars = json_decode($json, TRUE);
 
@@ -290,7 +288,6 @@ class ProductController extends Controllers
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
         exit;
@@ -326,7 +323,6 @@ class ProductController extends Controllers
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         dd($res);
         exit;

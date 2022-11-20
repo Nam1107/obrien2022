@@ -41,7 +41,6 @@ class UserController extends Controllers
         $this->middle_ware->userOnly();
         $id = $_SESSION['user']['ID'];
         $obj = $this->user_model->getDetail($id);
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         $res['obj'] = $obj;
         exit();
@@ -52,7 +51,6 @@ class UserController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
         $obj = $this->user_model->getDetail($id);
-        $res['status'] = 1;
         $res['msg'] = 'Success';
         $res['obj'] = $obj;
         dd($res);
@@ -65,9 +63,7 @@ class UserController extends Controllers
         $this->middle_ware->adminOnly();
         $table = 'user';
         if ($id == $_SESSION['user']['ID']) {
-            http_response_code(404);
-            $res['status'] = 0;
-            $res['errors'] = 'You cannot delete your account';
+            $this->loadErrors(400, 'You cannot delete your account');
         } else {
             $res = $this->user_model->delete($id);
         }
@@ -155,10 +151,7 @@ class UserController extends Controllers
                 dd($res);
                 exit();
             } else {
-                $res['status'] = 0;
-                $res['msg'] = $errors;
-                dd($res);
-                exit();
+                $this->loadErrors(400, $errors);
             }
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
