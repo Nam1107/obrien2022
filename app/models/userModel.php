@@ -3,28 +3,33 @@
 class userModel
 {
     protected $table = 'user';
-    public $middle;
-    public function __construct()
-    {
-        $this->middle = new middleware();
-    }
-
-    public function getList($page, $perPage, $email, $sortBy, $sortType)
+    public function getList($page, $perPage, $email, $sortBy, $sortType, $role = '')
     {
         $offset = $perPage * ($page - 1);
         $total = custom("
         SELECT COUNT(ID) as total
-        FROM (SELECT * FROM `user` WHERE email LIKE '%$email%' ORDER BY $sortBy $sortType) as B
+        FROM (
+            SELECT user.ID
+            FROM `user`,tbl_role
+            WHERE email LIKE '%$email%' 
+            AND tbl_role.id = user.role
+            AND tbl_role.role_name LIKE '%$role%'
+            ORDER BY $sortBy $sortType
+            ) as B
         ");
         $check = ceil($total[0]['total'] / $perPage);
 
         $obj = custom("
-        SELECT * FROM `user` WHERE email LIKE '%$email%' ORDER BY $sortBy $sortType LIMIT $perPage OFFSET $offset
+        SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
+        FROM `user`,tbl_role
+        WHERE email LIKE '%$email%' 
+        AND tbl_role.id = user.role
+        AND tbl_role.role_name LIKE '%$role%'
+        ORDER BY $sortBy $sortType LIMIT $perPage OFFSET $offset
         ");
-        $totalCount = custom("SELECT COUNT(*)  AS totalCount FROM  `user`");
 
 
-        $res['totalCount'] = $totalCount[0]['totalCount'];
+        $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = ceil($check);
         $res['page'] = $page;
         $res['obj'] = $obj;
@@ -32,13 +37,13 @@ class userModel
         return ($res);
     }
 
-    public function getDetail($id, $value = '*')
+    public function getDetail($id)
     {
-        // $obj = selectOne('user', ['ID' => $id]);
         $obj = custom("
-        SELECT ID,email,name,phone,avatar
-        FROM user
-        WHERE ID = $id
+        SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
+        FROM `user`,tbl_role
+        WHERE `user`.id = $id
+        AND tbl_role.id = user.role
         ");
 
         if (!$obj) {
@@ -48,29 +53,6 @@ class userModel
         }
 
         return $obj;
-    }
-
-    public function delete($id)
-    {
-        $obj = selectOne('`user`', ['ID' => $id]);
-        if (!$obj) {
-            http_response_code(404);
-            $res['status'] = 0;
-            $res['errors'] = 'Not found user by ID';
-            return $res;
-        }
-        $userID['ID'] = $id;
-        delete('user', $userID);
-
-        $res['msg'] = 'Success';
-        return $res;
-    }
-    public function update($id, $sent_vars)
-    {
-        update('user', ['ID' => $id], $sent_vars);
-
-        $res['msg'] = 'Success';
-        return $res;
     }
 
     public function changePass($id, $var)

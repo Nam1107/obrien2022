@@ -12,6 +12,14 @@ use Firebase\JWT\JWT;
 
 class middleware extends Controllers
 {
+    public $user_model;
+    public function __construct()
+    {
+        $this->user_model = $this->model('userModel');
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        }, E_WARNING);
+    }
 
     function md5Security($pwd)
     {
@@ -34,23 +42,20 @@ class middleware extends Controllers
             $jwt = JWT::decode($check[1],  new Key(TOKEN_SECRET, 'HS256'));
             $data = json_decode(json_encode($jwt), true);
             $id = $data['data']['id'];
-            $obj = custom("SELECT user.ID,user.role FROM user where ID = $id");
-            $_SESSION['user'] = $obj[0];
+            $obj = $this->user_model->getDetail($id);
+
+            if (!$obj) {
+                $res['status'] = 0;
+                $res['errors'] = 'Not found user';
+            }
+            $_SESSION['user'] = $obj;
             $res['status'] = 1;
-            $res['obj'] = $obj[0];
+            $res['obj'] = $obj;
             return $res;
-        } catch (ExpiredException) {
-            session_destroy();
+        } catch (Exception $e) {
             $res['status'] = 0;
-            $res['errors'] = 'Expired token';
+            $res['errors'] = $e->getMessage();
             return $res;
-            // $this->loadErrors(400, 'Expired token');
-        } catch (Exception) {
-            session_destroy();
-            $res['status'] = 0;
-            $res['errors'] = 'Token verification failed';
-            return $res;
-            // $this->loadErrors(400, 'Token verification failed');
         }
     }
 
@@ -65,15 +70,13 @@ class middleware extends Controllers
     {
         $obj = $this->authenToken();
         if ($obj['status'] == 0) {
-            // dd($obj);
             $this->loadErrors(400, $obj['errors']);
-            // exit();
         }
     }
     function adminOnly()
     {
         $this->userOnly();
-        if ($_SESSION['user']['role'] != 1) {
+        if ($_SESSION['user']['role'] != 'ROLE_ADMIN') {
             $this->loadErrors(400, 'You are not admin');
         }
     }

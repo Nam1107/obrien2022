@@ -78,8 +78,6 @@ class productModel extends Controllers
             AND IsPublic LIKE '%1%'
             ORDER BY $sortBy $sortType
             LIMIT $perPage OFFSET $offset
-            
-            
             "
         );
 

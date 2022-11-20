@@ -26,11 +26,12 @@ class UserController extends Controllers
             $email = $sent_vars['email'];
             $sortBy = $sent_vars['sortBy'];
             $sortType = $sent_vars['sortType'];
+            $role = $sent_vars['role'];
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
-        $res = $this->user_model->getList($page, $perPage, $email, $sortBy, $sortType);
+        $res = $this->user_model->getList($page, $perPage, $email, $sortBy, $sortType, $role);
         dd($res);
         exit();
     }
@@ -41,7 +42,6 @@ class UserController extends Controllers
         $this->middle_ware->userOnly();
         $id = $_SESSION['user']['ID'];
         $obj = $this->user_model->getDetail($id);
-        $res['msg'] = 'Success';
         $res['obj'] = $obj;
         exit();
     }
@@ -51,7 +51,6 @@ class UserController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
         $obj = $this->user_model->getDetail($id);
-        $res['msg'] = 'Success';
         $res['obj'] = $obj;
         dd($res);
         exit();
@@ -62,12 +61,16 @@ class UserController extends Controllers
         $this->middle_ware->checkRequest('DELETE');
         $this->middle_ware->adminOnly();
         $table = 'user';
+        $user = $this->user_model->getDetail($id, 'id');
+        if (!$user) {
+            $this->loadErrors(404, 'Not found user by ID');
+        }
         if ($id == $_SESSION['user']['ID']) {
             $this->loadErrors(400, 'You cannot delete your account');
         } else {
-            $res = $this->user_model->delete($id);
+            delete('user', ['ID' => $id]);
         }
-
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }
@@ -80,13 +83,19 @@ class UserController extends Controllers
         $sent_vars = json_decode($json, TRUE);
 
         try {
-            $id['ID'] = $_SESSION['user']['ID'];
-            $sent_vars['updatedAt'] = currentTime();
-            unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID'],  $sent_vars['role']);
+            $id = $_SESSION['user']['ID'];
+            $input['phone'] = $sent_vars['phone'];
+            $input['firstName'] = $sent_vars['firstName'];
+            $input['lastName'] = $sent_vars['lastName'];
+            $input['name'] =  $input['firstName'] . " " . $input['lastName'];
+            $input['avatar'] = $sent_vars['avatar'];
+            $input['updatedAt'] = currentTime();
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res = $this->user_model->update($id, $sent_vars);
+        update('user', ['ID' => $id], $input);
+
+        $res['msg'] = 'Success';
 
         dd($res);
         exit();
@@ -96,14 +105,26 @@ class UserController extends Controllers
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->adminOnly();
+
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
-        $userID['ID'] =  $id;
         $sent_vars['updatedAt'] = currentTime();
         unset($sent_vars['email'], $sent_vars['password'], $sent_vars['ID']);
 
-        $res = $this->user_model->update($id, $sent_vars);
+        try {
+            $input['phone'] = $sent_vars['phone'];
+            $input['firstName'] = $sent_vars['firstName'];
+            $input['lastName'] = $sent_vars['lastName'];
+            $input['name'] =  $input['firstName'] . " " . $input['lastName'];
+            $input['avatar'] = $sent_vars['avatar'];
+            $input['updatedAt'] = currentTime();
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+
+        update('user', ['ID' => $id], $input);
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }
