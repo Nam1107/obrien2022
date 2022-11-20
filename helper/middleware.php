@@ -68,6 +68,7 @@ class middleware extends Controllers
 
     function userOnly()
     {
+
         $obj = $this->authenToken();
         if ($obj['status'] == 0) {
             $this->loadErrors(400, $obj['errors']);

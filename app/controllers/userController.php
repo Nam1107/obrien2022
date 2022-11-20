@@ -40,9 +40,11 @@ class UserController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->userOnly();
+
         $id = $_SESSION['user']['ID'];
         $obj = $this->user_model->getDetail($id);
         $res['obj'] = $obj;
+        dd($res);
         exit();
     }
 
@@ -145,7 +147,8 @@ class UserController extends Controllers
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res = $this->user_model->update($id, $var);
+        update('user', ['ID' => $id], $var);
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }
@@ -163,12 +166,11 @@ class UserController extends Controllers
             if (count($errors) === 0) {
                 $sent_vars['newPass'] = password_hash($sent_vars['newPass'], PASSWORD_DEFAULT);
                 $id = $_SESSION['user']['ID'];
-                unset($sent_vars['confirmPass'], $sent_vars['ID']);
-
                 $var['updatedAt'] = currentTime();
                 $var['password'] = $sent_vars['newPass'];
 
-                $res = $this->user_model->update($id, $var);
+                update('user', ['ID' => $id], $var);
+                $res['msg'] = 'Success';
                 dd($res);
                 exit();
             } else {
