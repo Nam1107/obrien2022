@@ -32,11 +32,14 @@ class cartController extends Controllers
         $sent_vars = json_decode($json, TRUE);
 
         if (empty($sent_vars['quantity'])) {
-            $this->loadErrors(400, 'Error: input is invalid');
+            $this->loadErrors(400, 'Error: quantity value invalid');
         }
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
-        $this->product_model->checkProduct($id, 1);
+        $product = $this->product_model->getDetail($id, 1);
+        if (!$product) {
+            $this->loadErrors(404, 'Not found product');
+        }
 
         $condition = [
             'userID' => $userID,
@@ -81,8 +84,14 @@ class cartController extends Controllers
         $this->middle_ware->checkRequest('DELETE');
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
-        $this->product_model->checkProduct($id, 1);
+        $product = $this->product_model->getDetail($id, 1);
+        if (!$product) {
+            $this->loadErrors(404, 'Not found product');
+        }
         $obj = $this->cart_model->getProductInCart($userID, $id);
+        if (!$obj) {
+            $this->loadErrors(400, 'Cannot found product in your cart');
+        }
 
         $table = 'shoppingCart';
         $condition = [
@@ -101,6 +110,9 @@ class cartController extends Controllers
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
         $obj = $this->cart_model->getProductInCart($userID, $id);
+        if (!$obj) {
+            $this->loadErrors(400, 'Cannot found product in your cart');
+        }
         if ($obj['quantity'] > 5) {
             $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
         }
@@ -119,6 +131,9 @@ class cartController extends Controllers
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
         $obj = $this->cart_model->getProductInCart($userID, $id);
+        if (!$obj) {
+            $this->loadErrors(400, 'Cannot found product in your cart');
+        }
 
         custom("
         UPDATE shoppingCart SET quantity = if(quantity > 1 ,quantity - 1, 1) WHERE userID = $userID AND productID = $id

@@ -140,9 +140,12 @@ class ProductController extends Controllers
             $input = [
                 'priceSale' => $priceSale,
                 'startSale' => $startSale,
-                'endSale' => $endSale
+                'endSale' => $endSale,
+                'updatedAt' => currentTime()
             ];
-            $res = $this->product_model->update($id, $input);
+            update('product', ['ID' => $id], $input);
+
+            $res['msg'] = 'Success';
             dd($res);
             exit();
         } catch (ErrorException $e) {
@@ -222,7 +225,7 @@ class ProductController extends Controllers
             $input['image'] = $sent_vars['image'];
             $input['description'] = $sent_vars['description'];
             $input['IsPublic'] = $sent_vars['IsPublic'];
-
+            $input['updatedAt'] = currentTime();
             $category = $sent_vars['category'];
             $categoryID = custom("SELECT ID FROM category WHERE name like '%$category%'");
             if (!$categoryID) {
@@ -230,10 +233,13 @@ class ProductController extends Controllers
             } else {
                 $input['categoryID'] = $categoryID[0]['ID'];
             }
+            update('product', ['ID' => $id], $input);
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res = $this->product_model->update($id, $input);
+
+
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }

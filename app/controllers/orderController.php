@@ -139,7 +139,7 @@ class orderController extends Controllers
             ");
         }
         #delete cart
-        $this->cart_model->delete($userID);
+        delete('shoppingCart', ['userID' => $userID]);
 
         #create order
         $orderID = $this->createNewOrder($userID, $sent_vars['note'], $sent_vars['phone'], $sent_vars['address']);

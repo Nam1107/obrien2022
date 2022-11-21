@@ -31,11 +31,17 @@ class categoryController extends Controllers
         try {
             $name = $sent_vars['name'];
             $desc = $sent_vars['description'];
+            $condition = [
+                'name' => $name,
+                'description' => $desc,
+            ];
+            create('category', $condition);
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
-        $res = $this->category_model->create($name, $desc);
+
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }

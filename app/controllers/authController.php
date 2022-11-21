@@ -67,8 +67,7 @@ class AuthController extends Controllers
             } elseif (password_verify($sent_vars['password'], $user['password'])) {
 
                 $id = $sessionUser['ID'] = $user['ID'];
-                $email = $user['email'];
-                $role = $sessionUser['role'] = $user['role'];
+                $sessionUser['role'] = $user['role'];
 
                 $payload = [
                     'iss' => 'obrien',

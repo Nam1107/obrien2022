@@ -3,7 +3,6 @@
 class productModel extends Controllers
 {
     protected $table = 'product';
-    public $model_product;
     public $middle;
     public function __construct()
     {
@@ -92,33 +91,5 @@ class productModel extends Controllers
         $res['page'] = $page;
         $res['obj'] = $obj;
         return $res;
-    }
-
-    public function create($sent_vars, $gallery)
-    {
-        $sent_vars['createdAt'] = currentTime();
-        $sent_vars['updatedAt'] = currentTime();
-
-        $id = create('product', $sent_vars);
-
-        if ($id == 0) {
-            $this->loadErrors(400, 'Errors: value invalid');
-        }
-
-        foreach ($gallery as $key => $url) :
-            $image['productID'] = $id;
-            $image['URLImage'] =  $url;
-            create('gallery', $image);
-        endforeach;
-
-        return $id;
-    }
-    public function update($id, $sent_vars)
-    {
-        $sent_vars['updatedAt'] = currentTime();
-        update('product', ['ID' => $id], $sent_vars);
-
-        $res['msg'] = 'Success';
-        return ($res);
     }
 }

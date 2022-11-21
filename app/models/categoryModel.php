@@ -23,16 +23,4 @@ class categoryModel
         $res['obj'] = $obj;
         return ($res);
     }
-    function create($name, $desc)
-    {
-
-        $condition = [
-            'name' => $name,
-            'description' => $desc,
-        ];
-
-        $res['msg'] = 'Success';
-        create('category', $condition);
-        return ($res);
-    }
 }

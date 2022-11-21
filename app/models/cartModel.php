@@ -2,15 +2,6 @@
 
 class cartModel extends Controllers
 {
-    public $middle;
-    public function __construct()
-    {
-        $this->middle = new middleware();
-    }
-    function delete($userID)
-    {
-        delete('shoppingCart', ['userID' => $userID]);
-    }
     public function getCart($id)
     {
         $shoppingCart = custom("
@@ -39,9 +30,7 @@ class cartModel extends Controllers
             'productID' => $productID,
         ];
         $obj = selectOne('shoppingCart', $condition);
-        if (!$obj) {
-            $this->loadErrors(400, 'Cannot found product in your cart');
-        }
+
 
         return $obj;
     }

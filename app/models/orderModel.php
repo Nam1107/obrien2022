@@ -137,37 +137,4 @@ class orderModel extends Controllers
         $res['obj'] = $order;
         return $res;
     }
-    public function createOrder($userID, $note, $phone, $address)
-    {
-        $order['userID'] = $userID;
-        $order['note'] = $note;
-        $order['status'] = 'To Ship';
-        $order['phone'] = $phone;
-        $order['address'] = $address;
-        $order['createdAt'] = currentTime();
-
-        $orderID = create('order', $order);
-        return $orderID;
-    }
-    public function createOrderDetail($orderID, $productID, $unitPrice, $quantity)
-    {
-        $condition = [
-            "orderID" => $orderID,
-            "productID" => $productID,
-            "unitPrice" => $unitPrice,
-            "quantity" => $quantity,
-            "createdAt" => currentTime()
-        ];
-        create('orderDetail', $condition);
-    }
-    public function updateStatus($orderID, $status, $description)
-    {
-        update('order', ['ID' => $orderID], ['status' => $status]);
-        $shipping = [
-            "orderID" => $orderID,
-            "description" => $description,
-            "createdAt" => currentTime()
-        ];
-        create('shippingDetail', $shipping);
-    }
 }
