@@ -13,6 +13,15 @@ class UserController extends Controllers
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
     }
+    public function listRole()
+    {
+        $this->middle_ware->checkRequest('GET');
+        $role = custom("SELECT role_name as `role` from tbl_role");
+        $role = array_column($role, 'role');
+        $res['role'] =  $role;
+        dd($res);
+        exit;
+    }
     public function ListUser()
     {
         $this->middle_ware->checkRequest('GET');
@@ -119,6 +128,7 @@ class UserController extends Controllers
             $input['firstName'] = $sent_vars['firstName'];
             $input['lastName'] = $sent_vars['lastName'];
             $input['name'] =  $input['firstName'] . " " . $input['lastName'];
+            $input['role'] = $sent_vars['role'];
             $input['avatar'] = $sent_vars['avatar'];
             $input['updatedAt'] = currentTime();
         } catch (ErrorException $e) {

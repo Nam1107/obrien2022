@@ -42,15 +42,4 @@ class wishListModel extends Controllers
         $res = selectOne('wishList', $condition);
         return $res;
     }
-    function delete($userID, $productID)
-    {
-        $condition = [
-            "userID" => $userID,
-            "productID" => $productID
-        ];
-        delete('wishList', $condition);
-    }
-    function create($userID, $productID)
-    {
-    }
 }

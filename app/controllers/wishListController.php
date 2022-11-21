@@ -42,7 +42,11 @@ class wishListController extends Controllers
         if (!$check) {
             $this->loadErrors(404, 'Not found this product in your wishlist');
         }
-        $this->wishlist_model->delete($userID, $id);
+        $condition = [
+            "userID" => $userID,
+            "productID" => $id
+        ];
+        delete('wishList', $condition);
         $wishList = custom("
         SELECT A.* , category.name AS category
         FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale

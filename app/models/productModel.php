@@ -28,6 +28,12 @@ class productModel extends Controllers
         
         ");
 
+        if (!$obj) {
+            return null;
+        } else {
+            $obj = $obj[0];
+        }
+
         $wish = custom("
         SELECT *
             FROM wishList
@@ -36,14 +42,14 @@ class productModel extends Controllers
         ");
 
         if (!$wish) {
-            $obj[0]['wishList'] = 0;
-        } else $obj[0]['wishList'] = 1;
+            $obj['wishList'] = 0;
+        } else $obj['wishList'] = 1;
 
 
         $gallery = selectAll('gallery', ['productID' => $id]);
 
-        $obj[0]['gallery'] = $gallery;
-        $res['obj'] = $obj[0];
+        $obj['gallery'] = $gallery;
+        $res['obj'] = $obj;
 
         return ($res);
     }
@@ -75,7 +81,7 @@ class productModel extends Controllers
             AND category.name LIKE '%$category%'
             AND A.name LIKE '%$name%'
             AND statusSale LIKE '%$sale%'
-            AND IsPublic LIKE '%1%'
+            AND IsPublic LIKE '%$IsPublic%'
             ORDER BY $sortBy $sortType
             LIMIT $perPage OFFSET $offset
             "
@@ -96,9 +102,7 @@ class productModel extends Controllers
         $id = create('product', $sent_vars);
 
         if ($id == 0) {
-            $res['status'] = 0;
-            $res['errors'] = 'Invalid Parameter';
-            return $res;
+            $this->loadErrors(400, 'Errors: value invalid');
         }
 
         foreach ($gallery as $key => $url) :
@@ -107,22 +111,7 @@ class productModel extends Controllers
             create('gallery', $image);
         endforeach;
 
-
-        $res['msg'] = 'Success';
-
-        return $res;
-    }
-    public function delete($id)
-    {
-        $IsPublic = '';
-        $obj = $this->getDetail($id, $IsPublic);
-        if ($obj['status'] == 0) {
-            return ($obj);
-        };
-        delete('product', ['ID' => $id]);
-
-        $res['msg'] = 'Success';
-        return $res;
+        return $id;
     }
     public function update($id, $sent_vars)
     {

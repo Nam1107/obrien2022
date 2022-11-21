@@ -4,10 +4,12 @@ class GalleryController extends Controllers
 {
     public $validate_user;
     public $middle_ware;
-    public $wishlist_model;
+    public $gallery_model;
+    public $product_model;
     public function __construct()
     {
-        $this->wishlist_model = $this->model('galleryModel');
+        $this->product_model = $this->model('productModel');
+        $this->gallery_model = $this->model('galleryModel');
         $this->middle_ware = new middleware();
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
@@ -17,7 +19,11 @@ class GalleryController extends Controllers
     {
         $this->middle_ware->checkRequest('POST');
         $this->middle_ware->adminOnly();
-        $table = 'gallery';
+
+        $product = $this->product_model->getDetail($id);
+        if (!$product) {
+            $this->loadErrors(404, 'Not found product');
+        }
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
@@ -29,8 +35,7 @@ class GalleryController extends Controllers
         foreach ($urls as $key => $url) :
             $obj['productID'] = $id;
             $obj['URLImage'] =  $url;
-            $obj['Sort'] =  $key;
-            create($table, $obj);
+            create('gallery', $obj);
         endforeach;
         update('product', ['ID' => $id], ['updatedAt' => currentTime()]);
         $res['msg'] = 'Success';
@@ -57,26 +62,5 @@ class GalleryController extends Controllers
             exit();
         }
         $this->loadErrors(404, 'Not found image by ID');
-    }
-    public function updateGallery($id)
-    {
-        $this->middle_ware->checkRequest('PUT');
-        $table = 'gallery';
-        $this->middle_ware->adminOnly();
-
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
-
-        $image['ID'] =  $id;
-        update($table, $image, $sent_vars);
-        $product = selectOne($table, $image);
-        $productID = $product['productID'];
-        update('product', ['ID' => $product['productID']], ['updatedAt' => currentTime()]);
-        $res['obj'] = custom("
-            SELECT * from gallery where productID = $productID
-            ");
-        $res['msg'] = 'Success';
-        dd($res);
-        exit();
     }
 }

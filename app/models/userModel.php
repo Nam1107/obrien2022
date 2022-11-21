@@ -54,12 +54,4 @@ class userModel
 
         return $obj;
     }
-
-    public function changePass($id, $var)
-    {
-        update('user', ['ID' => $id], $var);
-
-        $res['msg'] = 'Success';
-        return $res;
-    }
 }

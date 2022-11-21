@@ -15,6 +15,39 @@ class orderController extends Controllers
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
     }
+    public function createNewOrder($userID, $note, $phone, $address)
+    {
+        $order['userID'] = $userID;
+        $order['note'] = $note;
+        $order['status'] = 'To Ship';
+        $order['phone'] = $phone;
+        $order['address'] = $address;
+        $order['createdAt'] = currentTime();
+
+        $orderID = create('order', $order);
+        return $orderID;
+    }
+    public function createOrderDetail($orderID, $productID, $unitPrice, $quantity)
+    {
+        $condition = [
+            "orderID" => $orderID,
+            "productID" => $productID,
+            "unitPrice" => $unitPrice,
+            "quantity" => $quantity,
+            "createdAt" => currentTime()
+        ];
+        create('orderDetail', $condition);
+    }
+    public function updateStatus($orderID, $status, $description)
+    {
+        update('order', ['ID' => $orderID], ['status' => $status]);
+        $shipping = [
+            "orderID" => $orderID,
+            "description" => $description,
+            "createdAt" => currentTime()
+        ];
+        create('shippingDetail', $shipping);
+    }
     function listStatus()
     {
         $this->middle_ware->checkRequest('GET');
@@ -109,12 +142,12 @@ class orderController extends Controllers
         $this->cart_model->delete($userID);
 
         #create order
-        $orderID = $this->order_model->createOrder($userID, $sent_vars['note'], $sent_vars['phone'], $sent_vars['address']);
+        $orderID = $this->createNewOrder($userID, $sent_vars['note'], $sent_vars['phone'], $sent_vars['address']);
 
         $this->shipping_model->create($orderID);
 
         foreach ($cart as $key => $val) {
-            $this->order_model->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quantity"]);
+            $this->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quantity"]);
         }
         $res = $this->order_model->getDetail($orderID);
         dd($res);
@@ -199,7 +232,7 @@ class orderController extends Controllers
             $this->loadErrors(400, 'Not enough value');
         }
 
-        $this->order_model->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
+        $this->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
         $res['msg'] = 'Success';
         dd($res);
         exit();
@@ -224,7 +257,7 @@ class orderController extends Controllers
         }
         switch ($order['status']) {
             case 'To Ship':
-                $this->order_model->updateStatus($id, $status, $reason);
+                $this->updateStatus($id, $status, $reason);
                 $res['msg'] = 'Success';
                 dd($res);
                 exit();
@@ -253,7 +286,7 @@ class orderController extends Controllers
 
         switch ($order['status']) {
             case 'To Recivie':
-                $this->order_model->updateStatus($id, $status, "Confirm Receipt of an Order from a Customer");
+                $this->updateStatus($id, $status, "Confirm Receipt of an Order from a Customer");
                 $res['msg'] = 'Success';
                 dd($res);
                 exit();

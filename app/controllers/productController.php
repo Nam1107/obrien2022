@@ -3,12 +3,16 @@
 class ProductController extends Controllers
 {
     public $product_model;
+    public $category_model;
+    public $gallery_model;
     public $middle_ware;
     public function __construct()
     {
 
         $this->middle_ware = new middleware();
         $this->product_model = $this->model('productModel');
+        $this->category_model = $this->model('categoryModel');
+        $this->gallery_model = $this->model('gallery_model');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -59,8 +63,6 @@ class ProductController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        // $json = file_get_contents("php://input");
-        // $sent_vars = json_decode($json, TRUE);
 
         $sent_vars = $_GET;
 
@@ -121,13 +123,18 @@ class ProductController extends Controllers
             }
             $startSale = $sent_vars['startSale'];
             $endSale = $sent_vars['endSale'];
+
             $check = $this->validateDate($startSale);
             if (!$check) {
                 $this->loadErrors(404, 'Errors: day value invalid');
             }
-            $check = var_dump($this->validateDate($endSale));
+            $check = $this->validateDate($endSale);
             if (!$check) {
                 $this->loadErrors(404, 'Errors: day value invalid');
+            }
+
+            if ($startSale >= $endSale) {
+                $this->loadErrors(404, 'Errors: startSale must less than endSale');
             }
 
             $input = [
@@ -151,29 +158,40 @@ class ProductController extends Controllers
         $sent_vars = json_decode($json, TRUE);
 
         try {
-            $cate = $sent_vars['category'];
             $gallery = $sent_vars['gallery'];
-            $category = custom("
-                SELECT * FROM category WHERE name LIKE '%$cate%' 
-            ");
+            $category = $this->category_model->getDetail($sent_vars['category']);
 
             if (empty($category)) {
                 $this->loadErrors(404, 'Not found category');
             }
 
             $product = [
-                'categoryID' => $category[0]['ID'],
+                'categoryID' => $category['ID'],
                 'name' =>  $sent_vars['name'],
                 'price' => $sent_vars['price'],
                 'image' => $sent_vars['image'],
                 'description' => $sent_vars['description'],
-                'IsPublic' => $sent_vars['IsPublic']
+                'IsPublic' => $sent_vars['IsPublic'],
+                'createdAt' => currentTime(),
+                'updatedAt' => currentTime(),
+                'stock' => 0
             ];
+
+            $productID = create('product', $product);
+            if ($productID == 0) {
+                $this->loadErrors(400, 'Errors: value invalid');
+            }
+
+            foreach ($gallery as $key => $url) :
+                $image['productID'] = $productID;
+                $image['URLImage'] =  $url;
+                create('gallery', $image);
+            endforeach;
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
-        $res = $this->product_model->create($product, $gallery);
+        $res['product']['ID'] = $productID;
         dd($res);
         exit();
     }
@@ -183,7 +201,10 @@ class ProductController extends Controllers
         $this->middle_ware->checkRequest('DELETE');
         $this->middle_ware->adminOnly();
         $this->checkProduct($id);
-        $res = $this->product_model->delete($id);
+
+        delete('product', ['ID' => $id]);
+
+        $res['msg'] = 'Success';
         dd($res);
         exit();
     }
