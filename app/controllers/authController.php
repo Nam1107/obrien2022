@@ -155,8 +155,8 @@ class AuthController extends Controllers
                 array_push($errors, 'Email address does not exist');
             }
 
-            $id = $user['ID'];
             if (count($errors) === 0) {
+                $id = $user['ID'];
                 $this->sendEmail($input['email'], $input['password']);
                 $input['password'] = password_hash($input['password'], PASSWORD_DEFAULT);
             } else {
