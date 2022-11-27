@@ -30,8 +30,6 @@ class cartModel extends Controllers
             'productID' => $productID,
         ];
         $obj = selectOne('shoppingCart', $condition);
-
-
         return $obj;
     }
 }

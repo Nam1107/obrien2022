@@ -1,6 +1,13 @@
 <?php
 require_once './src/JWT.php';
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require './PHPMailer/src/Exception.php';
+require './PHPMailer/src/PHPMailer.php';
+require './PHPMailer/src/SMTP.php';
+
 use Firebase\JWT\JWT;
 
 class AuthController extends Controllers
@@ -128,6 +135,41 @@ class AuthController extends Controllers
             $this->loadErrors(400, 'Refresh token not invalid. You must login again');
         }
     }
+    public function forgotPassword()
+    {
+        $this->middle_ware->checkRequest('POST');
+        $this->middle_ware->guestsOnly();
+        $table = 'user';
+
+        $json = file_get_contents("php://input");
+        $sent_vars = json_decode($json, TRUE);
+
+        try {
+            $input['email'] = $sent_vars['email'];
+            $input['password'] = $this->rand_string(8);
+            $errors = validateForgotPassword($input);
+
+            $user = selectOne('user', ['email' => $sent_vars['email']]);
+
+            if (!$user) {
+                array_push($errors, 'Email address does not exist');
+            }
+
+            $id = $user['ID'];
+            if (count($errors) === 0) {
+                $this->sendEmail($input['email'], $input['password']);
+                $input['password'] = password_hash($input['password'], PASSWORD_DEFAULT);
+            } else {
+                $this->loadErrors(400, $errors);
+            }
+        } catch (ErrorException $e) {
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+        update($table, ['ID' => $id], $input);
+        $res['msg'] = 'Success';
+        dd($res);
+        exit();
+    }
     public function Register()
     {
         $this->middle_ware->checkRequest('POST');
@@ -139,16 +181,19 @@ class AuthController extends Controllers
 
         try {
             $input['email'] = $sent_vars['email'];
-            $input['password'] = $sent_vars['password'];
+            $input['password'] = $this->rand_string(8);
             $errors = validateRegister($input);
             if (count($errors) === 0) {
-                $input['firstName'] = $sent_vars['firstName'];
-                $input['lastName'] = $sent_vars['lastName'];
-                $input['firstName'] = $input['firstName'] . " " . $input['lastName'];
+                $this->sendEmail($input['email'], $input['password']);
+                $input['firstName'] = '';
+                $input['lastName'] = '';
+                $input['firstName'] = '';
                 $input['role'] = '1';
                 $input['avatar'] = 'https://staticfvvn.s3-ap-southeast-1.amazonaws.com/fv4uploads/uploads/users/4x/6gl/xtq/avatar/thumb_694526497374699.jpg';
                 $input['createdAt'] = currentTime();
                 $input['password'] = password_hash($input['password'], PASSWORD_DEFAULT);
+            } else {
+                $this->loadErrors(400, $errors);
             }
         } catch (ErrorException $e) {
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
@@ -157,7 +202,29 @@ class AuthController extends Controllers
         $res['msg'] = 'Success';
         dd($res);
         exit();
+    }
+    function rand_string($length)
+    {
+        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return substr(str_shuffle($chars), 0, $length);
+    }
+    function sendEmail($email, $password)
+    {
+        $mail  = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'htrannamss@gmail.com';
+        $mail->Password = 'ncchbnjlarsflytl';
+        $mail->SMTPSecure = 'ss1';
+        $mail->Port = 587;
 
-        $this->loadErrors(400, $errors);
+        $mail->setFrom('htrannamss@gmail.com');
+        $mail->addAddress($email);
+        $mail->isHTML(true);
+        $mail->Subject = "From Obrien with love";
+        $mail->Body = "Your password: " . $password;
+
+        $mail->send();
     }
 }
