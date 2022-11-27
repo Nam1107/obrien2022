@@ -5,7 +5,7 @@ class orderModel extends Controllers
     function getDetail($orderID, $all = 0)
     {
         $order = custom("
-        SELECT `order`.ID,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        SELECT `order`.* ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`	
         WHERE `order`.ID = orderDetail.orderID
         AND `order`.ID = $orderID
