@@ -19,8 +19,7 @@ class wishListController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        $sent_vars = $_GET;
         try {
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];

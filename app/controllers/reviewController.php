@@ -50,8 +50,7 @@ class reviewController extends Controllers
     public function productReview($id = 0)
     {
         $this->middle_ware->checkRequest('GET');
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        $sent_vars = $_GET;
         try {
             $rate = $sent_vars['rate'];
             $page = $sent_vars['page'];
@@ -68,8 +67,7 @@ class reviewController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        $sent_vars = $_GET;
 
 
         try {
@@ -103,8 +101,7 @@ class reviewController extends Controllers
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
 
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+        $sent_vars = $_GET;
         try {
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
