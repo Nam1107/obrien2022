@@ -1,6 +1,6 @@
 <?php
 
-class wishListModel extends Controllers
+class wishModel extends Controllers
 {
     function getList($userID, $page, $perPage)
     {

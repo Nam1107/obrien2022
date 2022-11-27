@@ -4,10 +4,10 @@ class dashboard extends Controllers
 {
     public $validate_user;
     public $middle_ware;
-    public $wishlist_model;
+    public $dashboard_model;
     public function __construct()
     {
-        $this->wishlist_model = $this->model('dashboardModel');
+        $this->dashboard_model = $this->model('dashboardModel');
         $this->middle_ware = new middleware();
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);

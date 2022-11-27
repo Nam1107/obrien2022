@@ -1,13 +1,13 @@
 <?php
 
-class wishlistController extends Controllers
+class wishController extends Controllers
 {
     public $validate_user;
     public $middle_ware;
     public $wishlist_model;
     public function __construct()
     {
-        $this->wishlist_model = $this->model('wishlistModel');
+        $this->wishlist_model = $this->model('wishModel');
         $this->middle_ware = new middleware();
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
