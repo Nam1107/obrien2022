@@ -26,6 +26,21 @@ class orderController extends Controllers
         $this->render_view->ToView(status_order);
         exit();
     }
+
+    function cancelReason()
+    {
+        $this->middle_ware->checkRequest('GET');
+        $this->render_view->ToView(cancel_reason);
+        exit;
+    }
+
+    function orderFail()
+    {
+        $this->middle_ware->checkRequest('GET');
+        $this->render_view->ToView(order_fail);
+        exit;
+    }
+
     function report()
     {
         $this->middle_ware->checkRequest('GET');
@@ -171,7 +186,7 @@ class orderController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->userOnly();
-        $res = $this->order_model->getDetail($id);
+        $res = $this->order_model->getDetail($id, 1);
         $this->render_view->ToView($res);
         exit();
     }
@@ -228,13 +243,13 @@ class orderController extends Controllers
             $this->render_view->loadErrors(400, 'No orders yet');
         }
         switch ($order['status']) {
-            case 'To Ship':
+            case status_order[0]:
                 $this->order_model->updateStatus($id, $status, $reason);
                 $res['msg'] = 'Success';
                 $this->render_view->ToView($res);
                 exit();
                 break;
-            case 'To Recivie':
+            case status_order[1]:
                 $this->render_view->loadErrors(400, 'The order is being shipped');
                 exit;
                 break;
@@ -244,7 +259,7 @@ class orderController extends Controllers
                 break;
         }
     }
-    public function orderRecevied($id = 0)
+    public function orderReceived($id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->userOnly();

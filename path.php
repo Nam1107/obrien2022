@@ -41,14 +41,20 @@ const report_status = [
     1 => 'Defective products'
 ];
 
+const cancel_reason = [
+    0 => 'Changed my mind'
+];
+
 const shipping_fail = [
     0 => 'Customers do not answer the phone',
-    1 => 'Customers make an appointment to pick up the goods on another day'
+    1 => 'Customers make an appointment to pick up the goods on another day',
+    2 => 'Product is being delivered to a wrong address'
 ];
 
 const order_fail = [
     0 => 'Unable to contact customer',
-    1 => 'The goods in stock are sold out'
+    1 => 'The goods in stock are sold out',
+    2 => 'Product is being delivered to a wrong address'
 ];
 
 const delivery_status = [
