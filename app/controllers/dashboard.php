@@ -2,13 +2,14 @@
 
 class dashboard extends Controllers
 {
-    public $validate_user;
     public $middle_ware;
     public $dashboard_model;
+    public $render_view;
     public function __construct()
     {
         $this->dashboard_model = $this->model('dashboardModel');
         $this->middle_ware = new middleware();
+        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -26,7 +27,7 @@ class dashboard extends Controllers
             $startDate = $sent_vars['startDate'];
             $endDate = $sent_vars['endDate'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $report = custom("SELECT A.status,SUM(A.total) AS total,COUNT(A.ID) AS num
@@ -39,7 +40,7 @@ class dashboard extends Controllers
         GROUP BY A.status
         ");
         $res['report'] = $report;
-        dd($res);
+        $this->render_view->ToView($res);
         exit;
     }
 }

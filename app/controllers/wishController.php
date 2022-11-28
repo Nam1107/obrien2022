@@ -2,13 +2,14 @@
 
 class wishController extends Controllers
 {
-    public $validate_user;
     public $middle_ware;
     public $wishlist_model;
+    public $render_view;
     public function __construct()
     {
         $this->wishlist_model = $this->model('wishModel');
         $this->middle_ware = new middleware();
+        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -24,11 +25,11 @@ class wishController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->wishlist_model->getList($userID, $page, $perPage);
 
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -39,7 +40,7 @@ class wishController extends Controllers
         $userID = $_SESSION['user']['ID'];
         $check = $this->wishlist_model->getDetail($userID, $id);
         if (!$check) {
-            $this->loadErrors(404, 'Not found this product in your wishlist');
+            $this->render_view->loadErrors(404, 'Not found this product in your wishlist');
         }
         $condition = [
             "userID" => $userID,
@@ -55,7 +56,7 @@ class wishController extends Controllers
         AND wishList.userID = $userID
         ");
         $res['obj'] = $wishList;
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -65,7 +66,7 @@ class wishController extends Controllers
         $this->middle_ware->userOnly();
         $check = selectOne('product', ['ID' => $id]);
         if (!$check) {
-            $this->loadErrors(400, 'This product does not exist');
+            $this->render_view->loadErrors(400, 'This product does not exist');
         }
         $userID = $_SESSION['user']['ID'];
 
@@ -86,10 +87,10 @@ class wishController extends Controllers
             AND wishList.userID = $userID
             ");
             $res['obj'] = $wishList;
-            dd($res);
+            $this->render_view->ToView($res);
             exit();
         } else {
-            $this->loadErrors(400, 'This product has exists in your list');
+            $this->render_view->loadErrors(400, 'This product has exists in your list');
         }
     }
 }

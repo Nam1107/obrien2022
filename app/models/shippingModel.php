@@ -5,7 +5,7 @@ class shippingModel
     {
         $shipping = [
             "orderID" => $orderID,
-            "description" => "Order has been created",
+            "description" => shipping_status[0],
             "createdAt" => currentTime(),
             "createdBy" => $userID
         ];

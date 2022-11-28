@@ -2,56 +2,28 @@
 
 class orderController extends Controllers
 {
-    public $validate_user;
     public $middle_ware;
     public $order_model;
+    public $render_view;
+    public $shipping_model;
     public function __construct()
     {
         $this->order_model = $this->model('orderModel');
         $this->cart_model = $this->model('cartModel');
         $this->shipping_model = $this->model('shippingModel');
+        $this->render_view = $this->render('renderView');
         $this->middle_ware = new middleware();
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
     }
-    public function createNewOrder($userID, $note, $phone, $address)
-    {
-        $order['userID'] = $userID;
-        $order['note'] = $note;
-        $order['status'] = 'To Ship';
-        $order['phone'] = $phone;
-        $order['address'] = $address;
-        $order['createdAt'] = currentTime();
 
-        $orderID = create('order', $order);
-        return $orderID;
-    }
-    public function createOrderDetail($orderID, $productID, $unitPrice, $quantity)
-    {
-        $condition = [
-            "orderID" => $orderID,
-            "productID" => $productID,
-            "unitPrice" => $unitPrice,
-            "quantity" => $quantity,
-            "createdAt" => currentTime()
-        ];
-        create('orderDetail', $condition);
-    }
-    public function updateStatus($orderID, $status, $description)
-    {
-        update('order', ['ID' => $orderID], ['status' => $status]);
-        $shipping = [
-            "orderID" => $orderID,
-            "description" => $description,
-            "createdAt" => currentTime()
-        ];
-        create('shippingDetail', $shipping);
-    }
+
+
     function listStatus()
     {
         $this->middle_ware->checkRequest('GET');
-        dd(status_order);
+        $this->render_view->ToView(status_order);
         exit();
     }
     function report()
@@ -65,7 +37,7 @@ class orderController extends Controllers
             $startDate = $sent_vars['startDate'];
             $endDate = $sent_vars['endDate'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $report = custom("SELECT A.status,SUM(A.total) AS total,COUNT(A.ID) AS numOfOrder
@@ -102,7 +74,7 @@ class orderController extends Controllers
         }
 
         $res['report'] = $obj;
-        dd($res);
+        $this->render_view->ToView($res);
         exit;
     }
 
@@ -118,15 +90,15 @@ class orderController extends Controllers
 
         #check...
         if (!isset($sent_vars['note']) || empty($sent_vars['phone']) || empty($sent_vars['address'])) {
-            $this->loadErrors(400, 'Error: input is invalid');
+            $this->render_view->loadErrors(400, 'Error: input is invalid');
         }
         $cart = $this->cart_model->getCart($userID)['obj'];
         if (!$cart) {
-            $this->loadErrors(400, 'Your cart is empty');
+            $this->render_view->loadErrors(400, 'Your cart is empty');
         }
         foreach ($cart as $key => $val) {
             if ($val['status'] === 0) {
-                $this->loadErrors(400, 'Some items in your cart has sold out');
+                $this->render_view->loadErrors(400, 'Some items in your cart has sold out');
             }
         }
 
@@ -142,15 +114,15 @@ class orderController extends Controllers
         delete('shoppingCart', ['userID' => $userID]);
 
         #create order
-        $orderID = $this->createNewOrder($userID, $sent_vars['note'], $sent_vars['phone'], $sent_vars['address']);
+        $orderID = $this->order_model->createNewOrder($userID, $sent_vars['note'], $sent_vars['phone'], $sent_vars['address']);
 
         $this->shipping_model->create($orderID);
 
         foreach ($cart as $key => $val) {
-            $this->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quantity"]);
+            $this->order_model->createOrderDetail($orderID, $val['productID'], $val['unitPrice'], $val["quantity"]);
         }
         $res = $this->order_model->getDetail($orderID);
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -167,11 +139,11 @@ class orderController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->order_model->ListOrderByUser($userID, $status, $page, $perPage);
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -179,8 +151,6 @@ class orderController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
-        // $json = file_get_contents("php://input");
-        // $sent_vars = json_decode($json, TRUE);
         $sent_vars = $_GET;
         try {
             $status = $sent_vars['status'];
@@ -189,11 +159,11 @@ class orderController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->order_model->listOrder($status, $page, $perPage, $startDate, $endDate);
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -202,7 +172,7 @@ class orderController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->userOnly();
         $res = $this->order_model->getDetail($id);
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -211,7 +181,7 @@ class orderController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
         $res = $this->order_model->getDetail($id, 1);
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -220,21 +190,21 @@ class orderController extends Controllers
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->adminOnly();
 
-        $order = selectOne('order', ['ID' => $id]);
+        $order = $this->order_model->getDetail($id, 0);
         if (!$order) {
-            $this->loadErrors(400, 'No orders yet');
+            $this->render_view->loadErrors(400, 'No orders yet');
         }
 
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
 
         if (empty($sent_vars['status']) || empty($sent_vars['description'])) {
-            $this->loadErrors(400, 'Not enough value');
+            $this->render_view->loadErrors(400, 'Not enough value');
         }
 
-        $this->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
+        $this->order_model->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
         $res['msg'] = 'Success';
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -244,30 +214,32 @@ class orderController extends Controllers
         $this->middle_ware->userOnly();
 
         $status = 'Cancelled';
-        $order = selectOne('order', ['ID' => $id]);
+
         $json = file_get_contents("php://input");
         $sent_vars = json_decode($json, TRUE);
         $reason = $sent_vars['reason'];
         $reason = "Reason for Cancellation : " . $reason;
         if (!isset($sent_vars['reason'])) {
-            $this->loadErrors(400, 'Error: input is invalid');
+            $this->render_view->loadErrors(400, 'Error: input is invalid');
         }
+
+        $order = $this->order_model->getDetail($id, 0);
         if (!$order) {
-            $this->loadErrors(400, 'No orders yet');
+            $this->render_view->loadErrors(400, 'No orders yet');
         }
         switch ($order['status']) {
             case 'To Ship':
-                $this->updateStatus($id, $status, $reason);
+                $this->order_model->updateStatus($id, $status, $reason);
                 $res['msg'] = 'Success';
-                dd($res);
+                $this->render_view->ToView($res);
                 exit();
                 break;
             case 'To Recivie':
-                $this->loadErrors(400, 'The order is being shipped');
+                $this->render_view->loadErrors(400, 'The order is being shipped');
                 exit;
                 break;
             default:
-                $this->loadErrors(400, 'The order has been delivered');
+                $this->render_view->loadErrors(400, 'The order has been delivered');
                 exit;
                 break;
         }
@@ -278,23 +250,23 @@ class orderController extends Controllers
         $this->middle_ware->userOnly();
 
         $status = 'To Rate';
-        $order = selectOne('order', ['ID' => $id]);
+        $order = $this->order_model->getDetail($id, 0);
         if (!$order) {
-            $this->loadErrors(400, 'No orders yet');
+            $this->render_view->loadErrors(400, 'No orders yet');
             exit();
         }
 
         switch ($order['status']) {
-            case 'To Recivie':
-                $this->updateStatus($id, $status, "Confirm Receipt of an Order from a Customer");
+            case status_order[1]:
+                $this->order_model->updateStatus($id, $status, shipping_status[3]);
                 $res['msg'] = 'Success';
-                dd($res);
+                $this->render_view->ToView($res);
                 exit();
-            case 'To Ship':
-                $this->loadErrors(400, 'Orders are being prepared');
+            case status_order[0]:
+                $this->render_view->loadErrors(400, 'Orders are being prepared');
                 exit();
             default:
-                $this->loadErrors(400, 'The order has been completed');
+                $this->render_view->loadErrors(400, 'The order has been completed');
                 exit();
         }
     }

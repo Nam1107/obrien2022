@@ -12,6 +12,17 @@ class Controllers
         }
         return false;
     }
+    public function render($view)
+    {
+        if (file_exists("./app/views/" . $view . ".php")) {
+            require_once "./app/views/" . $view . ".php";
+            if (class_exists($view)) {
+                $view = new $view();
+                return $view;
+            }
+        }
+        return false;
+    }
     public function loadErrors($code, $errors)
     {
         http_response_code($code);

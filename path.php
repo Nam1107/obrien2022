@@ -28,3 +28,31 @@ const status_order = [
     4 => 'Completed',
     5 => 'Canceled'
 ];
+
+const shipping_status = [
+    0 => 'Order has been created',
+    1 => 'Order is being shipped',
+    2 => 'Order has been delivered',
+    3 => 'Confirm Receipt of an Order from a Customer'
+];
+
+const report_status = [
+    0 => 'Wrong product delivered',
+    1 => 'Defective products'
+];
+
+const shipping_fail = [
+    0 => 'Customers do not answer the phone',
+    1 => 'Customers make an appointment to pick up the goods on another day'
+];
+
+const order_fail = [
+    0 => 'Unable to contact customer',
+    1 => 'The goods in stock are sold out'
+];
+
+const delivery_status = [
+    0 => 'Processing',
+    1 => 'Success',
+    2 => 'Fail'
+];

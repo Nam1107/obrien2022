@@ -1,13 +1,14 @@
 <?php
 class sliderController extends Controllers
 {
-    public $validate_user;
     public $middle_ware;
     public $user_model;
+    public $render_view;
     public function __construct()
     {
         $this->user_model = $this->model('sliderModel');
         $this->middle_ware = new middleware();
+        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);

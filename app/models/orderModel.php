@@ -14,23 +14,10 @@ class orderModel extends Controllers
         ");
 
         if (!$order) {
-            $this->loadErrors(400, 'No orders yet');
+            return null;
         }
 
         $res['obj'] = $order[0];
-
-
-        $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
-        from shippingDetail
-        WHERE orderID =  $orderID
-        ");
-
-        $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quantity
-        FROM `product`,`orderDetail`	
-        WHERE `product`.ID = orderDetail.productID
-        AND orderID = $orderID
-        ");
-
 
         if ($all == 1) {
             $user = custom("
@@ -44,9 +31,20 @@ class orderModel extends Controllers
             } else {
                 $res['obj']['user'] = $user[0];
             }
+            $shipping = custom("SELECT shippingDetail.description,shippingDetail.createdAt
+            from shippingDetail
+            WHERE orderID =  $orderID
+            ");
+
+            $product = custom("SELECT product.ID, product.image,product.name,unitPrice,quantity
+            FROM `product`,`orderDetail`	
+            WHERE `product`.ID = orderDetail.productID
+            AND orderID = $orderID
+            ");
+            $res['obj']['shipping'] = $shipping;
+            $res['obj']['product'] = $product;
         }
-        $res['obj']['shipping'] = $shipping;
-        $res['obj']['product'] = $product;
+
         return $res;
     }
     function listOrder($status, $page, $perPage, $startDate, $endDate)
@@ -119,7 +117,7 @@ class orderModel extends Controllers
         ");
 
         if (!$order) {
-            $this->loadErrors(400, 'No orders yet');
+            return null;
         }
 
         foreach ($order as $key => $obj) {
@@ -136,5 +134,38 @@ class orderModel extends Controllers
         $res['page'] = (int)$page;
         $res['obj'] = $order;
         return $res;
+    }
+    public function updateStatus($orderID, $status, $description)
+    {
+        update('order', ['ID' => $orderID], ['status' => $status]);
+        $shipping = [
+            "orderID" => $orderID,
+            "description" => $description,
+            "createdAt" => currentTime()
+        ];
+        create('shippingDetail', $shipping);
+    }
+    public function createNewOrder($userID, $note, $phone, $address)
+    {
+        $order['userID'] = $userID;
+        $order['note'] = $note;
+        $order['status'] = status_order[0];
+        $order['phone'] = $phone;
+        $order['address'] = $address;
+        $order['createdAt'] = currentTime();
+
+        $orderID = create('order', $order);
+        return $orderID;
+    }
+    public function createOrderDetail($orderID, $productID, $unitPrice, $quantity)
+    {
+        $condition = [
+            "orderID" => $orderID,
+            "productID" => $productID,
+            "unitPrice" => $unitPrice,
+            "quantity" => $quantity,
+            "createdAt" => currentTime()
+        ];
+        create('orderDetail', $condition);
     }
 }

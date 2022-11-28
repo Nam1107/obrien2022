@@ -4,15 +4,15 @@ class ProductController extends Controllers
 {
     public $product_model;
     public $category_model;
-    public $gallery_model;
     public $middle_ware;
+    public $render_view;
     public function __construct()
     {
 
         $this->middle_ware = new middleware();
         $this->product_model = $this->model('productModel');
         $this->category_model = $this->model('categoryModel');
-        $this->gallery_model = $this->model('gallery_model');
+        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -22,7 +22,7 @@ class ProductController extends Controllers
         // $pro = selectOne('product', ['ID' => $id]);
         $product = custom("SELECT * FROM product WHERE ID = $id AND IsPublic like '%$IsPublic%'");
         if (!$product) {
-            $this->loadErrors(404, 'Not found product');
+            $this->render_view->loadErrors(404, 'Not found product');
             exit();
         }
         return $product[0];
@@ -47,7 +47,7 @@ class ProductController extends Controllers
             $sortType = $sent_vars['sortType'];
             $name = $sent_vars['name'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $IsPublic = 1;
@@ -56,7 +56,7 @@ class ProductController extends Controllers
 
         $res = $this->product_model->getList($page, $perPage, $name, $category, $IsPublic, $sale, $sortBy,  $sortType);
 
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
     public function AdminListProduct()
@@ -77,12 +77,12 @@ class ProductController extends Controllers
             $name = $sent_vars['name'];
             $IsPublic = '';
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->product_model->getList($page, $perPage, $name, $category, $IsPublic, $sale, $sortBy,  $sortType);
 
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -91,7 +91,7 @@ class ProductController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->checkProduct($id, 1);
         $res = $this->product_model->getDetail($id, '1');
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
     public function AdminGetProduct($id = 0)
@@ -100,7 +100,7 @@ class ProductController extends Controllers
         $this->middle_ware->adminOnly();
         $this->checkProduct($id, '');
         $res = $this->product_model->getDetail($id, '');
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -116,25 +116,25 @@ class ProductController extends Controllers
         try {
             $priceSale = $sent_vars['priceSale'];
             if ($priceSale < 0 || $priceSale > $product['price']) {
-                $this->loadErrors(404, 'Errors: price-sale invalid');
+                $this->render_view->loadErrors(404, 'Errors: price-sale invalid');
             }
             if ($priceSale < $product['price'] / 2) {
-                $this->loadErrors(404, 'Errors: price-sale must not less than half price');
+                $this->render_view->loadErrors(404, 'Errors: price-sale must not less than half price');
             }
             $startSale = $sent_vars['startSale'];
             $endSale = $sent_vars['endSale'];
 
             $check = $this->validateDate($startSale);
             if (!$check) {
-                $this->loadErrors(404, 'Errors: day value invalid');
+                $this->render_view->loadErrors(404, 'Errors: day value invalid');
             }
             $check = $this->validateDate($endSale);
             if (!$check) {
-                $this->loadErrors(404, 'Errors: day value invalid');
+                $this->render_view->loadErrors(404, 'Errors: day value invalid');
             }
 
             if ($startSale >= $endSale) {
-                $this->loadErrors(404, 'Errors: startSale must less than endSale');
+                $this->render_view->loadErrors(404, 'Errors: startSale must less than endSale');
             }
 
             $input = [
@@ -146,10 +146,10 @@ class ProductController extends Controllers
             update('product', ['ID' => $id], $input);
 
             $res['msg'] = 'Success';
-            dd($res);
+            $this->render_view->ToView($res);
             exit();
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
     }
 
@@ -165,7 +165,7 @@ class ProductController extends Controllers
             $category = $this->category_model->getDetail($sent_vars['category']);
 
             if (empty($category)) {
-                $this->loadErrors(404, 'Not found category');
+                $this->render_view->loadErrors(404, 'Not found category');
             }
 
             $product = [
@@ -182,7 +182,7 @@ class ProductController extends Controllers
 
             $productID = create('product', $product);
             if ($productID == 0) {
-                $this->loadErrors(400, 'Errors: value invalid');
+                $this->render_view->loadErrors(400, 'Errors: value invalid');
             }
 
             foreach ($gallery as $key => $url) :
@@ -191,11 +191,11 @@ class ProductController extends Controllers
                 create('gallery', $image);
             endforeach;
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res['product']['ID'] = $productID;
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -208,7 +208,7 @@ class ProductController extends Controllers
         delete('product', ['ID' => $id]);
 
         $res['msg'] = 'Success';
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
     public function updateProduct($id = 0)
@@ -229,18 +229,18 @@ class ProductController extends Controllers
             $category = $sent_vars['category'];
             $categoryID = custom("SELECT ID FROM category WHERE name like '%$category%'");
             if (!$categoryID) {
-                $this->loadErrors(400, "Error: Not found category");
+                $this->render_view->loadErrors(400, "Error: Not found category");
             } else {
                 $input['categoryID'] = $categoryID[0]['ID'];
             }
             update('product', ['ID' => $id], $input);
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
 
         $res['msg'] = 'Success';
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -276,13 +276,13 @@ class ProductController extends Controllers
             LIMIT $perPage  OFFSET $offset 
             ");
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
         $res['page'] = $page;
         $res['obj'] = $report;
-        dd($res);
+        $this->render_view->ToView($res);
         exit;
     }
 
@@ -300,7 +300,7 @@ class ProductController extends Controllers
         try {
 
             if ($sent_vars['quantity'] <= 0) {
-                $this->loadErrors(400, "Error: quantity invalid");
+                $this->render_view->loadErrors(400, "Error: quantity invalid");
             }
             $quantity = $sent_vars['quantity'] + $product['stock'];
             $input = [
@@ -313,10 +313,10 @@ class ProductController extends Controllers
             create('stock_input', $input);
             update('product', ['ID' => $id], ['stock' => $quantity]);
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['msg'] = 'Success';
-        dd($res);
+        $this->render_view->ToView($res);
         exit;
     }
     function stockExpiry($id = 0)
@@ -332,11 +332,11 @@ class ProductController extends Controllers
         try {
 
             if ($sent_vars['quantity'] <= 0) {
-                $this->loadErrors(400, "Error: quantity invalid");
+                $this->render_view->loadErrors(400, "Error: quantity invalid");
             }
             $quantity = $product['stock'] - $sent_vars['quantity'];
             if ($quantity < 0) {
-                $this->loadErrors(400, "Error: quantity invalid");
+                $this->render_view->loadErrors(400, "Error: quantity invalid");
             }
             $input = [
                 'quantity' => $sent_vars['quantity'],
@@ -348,10 +348,10 @@ class ProductController extends Controllers
             create('stock_expiry', $input);
             update('product', ['ID' => $id], ['stock' => $quantity]);
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['msg'] = 'Success';
-        dd($res);
+        $this->render_view->ToView($res);
         exit;
     }
     function listStockExpiry()
@@ -386,13 +386,13 @@ class ProductController extends Controllers
             LIMIT $perPage  OFFSET $offset 
             ");
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
         $res['page'] = $page;
         $res['obj'] = $report;
-        dd($res);
+        $this->render_view->ToView($res);
         exit;
     }
 }

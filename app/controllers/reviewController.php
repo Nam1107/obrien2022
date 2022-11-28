@@ -2,13 +2,14 @@
 
 class reviewController extends Controllers
 {
-    public $validate_user;
     public $middle_ware;
     public $review_model;
+    public $render_view;
     public function __construct()
     {
         $this->review_model = $this->model('reviewModel');
         $this->middle_ware = new middleware();
+        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -20,9 +21,9 @@ class reviewController extends Controllers
 
         $order = selectOne('order', ['ID' => $id]);
         if (!$order) {
-            $this->loadErrors(404, 'No orders yet');
+            $this->render_view->loadErrors(404, 'No orders yet');
         } elseif ($order['status'] != 'To Rate') {
-            $this->loadErrors(400, 'Rating is not available');
+            $this->render_view->loadErrors(400, 'Rating is not available');
         }
 
         update('order', ['ID' => $id], ['status' => 'Completed']);
@@ -40,10 +41,10 @@ class reviewController extends Controllers
             ");
             }
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['msg'] = "Success";
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -56,10 +57,10 @@ class reviewController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, 1);
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -75,10 +76,10 @@ class reviewController extends Controllers
             $page =  $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->review_model->listByProduct($id, $page, $perPage, $rate, '');
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -91,7 +92,7 @@ class reviewController extends Controllers
         $IsPublic = !$obj['IsPublic'];
         update('review', ['ID' => $id], ['IsPublic' => $IsPublic]);
         $res['msg'] = 'Success';
-        dd($res);
+        $this->render_view->ToView($res);
         exit();
     }
 
@@ -106,11 +107,11 @@ class reviewController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->review_model->listByUser($userID, $page, $perPage, 1);
 
-        dd($res);
+        $this->render_view->ToView($res);
     }
 }
