@@ -129,7 +129,11 @@ class UserController extends Controllers
             $input['firstName'] = $sent_vars['firstName'];
             $input['lastName'] = $sent_vars['lastName'];
             $input['name'] =  $input['firstName'] . " " . $input['lastName'];
-            $input['role'] = $sent_vars['role'];
+            $role = $this->find($sent_vars['role'], role);
+            if (!$role) {
+                $this->render_view->loadErrors(400, "Role value not invalid");
+            }
+            $input['role'] = $role;
             $input['avatar'] = $sent_vars['avatar'];
             $input['updatedAt'] = currentTime();
         } catch (ErrorException $e) {

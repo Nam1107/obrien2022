@@ -29,6 +29,13 @@ const status_order = [
     5 => 'Canceled'
 ];
 
+const role = [
+    3 => "ROLE_ADMIN",
+    2 => "ROLE_SHIPPER",
+    1 => "ROLE_USER"
+];
+
+
 const shipping_status = [
     0 => 'Order has been created',
     1 => 'Order is being shipped',
