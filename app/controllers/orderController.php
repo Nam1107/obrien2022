@@ -186,7 +186,8 @@ class orderController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->userOnly();
-        $res = $this->order_model->getDetail($id, 1);
+        $userID = $_SESSION['user']['ID'];
+        $res = $this->order_model->getDetail($id, 1, $userID);
         $this->render_view->ToView($res);
         exit();
     }

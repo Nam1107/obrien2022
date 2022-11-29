@@ -165,7 +165,7 @@ class ProductController extends Controllers
             $category = $this->category_model->getDetail($sent_vars['category']);
 
             if (empty($category)) {
-                $this->render_view->loadErrors(404, 'Not found category');
+                $this->render_view->loadErrors(404, 'Value Category invalid');
             }
 
             $product = [
@@ -220,19 +220,20 @@ class ProductController extends Controllers
 
         $this->checkProduct($id);
         try {
+            $category = $sent_vars['category'];
+            $categoryID = custom("SELECT ID FROM category WHERE name like '%$category%'");
+            if (!$categoryID) {
+                $this->render_view->loadErrors(400, "Value Category invalid");
+            } else {
+                $input['categoryID'] = $categoryID[0]['ID'];
+            }
             $input['name'] = $sent_vars['name'];
             $input['price'] = $sent_vars['price'];
             $input['image'] = $sent_vars['image'];
             $input['description'] = $sent_vars['description'];
             $input['IsPublic'] = $sent_vars['IsPublic'];
             $input['updatedAt'] = currentTime();
-            $category = $sent_vars['category'];
-            $categoryID = custom("SELECT ID FROM category WHERE name like '%$category%'");
-            if (!$categoryID) {
-                $this->render_view->loadErrors(400, "Error: Not found category");
-            } else {
-                $input['categoryID'] = $categoryID[0]['ID'];
-            }
+
             update('product', ['ID' => $id], $input);
         } catch (ErrorException $e) {
             $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());

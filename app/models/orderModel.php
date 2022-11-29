@@ -2,16 +2,30 @@
 
 class orderModel extends Controllers
 {
-    function getDetail($orderID, $all = 0)
+    function getDetail($orderID, $all = 0, $userID = 0)
     {
-        $order = custom("
-        SELECT `order`.* ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
-        FROM `order`,`orderDetail`	
-        WHERE `order`.ID = orderDetail.orderID
-        AND `order`.ID = $orderID
-        GROUP BY
-        `orderDetail`.orderID
-        ");
+        // $order = custom("
+        // SELECT `order`.* ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        // FROM `order`,`orderDetail`	
+        // WHERE `order`.ID = orderDetail.orderID
+        // AND `order`.ID = $orderID
+        // GROUP BY
+        // `orderDetail`.orderID
+        // ");
+        $orderQuery1 = "SELECT `order`.* ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+FROM `order`,`orderDetail`	
+WHERE `order`.ID = orderDetail.orderID
+AND `order`.ID = $orderID";
+        $orderQuery2 = "GROUP BY
+`orderDetail`.orderID";
+
+        $userQuery = " ";
+        if ($userID != 0) {
+            $userQuery = " AND `order`.userID = $userID  ";
+        }
+
+        $order = custom($orderQuery1 . $userQuery . $orderQuery2);
+
 
         if (!$order) {
             return null;
