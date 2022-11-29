@@ -217,6 +217,10 @@ class orderController extends Controllers
         if (empty($sent_vars['status']) || empty($sent_vars['description'])) {
             $this->render_view->loadErrors(400, 'Not enough value');
         }
+        $check = $this->find($sent_vars['status'], status_order);
+        if (!$check) {
+            $this->render_view->loadErrors(400, 'Value status invalid');
+        }
 
         $this->order_model->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
         $res['msg'] = 'Success';
