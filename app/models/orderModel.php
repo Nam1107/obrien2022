@@ -130,10 +130,6 @@ AND `order`.ID = $orderID";
         LIMIT $perPage  OFFSET $offset 
         ");
 
-        if (!$order) {
-            return null;
-        }
-
         foreach ($order as $key => $obj) {
             $val = $obj['ID'];
             $order[$key]['product'] = custom("SELECT product.ID, product.image,product.name,unitPrice,quantity
@@ -142,7 +138,6 @@ AND `order`.ID = $orderID";
             AND orderID = $val
             ");
         }
-        $res['status'] = 1;
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
         $res['page'] = (int)$page;

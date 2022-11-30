@@ -151,7 +151,7 @@ class orderController extends Controllers
         $sent_vars = $_GET;
 
         try {
-            $status = $sent_vars['status'];
+            $status = str_replace('%20', ' ', $sent_vars['status']);
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
@@ -250,7 +250,7 @@ class orderController extends Controllers
             $order = $order['obj'];
             switch ($order['status']) {
                 case status_order[0]:
-                    $this->order_model->updateStatus($id, status_order[5], $reason);
+                    $this->order_model->updateStatus($id, status_order[4], $reason);
                     $res['msg'] = 'Success';
                     $this->render_view->ToView($res);
                     exit();
@@ -283,7 +283,7 @@ class orderController extends Controllers
 
             switch ($order['status']) {
                 case status_order[1]:
-                    $this->order_model->updateStatus($id, status_order[3], shipping_status[3]);
+                    $this->order_model->updateStatus($id, status_order[2], shipping_status[3]);
                     $res['msg'] = 'Success';
                     $this->render_view->ToView($res);
                     exit();

@@ -23,10 +23,9 @@ define('MD5_PRIVATE_KEY',   '2342kuhskdfsd23(&kusdhfjsgJYGJGsfdf384');
 const status_order = [
     0 => 'To Ship',
     1 => 'To Receive',
-    2 => null,
-    3 => 'To Rate',
-    4 => 'Completed',
-    5 => 'Canceled'
+    2 => 'To Rate',
+    3 => 'Completed',
+    4 => 'Canceled'
 ];
 
 const role = [
