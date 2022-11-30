@@ -269,28 +269,33 @@ class orderController extends Controllers
     }
     public function orderReceived($id = 0)
     {
-        $this->middle_ware->checkRequest('PUT');
-        $this->middle_ware->userOnly();
+        try {
+            $this->middle_ware->checkRequest('PUT');
+            $this->middle_ware->userOnly();
 
-        $status = 'To Rate';
-        $order = $this->order_model->getDetail($id, 0);
-        if (!$order) {
-            $this->render_view->loadErrors(400, 'No orders yet');
-            exit();
-        }
+            $status = 'To Rate';
+            $order = $this->order_model->getDetail($id, 0);
+            if (!$order) {
+                $this->render_view->loadErrors(400, 'No orders yet');
+                exit();
+            }
+            $order = $order['obj'];
 
-        switch ($order['status']) {
-            case status_order[1]:
-                $this->order_model->updateStatus($id, $status, shipping_status[3]);
-                $res['msg'] = 'Success';
-                $this->render_view->ToView($res);
-                exit();
-            case status_order[0]:
-                $this->render_view->loadErrors(400, 'Orders are being prepared');
-                exit();
-            default:
-                $this->render_view->loadErrors(400, 'The order has been completed');
-                exit();
+            switch ($order['status']) {
+                case status_order[1]:
+                    $this->order_model->updateStatus($id, $status, shipping_status[3]);
+                    $res['msg'] = 'Success';
+                    $this->render_view->ToView($res);
+                    exit();
+                case status_order[0]:
+                    $this->render_view->loadErrors(400, 'Orders are being prepared');
+                    exit();
+                default:
+                    $this->render_view->loadErrors(400, 'The order has been completed');
+                    exit();
+            }
+        } catch (ErrorException $e) {
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
     }
 }
