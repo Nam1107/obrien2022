@@ -234,7 +234,7 @@ class orderController extends Controllers
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->userOnly();
 
-        $status = 'Cancelled';
+        $status = 'Canceled';
         try {
             $json = file_get_contents("php://input");
             $sent_vars = json_decode($json, TRUE);
@@ -249,7 +249,7 @@ class orderController extends Controllers
             $order = $order['obj'];
             switch ($order['status']) {
                 case status_order[0]:
-                    $this->order_model->updateStatus($id, $status, $reason);
+                    $this->order_model->updateStatus($id, status_order[5], $reason);
                     $res['msg'] = 'Success';
                     $this->render_view->ToView($res);
                     exit();
@@ -273,7 +273,6 @@ class orderController extends Controllers
             $this->middle_ware->checkRequest('PUT');
             $this->middle_ware->userOnly();
 
-            $status = 'To Rate';
             $order = $this->order_model->getDetail($id, 0);
             if (!$order) {
                 $this->render_view->loadErrors(400, 'No orders yet');
@@ -283,7 +282,7 @@ class orderController extends Controllers
 
             switch ($order['status']) {
                 case status_order[1]:
-                    $this->order_model->updateStatus($id, $status, shipping_status[3]);
+                    $this->order_model->updateStatus($id, status_order[3], shipping_status[3]);
                     $res['msg'] = 'Success';
                     $this->render_view->ToView($res);
                     exit();
