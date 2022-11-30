@@ -23,7 +23,8 @@ class orderController extends Controllers
     function listStatus()
     {
         $this->middle_ware->checkRequest('GET');
-        $this->render_view->ToView(status_order);
+        $statusArr = array_values(array_filter(status_order));
+        $this->render_view->ToView($statusArr);
         exit();
     }
 
