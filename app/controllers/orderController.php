@@ -217,6 +217,7 @@ class orderController extends Controllers
         if (empty($sent_vars['status']) || empty($sent_vars['description'])) {
             $this->render_view->loadErrors(400, 'Not enough value');
         }
+
         $check = $this->find($sent_vars['status'], status_order);
         if (!$check) {
             $this->render_view->loadErrors(400, 'Value status invalid');
@@ -234,34 +235,36 @@ class orderController extends Controllers
         $this->middle_ware->userOnly();
 
         $status = 'Cancelled';
+        try {
+            $json = file_get_contents("php://input");
+            $sent_vars = json_decode($json, TRUE);
 
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
-        $reason = $sent_vars['reason'];
-        $reason = "Reason for Cancellation : " . $reason;
-        if (!isset($sent_vars['reason'])) {
-            $this->render_view->loadErrors(400, 'Error: input is invalid');
-        }
+            $reason = $sent_vars['reason'];
+            $reason = "Reason for Cancellation : " . $reason;
 
-        $order = $this->order_model->getDetail($id, 0);
-        if (!$order) {
-            $this->render_view->loadErrors(400, 'No orders yet');
-        }
-        switch ($order['status']) {
-            case status_order[0]:
-                $this->order_model->updateStatus($id, $status, $reason);
-                $res['msg'] = 'Success';
-                $this->render_view->ToView($res);
-                exit();
-                break;
-            case status_order[1]:
-                $this->render_view->loadErrors(400, 'The order is being shipped');
-                exit;
-                break;
-            default:
-                $this->render_view->loadErrors(400, 'The order has been delivered');
-                exit;
-                break;
+            $order = $this->order_model->getDetail($id, 0);
+            if (!$order) {
+                $this->render_view->loadErrors(400, 'No orders yet');
+            }
+            $order = $order['obj'];
+            switch ($order['status']) {
+                case status_order[0]:
+                    $this->order_model->updateStatus($id, $status, $reason);
+                    $res['msg'] = 'Success';
+                    $this->render_view->ToView($res);
+                    exit();
+                    break;
+                case status_order[1]:
+                    $this->render_view->loadErrors(400, 'The order is being shipped');
+                    exit;
+                    break;
+                default:
+                    $this->render_view->loadErrors(400, 'The order has been delivered');
+                    exit;
+                    break;
+            }
+        } catch (ErrorException $e) {
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
     }
     public function orderReceived($id = 0)
