@@ -68,9 +68,12 @@ AND `order`.ID = $orderID";
             "SELECT COUNT(ID) as total
             FROM (
                 SELECT `order`.ID
-                FROM `order`
+                FROM `order`,`orderDetail`,user
                 WHERE `order`.status LIKE '%$status%'
+                AND user.ID = `order`.userID
+                AND `order`.ID = orderDetail.orderID
                 AND `order`.createdAt > '$startDate' AND  `order`.createdAt < '$endDate'
+                GROUP BY `order`.ID
             ) AS B
         "
         );
@@ -90,7 +93,7 @@ AND `order`.ID = $orderID";
         ");
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] = $check;
-        $res['page'] = $page;
+        $res['page'] = (int)$page;
         $res['obj'] = $order;
         // $res = $this->loadList($total[0]['total'], $check, $page, $order);
         return $res;
@@ -103,9 +106,11 @@ AND `order`.ID = $orderID";
             "SELECT COUNT(ID) as total
             FROM (
                 SELECT `order`.ID
-                FROM `order`
+                FROM `order`,`orderDetail`,user
                 WHERE `order`.status LIKE '%$status%'
+                AND `order`.ID = orderDetail.orderID
                 AND `order`.userID = $userID
+                GROUP BY `order`.ID
             ) AS B
         "
         );

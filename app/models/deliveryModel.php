@@ -50,7 +50,7 @@ class deliveryModel extends Controllers
 
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] =  $check;
-        $res['page'] = $page;
+        $res['page'] = (int)$page;
         $res['obj'] = $order;
         return $res;
     }
@@ -84,7 +84,7 @@ class deliveryModel extends Controllers
 
         $res['totalCount'] = $total[0]['total'];
         $res['numOfPage'] =  $check;
-        $res['page'] = $page;
+        $res['page'] = (int)$page;
         $res['obj'] = $order;
         return $res;
     }

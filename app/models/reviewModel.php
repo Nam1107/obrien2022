@@ -44,7 +44,7 @@ class reviewModel
         ");
 
 
-        $res['page'] = $page;
+        $res['page'] = (int)$page;
         $res['numOfPage'] = $check;
         $res['countOfReviews'] = $num;
         $res['obj'] = $obj;
@@ -73,7 +73,7 @@ class reviewModel
 
 
         $res['count'] = $total[0]['total'];
-        $res['page'] = $page;
+        $res['page'] = (int)$page;
         $res['numOfPage'] = $check;
         $res['obj'] = $obj;
         dd($res);
