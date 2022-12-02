@@ -78,7 +78,7 @@ class AuthController extends Controllers
 
                 $payload = [
                     'iss' => 'obrien',
-                    'exp' => time() + 60,
+                    'exp' => time() + 24 * 60 * 60,
                     'data' => [
                         'id' => $id
                     ]
@@ -122,7 +122,7 @@ class AuthController extends Controllers
             $role = $result[0]['role'];
             $payload = [
                 'iss' => 'obrien',
-                'exp' => time() + 60,
+                'exp' => time() + 24 * 60 * 60,
                 'data' => [
                     'id' => $id
                 ],
