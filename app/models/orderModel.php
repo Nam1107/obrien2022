@@ -55,6 +55,7 @@ AND `order`.ID = $orderID";
             WHERE `product`.ID = orderDetail.productID
             AND orderID = $orderID
             ");
+
             $res['obj']['shipping'] = $shipping;
             $res['obj']['product'] = $product;
         }

@@ -12,12 +12,42 @@ class deliveryModel extends Controllers
                 ORDER BY id DESC
         ");
 
-
         if (empty($delivery)) {
             return null;
+        } else {
+            $delivery = $delivery[0];
+        }
+        $user_id = empty($delivery['shipper_id']) ? 0 : $delivery['shipper_id'];
+        unset($delivery['shipper_id']);
+        $obj = custom("
+        SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
+        FROM `user`,tbl_role
+        WHERE `user`.id = $user_id
+        AND tbl_role.id = user.role
+        ");
+
+        if (!$obj) {
+            $delivery['shipper'] = null;
+        } else {
+            $delivery['shipper'] = $obj[0];
         }
 
-        $res = $delivery[0];
+        $user_id = empty($delivery['created_by']) ? 0 : $delivery['created_by'];
+        unset($delivery['created_by']);
+        $obj = custom("
+        SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
+        FROM `user`,tbl_role
+        WHERE `user`.id = $user_id
+        AND tbl_role.id = user.role
+        ");
+
+        if (!$obj) {
+            $delivery['created_by'] = null;
+        } else {
+            $delivery['created_by'] = $obj[0];
+        }
+
+        $res = $delivery;
 
         return ($res);
     }
@@ -94,11 +124,14 @@ class deliveryModel extends Controllers
     function getListByOrder($order_id, $value = '*')
     {
         $delivery = custom("
-                SELECT $value
+                SELECT id
                 FROM delivery_order
                 WHERE delivery_order.order_id = $order_id
                 ORDER BY id DESC
         ");
+        foreach ($delivery as $key => $each) {
+            $delivery[$key] = $this->getDetail($each['id']);
+        }
         $res = $delivery;
 
         return ($res);

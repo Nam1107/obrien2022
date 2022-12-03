@@ -5,11 +5,13 @@ class orderController extends Controllers
     public $middle_ware;
     public $order_model;
     public $render_view;
+    public $delivery_model;
     public $shipping_model;
     public function __construct()
     {
         $this->order_model = $this->model('orderModel');
         $this->cart_model = $this->model('cartModel');
+        $this->delivery_model = $this->model('deliveryModel');
         $this->shipping_model = $this->model('shippingModel');
         $this->render_view = $this->render('renderView');
         $this->middle_ware = new middleware();
@@ -189,6 +191,7 @@ class orderController extends Controllers
         $this->middle_ware->userOnly();
         $userID = $_SESSION['user']['ID'];
         $res = $this->order_model->getDetail($id, 1, $userID);
+
         $this->render_view->ToView($res);
         exit();
     }
@@ -198,6 +201,7 @@ class orderController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->adminOnly();
         $res = $this->order_model->getDetail($id, 1);
+        $res['obj']['delivery']  = $this->delivery_model->getListByOrder($id);
         $this->render_view->ToView($res);
         exit();
     }
