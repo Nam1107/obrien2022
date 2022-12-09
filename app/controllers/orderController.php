@@ -207,33 +207,36 @@ class orderController extends Controllers
         exit();
     }
 
-    public function setStatusOrder($id = 0)
-    {
-        $this->middle_ware->checkRequest('PUT');
-        $this->middle_ware->adminOnly();
+    // public function setStatusOrder($id = 0)
+    // {
+    //     $this->middle_ware->checkRequest('PUT');
+    //     $this->middle_ware->adminOnly();
+    //     $userID = $_SESSION['user']['ID'];
+    //     $order = $this->order_model->getDetail($id, 0);
+    //     if (!$order) {
+    //         $this->render_view->loadErrors(400, 'No orders yet');
+    //     }
 
-        $order = $this->order_model->getDetail($id, 0);
-        if (!$order) {
-            $this->render_view->loadErrors(400, 'No orders yet');
-        }
+    //     $json = file_get_contents("php://input");
+    //     $sent_vars = json_decode($json, TRUE);
 
-        $json = file_get_contents("php://input");
-        $sent_vars = json_decode($json, TRUE);
+    //     if (empty($sent_vars['status']) || empty($sent_vars['description'])) {
+    //         $this->render_view->loadErrors(400, 'Not enough value');
+    //     }
 
-        if (empty($sent_vars['status']) || empty($sent_vars['description'])) {
-            $this->render_view->loadErrors(400, 'Not enough value');
-        }
+    //     $description = $sent_vars['description'];
 
-        $check = $this->find($sent_vars['status'], status_order);
-        if (!$check) {
-            $this->render_view->loadErrors(400, 'Value status invalid');
-        }
+    //     $check = $this->find($sent_vars['status'], status_order);
+    //     if (!$check) {
+    //         $this->render_view->loadErrors(400, 'Value status invalid');
+    //     }
 
-        $this->order_model->updateStatus($id, $sent_vars['status']);
-        $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
-        exit();
-    }
+    //     $this->order_model->updateStatus($id, $sent_vars['status']);
+    //     $this->shipping_model->create($id, $userID, $description);
+    //     $res['msg'] = 'Success';
+    //     $this->render_view->ToView($res);
+    //     exit();
+    // }
 
     public function cancelOrder($id = 0)
     {
@@ -247,7 +250,59 @@ class orderController extends Controllers
             $userID = $_SESSION['user']['ID'];
 
             $reason = $sent_vars['reason'];
-            $reason = "Reason for Cancellation : " . $reason;
+            $check = $this->find($reason, cancel_reason);
+            if ($check === null) {
+                $this->render_view->loadErrors(400, 'The reason invalid');
+            }
+            $reason = "Canceled by user: " . $reason;
+            $order = $this->order_model->getDetail($id, 0);
+            if (!$order) {
+                $this->render_view->loadErrors(400, 'No orders yet');
+            }
+            $order = $order['obj'];
+            switch ($order['status']) {
+                case status_order[0]:
+                    $this->order_model->updateStatus($id, status_order[4]);
+                    $this->shipping_model->create($id, $userID, $reason);
+                    $res['msg'] = 'Success';
+                    $this->render_view->ToView($res);
+                    exit();
+                    break;
+                case status_order[1]:
+                    $this->render_view->loadErrors(400, 'The order is being shipped');
+                    exit;
+                    break;
+                default:
+                    $this->render_view->loadErrors(400, 'The order has been delivered');
+                    exit;
+                    break;
+            }
+        } catch (ErrorException $e) {
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+        }
+    }
+    public function adminCancelOrder($id = 0)
+    {
+        $this->middle_ware->checkRequest('PUT');
+        $this->middle_ware->adminOnly();
+
+        $status = 'Canceled';
+        try {
+            $json = file_get_contents("php://input");
+            $sent_vars = json_decode($json, TRUE);
+            $userID = $_SESSION['user']['ID'];
+
+            $reason = $sent_vars['reason'];
+            $check = $this->find($reason, order_fail);
+            if ($check === null) {
+                $this->render_view->loadErrors(400, 'The reason invalid');
+            }
+
+            $order = $this->order_model->getDetail($id, 0);
+            if (!$order) {
+                $this->render_view->loadErrors(400, 'No orders yet');
+            }
+            $reason = "Canceled by admin: " . $reason;
 
             $order = $this->order_model->getDetail($id, 0);
             if (!$order) {
