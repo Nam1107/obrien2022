@@ -74,11 +74,18 @@ class middleware extends Controllers
             $this->loadErrors(400, $obj['errors']);
         }
     }
+    function shipperOnly()
+    {
+        $this->userOnly();
+        if ($_SESSION['user']['role'] == 'ROLE_USER') {
+            $this->loadErrors(400, 'you do not have permission to access');
+        }
+    }
     function adminOnly()
     {
         $this->userOnly();
         if ($_SESSION['user']['role'] != 'ROLE_ADMIN') {
-            $this->loadErrors(400, 'You are not admin');
+            $this->loadErrors(400, 'you not have permission to access');
         }
     }
     function guestsOnly()

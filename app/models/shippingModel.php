@@ -1,13 +1,13 @@
 <?php
 class shippingModel
 {
-    function create($orderID, $userID = 0)
+    function create($orderID, $userID = 0, $description)
     {
         $shipping = [
             "orderID" => $orderID,
-            "description" => shipping_status[0],
-            "createdAt" => currentTime(),
-            "createdBy" => $userID
+            "description" => $description,
+            "createdAt" => currentTime()
+            // "createdBy" => $userID
         ];
         create('shippingDetail', $shipping);
     }

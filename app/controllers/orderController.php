@@ -176,11 +176,12 @@ class orderController extends Controllers
             $endDate = $sent_vars['endDate'];
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
+            $id = empty($sent_vars['orderID']) ?  '' : $sent_vars['orderID'];
         } catch (ErrorException $e) {
             $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
-        $res = $this->order_model->listOrder($status, $page, $perPage, $startDate, $endDate);
+        $res = $this->order_model->listOrder($status, $page, $perPage, $startDate, $endDate, $id);
         $this->render_view->ToView($res);
         exit();
     }

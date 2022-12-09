@@ -38,8 +38,7 @@ const role = [
 const shipping_status = [
     0 => 'Order has been created',
     1 => 'Order is being shipped',
-    2 => 'Order has been delivered',
-    3 => 'Confirm Receipt of an Order from a Customer'
+    2 => 'Order has been delivered'
 ];
 
 const report_status = [

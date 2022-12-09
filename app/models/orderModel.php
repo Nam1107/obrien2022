@@ -62,7 +62,7 @@ AND `order`.ID = $orderID";
 
         return $res;
     }
-    function listOrder($status, $page, $perPage, $startDate, $endDate)
+    function listOrder($status, $page, $perPage, $startDate, $endDate, $id = '')
     {
         $offset = $perPage * ($page - 1);
         $total = custom(
@@ -72,7 +72,8 @@ AND `order`.ID = $orderID";
                 FROM `order`,`orderDetail`,user
                 WHERE `order`.status LIKE '%$status%'
                 AND user.ID = `order`.userID
-                AND `order`.ID = orderDetail.orderID
+                AND `order`.ID = orderDetail.orderID 
+                AND `order`.ID like '%$id%'
                 AND `order`.createdAt > '$startDate' AND  `order`.createdAt < '$endDate'
                 GROUP BY `order`.ID
             ) AS B
@@ -82,11 +83,12 @@ AND `order`.ID = $orderID";
         $check = ceil($total[0]['total'] / $perPage);
 
         $order = custom("
-        SELECT `order`.ID,`order`.userID,user.name,`order`.status , `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        SELECT `order`.*,user.name ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`,user
         WHERE `order`.ID = orderDetail.orderID
         AND `order`.status LIKE '%$status%'
         AND user.ID = `order`.userID
+        AND `order`.ID like '%$id%'
         AND `order`.createdAt > '$startDate' AND  `order`.createdAt < '$endDate'
         GROUP BY `orderDetail`.orderID
         ORDER BY `order`.createdAt DESC
@@ -150,15 +152,9 @@ AND `order`.ID = $orderID";
         $res['obj'] = $order;
         return $res;
     }
-    public function updateStatus($orderID, $status, $description)
+    public function updateStatus($orderID, $status, $description = '')
     {
         update('order', ['ID' => $orderID], ['status' => $status]);
-        $shipping = [
-            "orderID" => $orderID,
-            "description" => $description,
-            "createdAt" => currentTime()
-        ];
-        create('shippingDetail', $shipping);
     }
     public function createNewOrder($userID, $note, $phone, $address)
     {

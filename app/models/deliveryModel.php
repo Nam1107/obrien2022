@@ -17,35 +17,35 @@ class deliveryModel extends Controllers
         } else {
             $delivery = $delivery[0];
         }
-        $user_id = empty($delivery['shipper_id']) ? 0 : $delivery['shipper_id'];
-        unset($delivery['shipper_id']);
-        $obj = custom("
-        SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
-        FROM `user`,tbl_role
-        WHERE `user`.id = $user_id
-        AND tbl_role.id = user.role
-        ");
+        // $user_id = empty($delivery['shipper_id']) ? 0 : $delivery['shipper_id'];
+        // unset($delivery['shipper_id']);
+        // $obj = custom("
+        // SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
+        // FROM `user`,tbl_role
+        // WHERE `user`.id = $user_id
+        // AND tbl_role.id = user.role
+        // ");
 
-        if (!$obj) {
-            $delivery['shipper'] = null;
-        } else {
-            $delivery['shipper'] = $obj[0];
-        }
+        // if (!$obj) {
+        //     $delivery['shipper'] = null;
+        // } else {
+        //     $delivery['shipper'] = $obj[0];
+        // }
 
-        $user_id = empty($delivery['created_by']) ? 0 : $delivery['created_by'];
-        unset($delivery['created_by']);
-        $obj = custom("
-        SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
-        FROM `user`,tbl_role
-        WHERE `user`.id = $user_id
-        AND tbl_role.id = user.role
-        ");
+        // $user_id = empty($delivery['created_by']) ? 0 : $delivery['created_by'];
+        // unset($delivery['created_by']);
+        // $obj = custom("
+        // SELECT user.ID,email,phone,firstName,lastName,`user`.name,avatar ,tbl_role.role_name AS `role`
+        // FROM `user`,tbl_role
+        // WHERE `user`.id = $user_id
+        // AND tbl_role.id = user.role
+        // ");
 
-        if (!$obj) {
-            $delivery['created_by'] = null;
-        } else {
-            $delivery['created_by'] = $obj[0];
-        }
+        // if (!$obj) {
+        //     $delivery['created_by'] = null;
+        // } else {
+        //     $delivery['created_by'] = $obj[0];
+        // }
 
         $res = $delivery;
 
@@ -61,7 +61,7 @@ class deliveryModel extends Controllers
                 SELECT id
                 FROM `delivery_order`
                 WHERE `delivery_order`.status LIKE '%$status%'
-                AND `delivery_order`.departed_date > '$startDate' AND  `delivery_order`.departed_date < '$endDate'
+                AND `delivery_order`.created_date > '$startDate' AND  `delivery_order`.created_date < '$endDate'
             ) AS B
         "
         );
@@ -72,8 +72,8 @@ class deliveryModel extends Controllers
         SELECT *
         FROM `delivery_order`
         WHERE `delivery_order`.status LIKE '%$status%'
-        AND `delivery_order`.departed_date > '$startDate' AND  `delivery_order`.departed_date < '$endDate'
-        ORDER BY `delivery_order`.departed_date DESC
+        AND `delivery_order`.created_date > '$startDate' AND  `delivery_order`.created_date < '$endDate'
+        ORDER BY `delivery_order`.created_date DESC
         LIMIT $perPage  OFFSET $offset 
         ");
 
@@ -95,7 +95,7 @@ class deliveryModel extends Controllers
                 FROM `delivery_order`
                 WHERE `delivery_order`.status LIKE '%$status%'
                 AND delivery_order.shipper_id = $shipper_id
-                AND `delivery_order`.departed_date > '$startDate' AND  `delivery_order`.departed_date < '$endDate'
+                AND `delivery_order`.created_date > '$startDate' AND  `delivery_order`.created_date < '$endDate'
             ) AS B
         "
         );
@@ -107,8 +107,8 @@ class deliveryModel extends Controllers
         FROM `delivery_order`
         WHERE `delivery_order`.status LIKE '%$status%'
         AND delivery_order.shipper_id = $shipper_id
-        AND `delivery_order`.departed_date > '$startDate' AND  `delivery_order`.departed_date < '$endDate'
-        ORDER BY `delivery_order`.departed_date DESC
+        AND `delivery_order`.created_date > '$startDate' AND  `delivery_order`.created_date < '$endDate'
+        ORDER BY `delivery_order`.created_date DESC
         LIMIT $perPage  OFFSET $offset 
         ");
 
@@ -139,26 +139,26 @@ class deliveryModel extends Controllers
 
     function create($order_id = null, $shipper_id = null)
     {
-        $user_id = $_SESSION['user']['id'];
+        $user_id = $_SESSION['user']['ID'];
         $sent_vars = [
             'order_id' => $order_id,
             'shipper_id' => $shipper_id,
             'created_by' => $user_id,
-            'departed_date' => currentTime(),
+            'created_date' => currentTime(),
             'delivered_date' => null,
             'status' => delivery_status[0],
             'description' => null
         ];
         $delivery_id = create('delivery_order', $sent_vars);
 
-        update('tbl_order', ['id' => $order_id], ['status' => status_order[1]]);
+        update('order', ['ID' => $order_id], ['status' => status_order[1]]);
 
         return $delivery_id;
     }
 
     function update($delivery_id,  $status, $description, $delivered_date = null)
     {
-        $user_id = $_SESSION['user']['id'];
+        $user_id = $_SESSION['user']['ID'];
         $delivery = [
             'created_by' => $user_id,
             'status' => $status,

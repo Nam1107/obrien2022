@@ -14,8 +14,6 @@ class deliveryController extends Controllers
         $this->shipping_model = $this->model('shippingModel');
         $this->user_model = $this->model('userModel');
         $this->render_view = $this->render('renderView');
-        // $this->render_view->loadErrors
-        // $this->render_view->ToView
 
         $this->middle_ware = new middleware();
         set_error_handler(function ($severity, $message, $file, $line) {
@@ -27,28 +25,27 @@ class deliveryController extends Controllers
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->shipperOnly();
         $res = $this->delivery_model->getDetail($delivery_id, '*', 1);
+        try {
+            if (empty($res)) {
+                $this->render_view->loadErrors(404, 'Not found');
+            }
 
-        if (empty($res)) {
-            $this->render_view->loadErrors(404, 'Không tìm thấy đơn vận');
+            $user_id = $res['shipper_id'];
+            $res['shipper'] = $this->user_model->getDetail($user_id);
+            unset($res['shipper_id']);
+
+            $admin_id = $res['created_by'];
+            $res['admin'] = $this->user_model->getDetail($admin_id);
+            unset($res['created_by']);
+
+            $order_id = $res['order_id'];
+            $res['order'] = $this->order_model->getDetail($order_id, 1, 0)['obj'];
+            unset($res['order_id']);
+            $this->render_view->ToView($res);
+            exit;
+        } catch (ErrorException $e) {
+            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-
-        $user_id = $res['shipper_id'];
-        $res['shipper'] = $this->user_model->getDetail($user_id, 'id,avatar,user_name,phone,email', 0);
-        unset($res['shipper_id']);
-
-        $admin_id = $res['created_by'];
-        $res['admin'] = $this->user_model->getDetail($admin_id, 'id,avatar,user_name,phone,email', 0);
-        unset($res['created_by']);
-
-        $order_id = $res['order_id'];
-        $res['order'] = $this->order_model->getDetail($order_id, '*', 1);
-        unset($res['order_id']);
-
-        $customer_id = $res['order']['user_id'];
-        $res['order']['customer'] = $this->user_model->getDetail($customer_id, 'id,avatar,user_name,phone,email', 0);
-        unset($res['order']['user_id']);
-        $this->render_view->ToView($res);
-        exit;
     }
 
     function report($user_id = 0)
@@ -65,7 +62,7 @@ class deliveryController extends Controllers
         $report = custom("SELECT status,COUNT(id) AS numOfDelivery
         FROM delivery_order
         WHERE delivery_order.shipper_id = $user_id 
-        AND delivery_order.departed_date > '$startDate' AND  delivery_order.departed_date < '$endDate'
+        AND delivery_order.created_date > '$startDate' AND  delivery_order.created_date < '$endDate'
         GROUP BY delivery_order.`status`");
 
         $status = array_column($report, 'status');
@@ -101,7 +98,7 @@ class deliveryController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $this->middle_ware->shipperOnly();
-        $user_id = $_SESSION['user']['id'];
+        $user_id = $_SESSION['user']['ID'];
         $sent_vars = $_GET;
         try {
             $status = $sent_vars['status'];
@@ -138,7 +135,11 @@ class deliveryController extends Controllers
         $res = $this->delivery_model->getListByShipper($user_id, $status, $page, $perPage, $startDate, $endDate);
         foreach ($res['obj'] as $key => $each) {
             $order_id = empty($each['order_id']) ? 0 : $each['order_id'];
-            $res['obj'][$key]['order'] = $this->order_model->getDetail($order_id, '*', 0);
+            $order = $this->order_model->getDetail($order_id, '*', 0);
+            if ($order) {
+                $order = $order['obj'];
+            }
+            $res['obj'][$key]['order'] = $order;
             unset($res['obj'][$key]['order_id']);
         }
         $this->render_view->ToView($res);
@@ -157,13 +158,14 @@ class deliveryController extends Controllers
             $order_id = $sent_vars['order_id'];
             $order = $this->order_model->getDetail($order_id);
             if (!$order) {
-                $this->render_view->loadErrors(404, 'Không tìm thấy đơn hàng');
+                $this->render_view->loadErrors(404, 'Not found');
             }
-            if ($order['status'] != status_order[0]) {
+
+            if ($order['obj']['status'] != status_order[0]) {
                 $status = status_order[0];
-                $this->render_view->loadErrors(400, "Đơn hàng không trong trạng thái '$status'");
+                $this->render_view->loadErrors(400, "The order status is not '$status'");
             }
-            // $order_id = $sent_vars['order_id'];
+
             $shipper_id = $sent_vars['shipper_id'];
             $this->shipping_model->create($order_id, $shipper_id, shipping_status[1]);
             $delivery_id = $this->delivery_model->create($order_id, $shipper_id);
@@ -171,80 +173,42 @@ class deliveryController extends Controllers
             $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['delivery_id'] = $delivery_id;
-        $res['msg'] = 'Thành công';
+        $res['msg'] = 'Success';
         $this->render_view->ToView($res);
         exit;
     }
-    // function updateDelivery($delivery_id = 0)
-    // {
-    //     $this->middle_ware->checkRequest('PUT');
-    //     $this->middle_ware->shipperOnly();
 
-    //     $json = file_get_contents("php://input");
-    //     $sent_vars = json_decode($json, TRUE);
-
-    //     $role = $_SESSION['user']['role'];
-    //     $user_id = $_SESSION['user']['id'];
-
-    //     $delivery = $this->delivery_model->getDetail($delivery_id);
-    //     if (!$delivery) {
-    //         $this->render_view->loadErrors(404, "Không tìm thấy đơn hàng");
-    //     }
-
-    //     if (!in_array("ROLE_ADMIN", $role)) {
-
-    //         if ($user_id != $delivery['shipper_id']) {
-    //             $this->render_view->loadErrors(400, 'Bạn không có quyền sửa đơn vận');
-    //         }
-    //     }
-
-    //     try {
-    //         $shipper_id = $sent_vars['shipper_id'];
-    //         $status = $sent_vars['status'];
-    //         if (!in_array($status, delivery_status)) {
-    //             $this->render_view->loadErrors(400, 'Trạng thái đơn vận không hợp lệ');
-    //         }
-    //         $description = $sent_vars['description'];
-    //         $this->delivery_model->update($delivery_id, $shipper_id, $status, $description);
-    //     } catch (ErrorException $e) {
-    //         $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
-    //     }
-    //     $res['msg'] = 'Thành công';
-    //     $this->render_view->ToView($res);
-    //     exit;
-    // }
     function completeDelivery($delivery_id = 0)
     {
         $this->middle_ware->checkRequest('PUT');
         $this->middle_ware->shipperOnly();
 
         $role = $_SESSION['user']['role'];
-        $user_id = $_SESSION['user']['id'];
+        $user_id = $_SESSION['user']['ID'];
         $delivery = $this->delivery_model->getDetail($delivery_id);
 
         $status = $delivery['status'];
         if ($status != delivery_status[0]) {
             $status = delivery_status[0];
-            $this->render_view->loadErrors(400, "Đơn vận không trong trạng thái '$status'");
+            $this->render_view->loadErrors(400, "The delivery status is not '$status'");
         }
         if (!$delivery) {
-            $this->render_view->loadErrors(404, "Không tìm thấy đơn hàng");
+            $this->render_view->loadErrors(404, "Not found");
         }
-        if (!in_array("ROLE_ADMIN", $role)) {
+        if ($role != 'ROLE_ADMIN') {
             if ($user_id != $delivery['shipper_id']) {
-                $this->render_view->loadErrors(400, 'Bạn không có quyền sửa đơn vận');
+                $this->render_view->loadErrors(400, 'You do not have permission to access');
                 exit;
             }
         }
         try {
-            $description = "Giao hàng thành công";
-            $this->delivery_model->update($delivery_id, delivery_status[1], $description, currentTime());
+            $this->delivery_model->update($delivery_id, delivery_status[1], shipping_status[2], currentTime());
             $this->order_model->updateStatus($delivery['order_id'], status_order[2]);
-            $this->shipping_model->create($delivery['order_id'], $user_id, $description);
+            $this->shipping_model->create($delivery['order_id'], $user_id, shipping_status[2]);
         } catch (ErrorException $e) {
             $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res['msg'] = 'Thành công';
+        $res['msg'] = 'Success';
         $this->render_view->ToView($res);
         exit;
     }
@@ -257,34 +221,35 @@ class deliveryController extends Controllers
         $sent_vars = json_decode($json, TRUE);
 
         $role = $_SESSION['user']['role'];
-        $user_id = $_SESSION['user']['id'];
+        $user_id = $_SESSION['user']['ID'];
         $delivery = $this->delivery_model->getDetail($delivery_id);
         $status = $delivery['status'];
         if ($status != delivery_status[0]) {
             $status = delivery_status[0];
-            $this->render_view->loadErrors(400, "Đơn vận không trong trạng thái '$status'");
+            $this->render_view->loadErrors(400, "The delivery status is not '$status'");
         }
         if (!$delivery) {
-            $this->render_view->loadErrors(404, "Không tìm thấy đơn hàng");
+            $this->render_view->loadErrors(404, "Not found");
         }
-        if (!in_array("ROLE_ADMIN", $role)) {
+        if ($role != 'ROLE_ADMIN') {
             if ($user_id != $delivery['shipper_id']) {
-                $this->render_view->loadErrors(400, 'Bạn không có quyền sửa đơn vận');
+                $this->render_view->loadErrors(400, 'You do not have permission to access');
+                exit;
             }
         }
 
         try {
             $description = $sent_vars['description'];
             if (!in_array($description, shipping_fail)) {
-                $this->render_view->loadErrors(400, 'Lý do hủy không hợp lệ');
+                $this->render_view->loadErrors(400, 'The reason invalid');
             }
-            $this->delivery_model->update($delivery_id, delivery_status[2], $description, null);
+            $this->delivery_model->update($delivery_id, delivery_status[2], $description, currentTime());
             $this->shipping_model->create($delivery['order_id'], $user_id, $description);
             $this->order_model->updateStatus($delivery['order_id'], status_order[0]);
         } catch (ErrorException $e) {
             $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        $res['msg'] = 'Thành công';
+        $res['msg'] = 'Success';
         $this->render_view->ToView($res);
         exit;
     }
