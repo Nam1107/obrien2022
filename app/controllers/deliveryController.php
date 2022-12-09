@@ -203,7 +203,6 @@ class deliveryController extends Controllers
         }
         try {
             $this->delivery_model->update($delivery_id, delivery_status[1], shipping_status[2], currentTime());
-            $this->order_model->updateStatus($delivery['order_id'], status_order[2]);
             $this->shipping_model->create($delivery['order_id'], $user_id, shipping_status[2]);
         } catch (ErrorException $e) {
             $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());

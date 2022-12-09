@@ -229,7 +229,7 @@ class orderController extends Controllers
             $this->render_view->loadErrors(400, 'Value status invalid');
         }
 
-        $this->order_model->updateStatus($id, $sent_vars['status'], $sent_vars['description']);
+        $this->order_model->updateStatus($id, $sent_vars['status']);
         $res['msg'] = 'Success';
         $this->render_view->ToView($res);
         exit();
@@ -244,6 +244,7 @@ class orderController extends Controllers
         try {
             $json = file_get_contents("php://input");
             $sent_vars = json_decode($json, TRUE);
+            $userID = $_SESSION['user']['ID'];
 
             $reason = $sent_vars['reason'];
             $reason = "Reason for Cancellation : " . $reason;
@@ -255,7 +256,8 @@ class orderController extends Controllers
             $order = $order['obj'];
             switch ($order['status']) {
                 case status_order[0]:
-                    $this->order_model->updateStatus($id, status_order[4], $reason);
+                    $this->order_model->updateStatus($id, status_order[4]);
+                    $this->shipping_model->create($id, $userID, $reason);
                     $res['msg'] = 'Success';
                     $this->render_view->ToView($res);
                     exit();
@@ -278,6 +280,7 @@ class orderController extends Controllers
         try {
             $this->middle_ware->checkRequest('PUT');
             $this->middle_ware->userOnly();
+            $userID = $_SESSION['user']['ID'];
 
             $order = $this->order_model->getDetail($id, 0);
             if (!$order) {
@@ -288,7 +291,8 @@ class orderController extends Controllers
 
             switch ($order['status']) {
                 case status_order[1]:
-                    $this->order_model->updateStatus($id, status_order[2], shipping_status[3]);
+                    $this->order_model->updateStatus($id, status_order[2]);
+                    $this->shipping_model->create($id, $userID, shipping_status[3]);
                     $res['msg'] = 'Success';
                     $this->render_view->ToView($res);
                     exit();
