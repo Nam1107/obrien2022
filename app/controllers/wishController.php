@@ -4,11 +4,13 @@ class wishController extends Controllers
 {
     public $middle_ware;
     public $wishlist_model;
+    public $product_model;
     public $render_view;
     public function __construct()
     {
         $this->wishlist_model = $this->model('wishModel');
         $this->middle_ware = new middleware();
+        $this->product_model = $this->model('productModel');
         $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
@@ -47,15 +49,8 @@ class wishController extends Controllers
             "productID" => $id
         ];
         delete('wishList', $condition);
-        $wishList = custom("
-        SELECT A.* , category.name AS category
-        FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
-        FROM product) AS A,category,wishList
-        WHERE A.categoryID = category.ID
-        AND A.ID = wishList.productID
-        AND wishList.userID = $userID
-        ");
-        $res['obj'] = $wishList;
+
+        $res['msg'] = 'Success';
         $this->render_view->ToView($res);
         exit();
     }
@@ -64,29 +59,17 @@ class wishController extends Controllers
     {
         $this->middle_ware->checkRequest('POST');
         $this->middle_ware->userOnly();
-        $check = selectOne('product', ['ID' => $id]);
+        $check = $this->product_model->getDetail($id, 1);
         if (!$check) {
             $this->render_view->loadErrors(400, 'This product does not exist');
         }
         $userID = $_SESSION['user']['ID'];
-
-        $condition = [
-            "userID" => $userID,
-            "productID" => $id
-        ];
-        $check = selectOne('wishList', $condition);
+        $check = $this->wishlist_model->getDetail($userID, $id);
         if (!$check) {
             $condition['createdAt'] = currentTime();
             create('wishList', $condition);
-            $wishList = custom("
-            SELECT A.* , category.name AS category
-            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
-            FROM product) AS A,category,wishList
-            WHERE A.categoryID = category.ID
-            AND A.ID = wishList.productID
-            AND wishList.userID = $userID
-            ");
-            $res['obj'] = $wishList;
+
+            $res['msg'] = 'Success';
             $this->render_view->ToView($res);
             exit();
         } else {

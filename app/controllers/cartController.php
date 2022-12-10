@@ -48,9 +48,7 @@ class cartController extends Controllers
             'userID' => $userID,
             'productID' => $id,
         ];
-        $obj = selectOne('shoppingCart', $condition);
-
-
+        $obj = $this->cart_model->getProductInCart($userID, $id);
 
         if (!$obj) {
             $res = $this->cart_model->getCart($userID);

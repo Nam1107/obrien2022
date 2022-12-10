@@ -14,11 +14,13 @@ class AuthController extends Controllers
 {
     public $middle_ware;
     public $render_view;
+    public $user_model;
     public function __construct()
     {
-        // $this->wishlist_model = $this->model('categoryModel');
+
         $this->middle_ware = new middleware();
         $this->render_view = $this->render('renderView');
+        $this->user_model = $this->model('userModel');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -67,7 +69,8 @@ class AuthController extends Controllers
 
         if (count($errors) === 0) {
 
-            $user = selectOne('user', ['email' => $sent_vars['email']]);
+            $condition = ['email' => $sent_vars['email']];
+            $user = $this->user_model->findUser($condition);
 
             if (!$user) {
                 array_push($errors, 'Email address does not exist');
@@ -149,7 +152,8 @@ class AuthController extends Controllers
             $input['password'] = $this->rand_string(8);
             $errors = validateForgotPassword($input);
 
-            $user = selectOne('user', ['email' => $sent_vars['email']]);
+            $condition = ['email' => $sent_vars['email']];
+            $user = $this->user_model->findUser($condition);
 
             if (!$user) {
                 array_push($errors, 'Email address does not exist');
@@ -185,20 +189,21 @@ class AuthController extends Controllers
             $errors = validateRegister($input);
             if (count($errors) === 0) {
                 $this->sendEmail($input['email'], $input['password']);
-                $input['firstName'] = '';
-                $input['lastName'] = '';
-                $input['firstName'] = '';
-                $input['role'] = '1';
-                $input['avatar'] = 'https://staticfvvn.s3-ap-southeast-1.amazonaws.com/fv4uploads/uploads/users/4x/6gl/xtq/avatar/thumb_694526497374699.jpg';
-                $input['createdAt'] = currentTime();
+                // $input['firstName'] = '';
+                // $input['lastName'] = '';
+                // $input['firstName'] = '';
+                // $input['role'] = '1';
+                // $input['avatar'] = 'https://staticfvvn.s3-ap-southeast-1.amazonaws.com/fv4uploads/uploads/users/4x/6gl/xtq/avatar/thumb_694526497374699.jpg';
+                // $input['createdAt'] = currentTime();
                 $input['password'] = password_hash($input['password'], PASSWORD_DEFAULT);
+                $this->user_model->createUser($input['email'], $input['password']);
             } else {
                 $this->render_view->loadErrors(400, $errors);
             }
         } catch (ErrorException $e) {
             $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
-        create($table, $input);
+        // create($table, $input);
         $res['msg'] = 'Success';
         $this->render_view->ToView($res);
         exit();
