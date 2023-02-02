@@ -6,14 +6,13 @@ class deliveryController extends Controllers
     public $user_model;
     public $order_model;
     public $shipping_model;
-    public $render_view;
+    public $middle_ware;
     public function __construct()
     {
         $this->order_model = $this->model('orderModel');
         $this->delivery_model = $this->model('deliveryModel');
         $this->shipping_model = $this->model('shippingModel');
         $this->user_model = $this->model('userModel');
-        $this->render_view = $this->render('renderView');
 
         $this->middle_ware = new middleware();
         set_error_handler(function ($severity, $message, $file, $line) {
@@ -27,7 +26,7 @@ class deliveryController extends Controllers
         $res = $this->delivery_model->getDetail($delivery_id, '*', 1);
         try {
             if (empty($res)) {
-                $this->render_view->loadErrors(404, 'Not found');
+                $this->loadErrors(404, 'Not found');
             }
 
             $user_id = $res['shipper_id'];
@@ -41,10 +40,10 @@ class deliveryController extends Controllers
             $order_id = $res['order_id'];
             $res['order'] = $this->order_model->getDetail($order_id, 1, 0)['obj'];
             unset($res['order_id']);
-            $this->render_view->ToView($res);
+            $this->ToView($res);
             exit;
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
     }
 
@@ -57,7 +56,7 @@ class deliveryController extends Controllers
             $startDate = $sent_vars['startDate'];
             $endDate = $sent_vars['endDate'];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $report = custom("SELECT status,COUNT(id) AS numOfDelivery
         FROM delivery_order
@@ -78,20 +77,20 @@ class deliveryController extends Controllers
             }
             array_push($res, $value);
         }
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit;
     }
 
     function listStatus()
     {
         $this->middle_ware->checkRequest('GET');
-        $this->render_view->ToView(delivery_status);
+        $this->ToView(delivery_status);
         exit;
     }
     function reasonFail()
     {
         $this->middle_ware->checkRequest('GET');
-        $this->render_view->ToView(shipping_fail);
+        $this->ToView(shipping_fail);
         exit;
     }
     function listByStatus()
@@ -107,7 +106,7 @@ class deliveryController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->delivery_model->getListByStatus($status, $page, $perPage, $startDate, $endDate);
         foreach ($res['obj'] as $key => $each) {
@@ -115,7 +114,7 @@ class deliveryController extends Controllers
             $res['obj'][$key]['order'] = $this->order_model->getDetail($order_id, '*', 0);
             unset($res['obj'][$key]['order_id']);
         }
-        $this->render_view->ToView($res);
+        $this->ToView($res);
     }
     function listByShipper()
     {
@@ -130,7 +129,7 @@ class deliveryController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->delivery_model->getListByShipper($user_id, $status, $page, $perPage, $startDate, $endDate);
         foreach ($res['obj'] as $key => $each) {
@@ -142,7 +141,7 @@ class deliveryController extends Controllers
             $res['obj'][$key]['order'] = $order;
             unset($res['obj'][$key]['order_id']);
         }
-        $this->render_view->ToView($res);
+        $this->ToView($res);
     }
     function createDelivery()
     {
@@ -158,23 +157,23 @@ class deliveryController extends Controllers
             $order_id = $sent_vars['order_id'];
             $order = $this->order_model->getDetail($order_id);
             if (!$order) {
-                $this->render_view->loadErrors(404, 'Not found');
+                $this->loadErrors(404, 'Not found');
             }
 
             if ($order['obj']['status'] != status_order[0]) {
                 $status = status_order[0];
-                $this->render_view->loadErrors(400, "The order status is not '$status'");
+                $this->loadErrors(400, "The order status is not '$status'");
             }
 
             $shipper_id = $sent_vars['shipper_id'];
             $this->shipping_model->create($order_id, $shipper_id, shipping_status[1]);
             $delivery_id = $this->delivery_model->create($order_id, $shipper_id);
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['delivery_id'] = $delivery_id;
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit;
     }
 
@@ -190,14 +189,14 @@ class deliveryController extends Controllers
         $status = $delivery['status'];
         if ($status != delivery_status[0]) {
             $status = delivery_status[0];
-            $this->render_view->loadErrors(400, "The delivery status is not '$status'");
+            $this->loadErrors(400, "The delivery status is not '$status'");
         }
         if (!$delivery) {
-            $this->render_view->loadErrors(404, "Not found");
+            $this->loadErrors(404, "Not found");
         }
         if ($role != 'ROLE_ADMIN') {
             if ($user_id != $delivery['shipper_id']) {
-                $this->render_view->loadErrors(400, 'You do not have permission to access');
+                $this->loadErrors(400, 'You do not have permission to access');
                 exit;
             }
         }
@@ -205,10 +204,10 @@ class deliveryController extends Controllers
             $this->delivery_model->update($delivery_id, delivery_status[1], shipping_status[2], currentTime());
             $this->shipping_model->create($delivery['order_id'], $user_id, shipping_status[2]);
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit;
     }
     function cancelDelivery($delivery_id = 0)
@@ -225,14 +224,14 @@ class deliveryController extends Controllers
         $status = $delivery['status'];
         if ($status != delivery_status[0]) {
             $status = delivery_status[0];
-            $this->render_view->loadErrors(400, "The delivery status is not '$status'");
+            $this->loadErrors(400, "The delivery status is not '$status'");
         }
         if (!$delivery) {
-            $this->render_view->loadErrors(404, "Not found");
+            $this->loadErrors(404, "Not found");
         }
         if ($role != 'ROLE_ADMIN') {
             if ($user_id != $delivery['shipper_id']) {
-                $this->render_view->loadErrors(400, 'You do not have permission to access');
+                $this->loadErrors(400, 'You do not have permission to access');
                 exit;
             }
         }
@@ -240,16 +239,16 @@ class deliveryController extends Controllers
         try {
             $description = $sent_vars['description'];
             if (!in_array($description, shipping_fail)) {
-                $this->render_view->loadErrors(400, 'The reason invalid');
+                $this->loadErrors(400, 'The reason invalid');
             }
             $this->delivery_model->update($delivery_id, delivery_status[2], $description, currentTime());
             $this->shipping_model->create($delivery['order_id'], $user_id, $description);
             $this->order_model->updateStatus($delivery['order_id'], status_order[0]);
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit;
     }
 }

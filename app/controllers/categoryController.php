@@ -4,12 +4,10 @@ class categoryController extends Controllers
 {
     public $middle_ware;
     public $category_model;
-    public $render_view;
     public function __construct()
     {
         $this->category_model = $this->model('categoryModel');
         $this->middle_ware = new middleware();
-        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -18,7 +16,7 @@ class categoryController extends Controllers
     {
         $this->middle_ware->checkRequest('GET');
         $res = $this->category_model->getList();
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
     public function addCategory()
@@ -38,12 +36,12 @@ class categoryController extends Controllers
             ];
             create('category', $condition);
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
 
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
     public function updateCategory($id)
@@ -61,11 +59,11 @@ class categoryController extends Controllers
                 'description' => $desc
             ];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res['msg'] = 'Success';
         update('category', ['ID' => $id], $input);
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 }

@@ -5,13 +5,11 @@ class cartController extends Controllers
     public $middle_ware;
     public $cart_model;
     public $product_model;
-    public $render_view;
 
     public function __construct()
     {
         $this->cart_model = $this->model('cartModel');
         $this->product_model = $this->model('productModel');
-        $this->render_view = $this->render('renderView');
         $this->middle_ware = new middleware();
     }
     public function getCart()
@@ -23,7 +21,7 @@ class cartController extends Controllers
             $userID = $_SESSION['user']['ID'];
         }
         $res = $this->cart_model->getCart($userID);
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -35,13 +33,13 @@ class cartController extends Controllers
         $sent_vars = json_decode($json, TRUE);
 
         if (empty($sent_vars['quantity'])) {
-            $this->render_view->loadErrors(400, 'Error: quantity value invalid');
+            $this->loadErrors(400, 'Error: quantity value invalid');
         }
         $table = 'shoppingCart';
         $userID = $_SESSION['user']['ID'];
         $product = $this->product_model->getDetail($id, 1);
         if (!$product) {
-            $this->render_view->loadErrors(404, 'Not found product');
+            $this->loadErrors(404, 'Not found product');
         }
 
         $condition = [
@@ -53,7 +51,7 @@ class cartController extends Controllers
         if (!$obj) {
             $res = $this->cart_model->getCart($userID);
             if (count($res) > 10) {
-                $this->render_view->loadErrors(400, 'Your cart is full of slot');
+                $this->loadErrors(400, 'Your cart is full of slot');
             }
 
             $condition['quantity'] = $sent_vars['quantity'];
@@ -62,12 +60,12 @@ class cartController extends Controllers
             }
             create($table, $condition);
             $res = $this->cart_model->getCart($userID);
-            $this->render_view->ToView($res);
+            $this->ToView($res);
             exit();
         }
 
         if ($obj['quantity'] > 5) {
-            $this->render_view->loadErrors(400, 'You cannot add more than 6 quantities of this product');
+            $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
         }
 
         $quantity['quantity'] = $obj['quantity'] + $sent_vars['quantity'];
@@ -76,7 +74,7 @@ class cartController extends Controllers
         }
         update($table, ['ID' => $obj['ID']], $quantity);
         $res = $this->cart_model->getCart($userID);
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -87,11 +85,11 @@ class cartController extends Controllers
         $userID = $_SESSION['user']['ID'];
         $product = $this->product_model->getDetail($id, 1);
         if (!$product) {
-            $this->render_view->loadErrors(404, 'Not found product');
+            $this->loadErrors(404, 'Not found product');
         }
         $obj = $this->cart_model->getProductInCart($userID, $id);
         if (!$obj) {
-            $this->render_view->loadErrors(400, 'Cannot found product in your cart');
+            $this->loadErrors(400, 'Cannot found product in your cart');
         }
 
         $table = 'shoppingCart';
@@ -101,7 +99,7 @@ class cartController extends Controllers
         ];
         delete($table, $condition);
         $res = $this->cart_model->getCart($userID);
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -112,16 +110,16 @@ class cartController extends Controllers
         $userID = $_SESSION['user']['ID'];
         $obj = $this->cart_model->getProductInCart($userID, $id);
         if (!$obj) {
-            $this->render_view->loadErrors(400, 'Cannot found product in your cart');
+            $this->loadErrors(400, 'Cannot found product in your cart');
         }
         if ($obj['quantity'] > 5) {
-            $this->render_view->loadErrors(400, 'You cannot add more than 6 quantities of this product');
+            $this->loadErrors(400, 'You cannot add more than 6 quantities of this product');
         }
         custom("
         UPDATE shoppingCart SET quantity = if(quantity < 6,quantity + 1, 6) WHERE userID = $userID AND productID = $id
         ");
         $res = $this->cart_model->getCart($userID);
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -133,14 +131,14 @@ class cartController extends Controllers
         $userID = $_SESSION['user']['ID'];
         $obj = $this->cart_model->getProductInCart($userID, $id);
         if (!$obj) {
-            $this->render_view->loadErrors(400, 'Cannot found product in your cart');
+            $this->loadErrors(400, 'Cannot found product in your cart');
         }
 
         custom("
         UPDATE shoppingCart SET quantity = if(quantity > 1 ,quantity - 1, 1) WHERE userID = $userID AND productID = $id
         ");
         $res = $this->cart_model->getCart($userID);
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 }

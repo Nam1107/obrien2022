@@ -5,13 +5,11 @@ class GalleryController extends Controllers
     public $middle_ware;
     public $gallery_model;
     public $product_model;
-    public $render_view;
     public function __construct()
     {
         $this->product_model = $this->model('productModel');
         $this->gallery_model = $this->model('galleryModel');
         $this->middle_ware = new middleware();
-        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -23,7 +21,7 @@ class GalleryController extends Controllers
 
         $product = $this->product_model->getDetail($id);
         if (!$product) {
-            $this->render_view->loadErrors(404, 'Not found product');
+            $this->loadErrors(404, 'Not found product');
         }
 
         $json = file_get_contents("php://input");
@@ -31,7 +29,7 @@ class GalleryController extends Controllers
         try {
             $urls = $sent_vars['gallery'];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         foreach ($urls as $key => $url) :
             $obj['productID'] = $id;
@@ -40,7 +38,7 @@ class GalleryController extends Controllers
         endforeach;
         update('product', ['ID' => $id], ['updatedAt' => currentTime()]);
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -59,9 +57,9 @@ class GalleryController extends Controllers
             $res['obj'] = custom("
             SELECT * from gallery where productID = $productID
             ");
-            $this->render_view->ToView($res);
+            $this->ToView($res);
             exit();
         }
-        $this->render_view->loadErrors(404, 'Not found image by ID');
+        $this->loadErrors(404, 'Not found image by ID');
     }
 }

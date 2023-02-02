@@ -13,13 +13,11 @@ use Firebase\JWT\JWT;
 class AuthController extends Controllers
 {
     public $middle_ware;
-    public $render_view;
     public $user_model;
     public function __construct()
     {
 
         $this->middle_ware = new middleware();
-        $this->render_view = $this->render('renderView');
         $this->user_model = $this->model('userModel');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
@@ -32,7 +30,7 @@ class AuthController extends Controllers
         session_destroy();
         $headers = apache_request_headers();
         if (!isset($headers['Authorization'])) {
-            $this->render_view->loadErrors(400, 'You need a token to access');
+            $this->loadErrors(400, 'You need a token to access');
         }
         $data = $headers['Authorization'];
         $check = explode(" ", $data);
@@ -43,10 +41,10 @@ class AuthController extends Controllers
         // setcookie('token', '', time() - 7 * 24 * 60 * 60, '/');
         if ($count == 1) {
             $res['msg'] = 'You have successfully logout';
-            $this->render_view->ToView($res);
+            $this->ToView($res);
             exit();
         } else {
-            $this->render_view->loadErrors(400, 'Refresh token has expired. You must login again');
+            $this->loadErrors(400, 'Refresh token has expired. You must login again');
         }
     }
 
@@ -64,7 +62,7 @@ class AuthController extends Controllers
             $input['password'] = $sent_vars['password'];
             $errors = validateLogin($input);
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         if (count($errors) === 0) {
@@ -98,20 +96,20 @@ class AuthController extends Controllers
                 $res['token'] = $token;
                 $res['refreshToken'] = $token;
 
-                $this->render_view->ToView($res);
+                $this->ToView($res);
                 exit();
             } else {
                 array_push($errors, 'Wrong password');
             }
         }
-        $this->render_view->loadErrors(400, $errors);
+        $this->loadErrors(400, $errors);
     }
     public function refreshToken()
     {
         $this->middle_ware->checkRequest('GET');
         $headers = apache_request_headers();
         if (!isset($headers['Authorization'])) {
-            $this->render_view->loadErrors(400, 'You need a refresh token to access');
+            $this->loadErrors(400, 'You need a refresh token to access');
         }
         $check = $headers['Authorization'];
         $data = explode(" ", $check);
@@ -132,10 +130,10 @@ class AuthController extends Controllers
             ];
             $token = JWT::encode($payload, TOKEN_SECRET, 'HS256');
             $res['token'] = $token;
-            $this->render_view->ToView($res);
+            $this->ToView($res);
             exit();
         } else {
-            $this->render_view->loadErrors(400, 'Refresh token not invalid. You must login again');
+            $this->loadErrors(400, 'Refresh token not invalid. You must login again');
         }
     }
     public function forgotPassword()
@@ -164,14 +162,14 @@ class AuthController extends Controllers
                 $this->sendEmail($input['email'], $input['password']);
                 $input['password'] = password_hash($input['password'], PASSWORD_DEFAULT);
             } else {
-                $this->render_view->loadErrors(400, $errors);
+                $this->loadErrors(400, $errors);
             }
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         update($table, ['ID' => $id], $input);
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
     public function Register()
@@ -198,14 +196,14 @@ class AuthController extends Controllers
                 $input['password'] = password_hash($input['password'], PASSWORD_DEFAULT);
                 $this->user_model->createUser($input['email'], $input['password']);
             } else {
-                $this->render_view->loadErrors(400, $errors);
+                $this->loadErrors(400, $errors);
             }
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         // create($table, $input);
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
     function rand_string($length)
