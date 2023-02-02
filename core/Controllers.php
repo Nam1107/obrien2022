@@ -46,9 +46,9 @@ class Controllers
     public function loadList($totalCount, $numOfPage, $page, $obj)
     {
         $res['status'] = 1;
-        $res['totalCount'] = $totalCount;
-        $res['numOfPage'] =  $numOfPage;
-        $res['page'] = $page;
+        $res['totalCount'] = (int)$totalCount;
+        $res['numOfPage'] =  (int)$numOfPage;
+        $res['page'] = (int)$page;
         $res['obj'] = $obj;
         return $res;
     }

@@ -66,7 +66,7 @@ class userModel
         $input['firstName'] = '';
         $input['lastName'] = '';
         $input['firstName'] = '';
-        $input['role'] = '1';
+        $input['role'] = 1;
         $input['avatar'] = 'https://staticfvvn.s3-ap-southeast-1.amazonaws.com/fv4uploads/uploads/users/4x/6gl/xtq/avatar/thumb_694526497374699.jpg';
         $input['createdAt'] = currentTime();
         create('user', $input);

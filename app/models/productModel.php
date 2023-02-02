@@ -21,7 +21,7 @@ class productModel extends Controllers
 
         $obj = custom("
             SELECT A.* , category.name AS category
-            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), 1, 0) AS statusSale
             FROM product) AS A,category
             WHERE A.categoryID = category.ID
             AND A.IsPublic like '%$IsPublic%'
@@ -63,7 +63,7 @@ class productModel extends Controllers
             "SELECT COUNT(ID) as total
             FROM (
                 SELECT A.* , category.name AS category
-                FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+                FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), 1, 0) AS statusSale
                 FROM product) AS A,category
                 WHERE A.categoryID = category.ID
                 AND category.name LIKE '%$category%'
@@ -75,8 +75,8 @@ class productModel extends Controllers
         );
         $check = ceil($total[0]['total'] / $perPage);
         $obj = custom(
-            "SELECT A.* , category.name AS category, IF(A.statusSale = '1', A.priceSale, A.price) AS curPrice
-            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+            "SELECT A.* , category.name AS category, IF(A.statusSale = 1, A.priceSale, A.price) AS curPrice
+            FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), 1, 0) AS statusSale
             FROM product) AS A,category
             WHERE A.categoryID = category.ID
             AND category.name LIKE '%$category%'

@@ -8,13 +8,20 @@ define('BASE_URL',          'http://localhost/obrien');
 // define('DB_NAME',           '');
 // define('DB_TABLE',          'obrien');
 
-define('DB_HOST',           'sql6.freesqldatabase.com');
-define('DB_USER',           'sql6525734');
-define('DB_PASS',           'bs4SfUqIYX');
-define('DB_NAME',           '');
-define('DB_TABLE',          'sql6525734');
-define('DB_CHARSET',          'utf8');
+// define('DB_HOST',           'sql6.freesqldatabase.com');
+// define('DB_USER',           'sql6525734');
+// define('DB_PASS',           'bs4SfUqIYX');
+// define('DB_NAME',           '');
+// define('DB_TABLE',          'sql6525734');
+// define('DB_CHARSET',          'utf8');
 // define('PASSWORD_KEY',          'obrien');
+
+define('DB_HOST',           '127.0.0.1');
+define('DB_USER',           'root');
+define('DB_PASS',           '');
+define('DB_NAME',           'obrien');
+define('DB_TABLE',          '');
+define('DB_CHARSET',          'utf8');
 
 define('TOKEN_SECRET',          'Sana961229');
 

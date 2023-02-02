@@ -21,7 +21,7 @@ class wishModel extends Controllers
 
         $wishList = custom("
         SELECT A.* , category.name AS category
-        FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), '1', '0') AS statusSale
+        FROM (SELECT *, IF(startSale<NOW() && endSale>NOW(), 1, 0) AS statusSale
         FROM product WHERE IsPublic = 1) AS A,category,wishList
         WHERE A.categoryID = category.ID
         AND A.ID = wishList.productID
