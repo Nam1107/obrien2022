@@ -4,12 +4,10 @@ class UserController extends Controllers
 {
     public $middle_ware;
     public $user_model;
-    public $render_view;
     public function __construct()
     {
         $this->user_model = $this->model('userModel');
         $this->middle_ware = new middleware();
-        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -20,7 +18,7 @@ class UserController extends Controllers
         $role = custom("SELECT role_name as `role` from tbl_role");
         $role = array_column($role, 'role');
         $res['role'] =  $role;
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit;
     }
     public function ListUser()
@@ -38,11 +36,11 @@ class UserController extends Controllers
             $sortType = $sent_vars['sortType'];
             $role = $sent_vars['role'];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         $res = $this->user_model->getList($page, $perPage, $email, $sortBy, $sortType, $role);
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -54,7 +52,7 @@ class UserController extends Controllers
         $id = $_SESSION['user']['ID'];
         $obj = $this->user_model->getDetail($id);
         $res['obj'] = $obj;
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -64,7 +62,7 @@ class UserController extends Controllers
         $this->middle_ware->adminOnly();
         $obj = $this->user_model->getDetail($id);
         $res['obj'] = $obj;
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -75,15 +73,15 @@ class UserController extends Controllers
         $table = 'user';
         $user = $this->user_model->getDetail($id, 'id');
         if (!$user) {
-            $this->render_view->loadErrors(404, 'Not found user by ID');
+            $this->loadErrors(404, 'Not found user by ID');
         }
         if ($id == $_SESSION['user']['ID']) {
-            $this->render_view->loadErrors(400, 'You cannot delete your account');
+            $this->loadErrors(400, 'You cannot delete your account');
         } else {
             delete('user', ['ID' => $id]);
         }
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -103,13 +101,13 @@ class UserController extends Controllers
             $input['avatar'] = $sent_vars['avatar'];
             $input['updatedAt'] = currentTime();
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         update('user', ['ID' => $id], $input);
 
         $res['msg'] = 'Success';
 
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -131,18 +129,18 @@ class UserController extends Controllers
             $input['name'] =  $input['firstName'] . " " . $input['lastName'];
             $role = $this->find($sent_vars['role'], role);
             if (!$role) {
-                $this->render_view->loadErrors(400, "Role value not invalid");
+                $this->loadErrors(400, "Role value not invalid");
             }
             $input['role'] = $role;
             $input['avatar'] = $sent_vars['avatar'];
             $input['updatedAt'] = currentTime();
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
         update('user', ['ID' => $id], $input);
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -160,11 +158,11 @@ class UserController extends Controllers
             $var['updatedAt'] = currentTime();
             $var['password'] = $sent_vars['password'];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         update('user', ['ID' => $id], $var);
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -186,13 +184,13 @@ class UserController extends Controllers
 
                 update('user', ['ID' => $id], $var);
                 $res['msg'] = 'Success';
-                $this->render_view->ToView($res);
+                $this->ToView($res);
                 exit();
             } else {
-                $this->render_view->loadErrors(400, $errors);
+                $this->loadErrors(400, $errors);
             }
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
     }
 }

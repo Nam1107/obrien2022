@@ -23,6 +23,12 @@ class Controllers
         }
         return false;
     }
+    public function ToView($value)
+    {
+        echo json_encode($value);
+        exit();
+    }
+
     public function loadErrors($code, $errors)
     {
         http_response_code($code);

@@ -5,13 +5,11 @@ class wishController extends Controllers
     public $middle_ware;
     public $wishlist_model;
     public $product_model;
-    public $render_view;
     public function __construct()
     {
         $this->wishlist_model = $this->model('wishModel');
         $this->middle_ware = new middleware();
         $this->product_model = $this->model('productModel');
-        $this->render_view = $this->render('renderView');
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new ErrorException($message, 0, $severity, $file, $line);
         }, E_WARNING);
@@ -27,11 +25,11 @@ class wishController extends Controllers
             $page = $sent_vars['page'];
             $perPage = $sent_vars['perPage'];
         } catch (ErrorException $e) {
-            $this->render_view->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
+            $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
         $res = $this->wishlist_model->getList($userID, $page, $perPage);
 
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -42,7 +40,7 @@ class wishController extends Controllers
         $userID = $_SESSION['user']['ID'];
         $check = $this->wishlist_model->getDetail($userID, $id);
         if (!$check) {
-            $this->render_view->loadErrors(404, 'Not found this product in your wishlist');
+            $this->loadErrors(404, 'Not found this product in your wishlist');
         }
         $condition = [
             "userID" => $userID,
@@ -51,7 +49,7 @@ class wishController extends Controllers
         delete('wishList', $condition);
 
         $res['msg'] = 'Success';
-        $this->render_view->ToView($res);
+        $this->ToView($res);
         exit();
     }
 
@@ -61,7 +59,7 @@ class wishController extends Controllers
         $this->middle_ware->userOnly();
         $check = $this->product_model->getDetail($id, 1);
         if (!$check) {
-            $this->render_view->loadErrors(400, 'This product does not exist');
+            $this->loadErrors(400, 'This product does not exist');
         }
         $userID = $_SESSION['user']['ID'];
         $check = $this->wishlist_model->getDetail($userID, $id);
@@ -70,10 +68,10 @@ class wishController extends Controllers
             create('wishList', $condition);
 
             $res['msg'] = 'Success';
-            $this->render_view->ToView($res);
+            $this->ToView($res);
             exit();
         } else {
-            $this->render_view->loadErrors(400, 'This product has exists in your list');
+            $this->loadErrors(400, 'This product has exists in your list');
         }
     }
 }
