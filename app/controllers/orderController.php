@@ -57,7 +57,7 @@ class orderController extends Controllers
             $this->loadErrors(400, $e->getMessage() . " on line " . $e->getLine() . " in file " . $e->getfile());
         }
 
-        $report = custom("SELECT A.status,SUM(A.total) AS total,COUNT(A.ID) AS numOfOrder
+        $report = custom("SELECT A.status,CAST(SUM(A.total) AS FLOAT) AS total,COUNT(A.ID) AS numOfOrder
         FROM 
         (SELECT `order`.ID,`order`.status,`order`.createdAt,SUM(unitPrice*quantity) AS total
         FROM orderDetail,`order`

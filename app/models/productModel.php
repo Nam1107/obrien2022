@@ -88,8 +88,8 @@ class productModel extends Controllers
             "
         );
 
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] = $check;
+        $res['totalCount'] = (int)$total[0]['total'];
+        $res['numOfPage'] = (int)$check;
         $res['page'] = (int)$page;
         $res['obj'] = $obj;
         return $res;

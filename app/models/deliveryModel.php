@@ -78,8 +78,8 @@ class deliveryModel extends Controllers
         ");
 
 
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] =  $check;
+        $res['totalCount'] = (int)$total[0]['total'];
+        $res['numOfPage'] =  (int)$check;
         $res['page'] = (int)$page;
         $res['obj'] = $order;
         return $res;
@@ -112,8 +112,8 @@ class deliveryModel extends Controllers
         LIMIT $perPage  OFFSET $offset 
         ");
 
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] =  $check;
+        $res['totalCount'] = (int)$total[0]['total'];
+        $res['numOfPage'] =  (int)$check;
         $res['page'] = (int)$page;
         $res['obj'] = $order;
         return $res;

@@ -12,12 +12,12 @@ class orderModel extends Controllers
         // GROUP BY
         // `orderDetail`.orderID
         // ");
-        $orderQuery1 = "SELECT `order`.* ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
-FROM `order`,`orderDetail`	
-WHERE `order`.ID = orderDetail.orderID
-AND `order`.ID = $orderID";
+        $orderQuery1 = "SELECT `order`.* ,CAST(SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS FLOAT) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        FROM `order`,`orderDetail`	
+        WHERE `order`.ID = orderDetail.orderID
+        AND `order`.ID = $orderID";
         $orderQuery2 = "GROUP BY
-`orderDetail`.orderID";
+        `orderDetail`.orderID";
 
         $userQuery = " ";
         if ($userID != 0) {
@@ -94,8 +94,8 @@ AND `order`.ID = $orderID";
         ORDER BY `order`.createdAt DESC
         LIMIT $perPage  OFFSET $offset 
         ");
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] = $check;
+        $res['totalCount'] = (int)$total[0]['total'];
+        $res['numOfPage'] = (int)$check;
         $res['page'] = (int)$page;
         $res['obj'] = $order;
         // $res = $this->loadList($total[0]['total'], $check, $page, $order);
@@ -121,7 +121,7 @@ AND `order`.ID = $orderID";
         $check = ceil($total[0]['total'] / $perPage);
 
         $order = custom("
-        SELECT `order`.ID,`order`.status ,C.description,C.createdAt AS lastUpdated, `order`.createdAt ,SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
+        SELECT `order`.ID,`order`.status ,C.description,C.createdAt AS lastUpdated, `order`.createdAt ,CAST(SUM(`orderDetail`.unitPrice*`orderDetail`.quantity) AS FLOAT ) AS total,  COUNT(`orderDetail`.orderID) AS numOfProduct
         FROM `order`,`orderDetail`	,(
         SELECT shippingDetail.*
         FROM (SELECT max(ID) AS curID
@@ -146,8 +146,8 @@ AND `order`.ID = $orderID";
             AND orderID = $val
             ");
         }
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] = $check;
+        $res['totalCount'] = (int)$total[0]['total'];
+        $res['numOfPage'] = (int)$check;
         $res['page'] = (int)$page;
         $res['obj'] = $order;
         return $res;

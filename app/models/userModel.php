@@ -29,8 +29,8 @@ class userModel
         ");
 
 
-        $res['totalCount'] = $total[0]['total'];
-        $res['numOfPage'] = ceil($check);
+        $res['totalCount'] = (int)$total[0]['total'];
+        $res['numOfPage'] = (int)ceil($check);
         $res['page'] = (int)$page;
         $res['obj'] = $obj;
 
